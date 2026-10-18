@@ -1,0 +1,29 @@
+{
+  "name": "bottleneck-finder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "NODE_ENV=production node server.js",
+    "seed": "node seed.js",
+    "build": "esbuild views/SignupPage.jsx --bundle --packages=external --outdir=build/views --format=cjs --platform=node --jsx=automatic --log-level=warning",
+    "prestart": "npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "better-sqlite3@13.0.3": true
+  }
+}
