@@ -72,9 +72,12 @@ The CMS can only finish about 40 requests a second (10 slots, ~250ms each).
 Below that, rates take ~250ms. Above it, the queue grows and every rates
 request waits longer and longer. That's the knee.
 
-A browser loading the homepage makes about 10 requests: the HTML, then
-`styles.css` and 7 icons from our server, plus the Manrope font from Google
-Fonts (which never touches our server). k6 only fetches what its script asks for.
+A browser loading the homepage makes about 11 requests: the HTML, then
+`styles.css`, `home.js` and 7 icons from our server, plus the Manrope font
+from Google Fonts (which never touches our server). Then `home.js` calls
+`GET /api/rates` straight away and fills in the "Our savings rates" cards, so
+**every homepage visit triggers one CMS call**. k6 only fetches what its script
+asks for, so the load test requests `/` and `/api/rates` itself.
 
 ## 3. Sign-up (the homepage buttons link to `/signup`)
 

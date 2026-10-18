@@ -230,6 +230,24 @@
     </div>
   </section>
 
+  <!-- Savings rates: home.js fills these in from /api/rates when the page loads -->
+  <section class="rates">
+    <div class="container">
+      <div class="ratings-head">
+        <div>
+          <p class="eyebrow">Grow your savings</p>
+          <h2 class="ratings-title">Our savings rates</h2>
+        </div>
+        <p class="ratings-note">Interest per year</p>
+      </div>
+      <div class="rates-grid" id="rates-grid" aria-live="polite">
+        <article class="rate-card is-loading">Loading…</article>
+        <article class="rate-card is-loading">Loading…</article>
+        <article class="rate-card is-loading">Loading…</article>
+      </div>
+    </div>
+  </section>
+
   <!-- Footer -->
   <footer class="footer">
     <div class="container">
@@ -260,5 +278,6 @@
     </div>
   </footer>
 
+  <script src="/home.js" defer></script>
 </body>
 </html>

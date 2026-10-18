@@ -7,7 +7,9 @@
     "start": "NODE_ENV=production node server.js",
     "seed": "node seed.js",
     "build": "esbuild views/SignupPage.jsx --bundle --packages=external --outdir=build/views --format=cjs --platform=node --jsx=automatic --log-level=warning",
-    "prestart": "npm run build"
+    "prestart": "npm run build",
+    "load:smoke": "k6 run load-tests/smoke.js",
+    "load": "load-tests/run.sh main"
   },
   "keywords": [],
   "author": "",

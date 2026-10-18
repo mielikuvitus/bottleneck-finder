@@ -619,6 +619,55 @@ img { display: block; }
   line-height: 20px;
 }
 
+/* ---------- Savings rates ---------- */
+
+.rates {
+  padding: 64px 0;
+  background: #fff;
+}
+.rates-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding-top: 28px;
+}
+.rate-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 112px;
+  padding: 24px 32px;
+  border-radius: 28px;
+  background: var(--mint);
+}
+.rate-card.is-loading {
+  color: var(--grey-label);
+  font-size: 14px;
+  font-weight: 600;
+}
+.rate-value {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 48px;
+  letter-spacing: -2.4px;
+}
+.rate-product {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 22px;
+}
+.rate-unit {
+  color: var(--grey-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+.rates-error {
+  grid-column: 1 / -1;
+  color: var(--grey-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 /* ---------- Footer ---------- */
 
 .footer {
@@ -687,6 +736,7 @@ img { display: block; }
   .roundups-copy { padding-left: 0; }
   .footer-cta { justify-self: start; }
   .ratings-grid { grid-template-columns: 1fr; }
+  .rates-grid { grid-template-columns: 1fr; }
   .ratings-head { flex-direction: column; align-items: flex-start; }
 }
 
@@ -700,6 +750,7 @@ img { display: block; }
   .roundup-title { font-size: 36px; line-height: 40px; }
   .roundup-widget { left: 24px; right: 24px; }
   .rating-card { padding: 20px; gap: 20px; }
+  .rate-card { padding: 20px 24px; }
   .rating-score { font-size: 48px; }
   .footer-bottom { flex-direction: column; align-items: flex-start; }
 }
