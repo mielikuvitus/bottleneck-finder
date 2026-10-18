@@ -113,3 +113,15 @@ passwords never touch the website.
 ## More
 
 - [DATAFLOW.md](DATAFLOW.md): diagram of how the files talk to each other
+
+## The fictional bank
+
+**tomorrow** is the made-up bank the test site pretends to be.
+
+The homepage (`GET /`):
+
+<img src="docs/images/tomorrow1.png" width="800" alt="The tomorrow homepage: the headline 'Money feels better here.', an 'Open free bank account' button, and a phone showing a €12,840.25 balance and recent transactions">
+
+The sign-up page (`GET /signup`):
+
+<img src="docs/images/tomorrow2.png" width="800" alt="The tomorrow sign-up page: a welcome panel saying 'A brighter tomorrow starts here.' with a debit card illustration, next to an email field and a 'Continue with email' button">
