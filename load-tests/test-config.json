@@ -1,0 +1,39 @@
+{
+  "_about": "Traffic assumptions, read by the k6 tests and the analyser.",
+
+  "expected_peak_visitors": 110,
+  "_expected_peak_visitors": "Visitors on the site at once during a normal busy hour.",
+
+  "campaign_peak_visitors": 260,
+  "_campaign_peak_visitors": "Visitors on the site at once just after an ad goes live.",
+
+  "avg_visit_seconds": null,
+  "_avg_visit_seconds": "How long one visit lasts. null = measure it from the run's healthy stages (before the knee).",
+
+  "planning_visit_seconds": 4.6,
+  "_planning_visit_seconds": "Estimated visit length, used only to turn the peaks into k6 arrival rates before a run (visitors at once / visit length = visits per second). The analyser measures the real length afterwards.",
+
+  "patience_seconds": 3,
+  "_patience_seconds": "Assumption: how long a visitor waits for a page or a form before leaving. Applies to requests the visitor waits for (see on_failure in analyzer/route-context.json); k6 uses this or the site's own timeout, whichever is shorter.",
+
+  "dataset_rows": 100000,
+  "_dataset_rows": "Rows in the main table (users) during the tests: the seed size. Used to estimate how slow lookups would get as the table grows.",
+
+  "main_funnel": {
+    "_about": "load-tests/main.js: every visitor lands on / and loads /api/rates, then some go on to sign up. The shares are the same at every load level, so only traffic volume changes between stages.",
+    "go_to_signup": 0.3,
+    "submit_signup": 0.6,
+    "reuse_seeded_email": 0.1,
+    "_go_to_signup": "Assumption: share of visitors who click through from / to /signup.",
+    "_submit_signup": "Assumption: share of those who submit the form. The rest leave (voluntary drop-off).",
+    "_reuse_seeded_email": "Share of submissions using an existing email, to hit the 'already taken' path."
+  },
+
+  "signup_test": {
+    "_about": "load-tests/signup.js: visitors land directly on /signup, like an ad campaign that links straight to sign-up. They skip the homepage and rates, so rates can't hide the sign-up problems.",
+    "submit_signup": 0.75,
+    "reuse_seeded_email": 0.1,
+    "scenario": "campaign",
+    "_scenario": "Every visitor lands straight on /signup, which only happens during a sign-up ad campaign. On a normal day about 30% of visitors reach sign-up (the main test), so the analyser judges this test at the campaign peak, and takes normal-day sign-up numbers from the latest main run."
+  }
+}

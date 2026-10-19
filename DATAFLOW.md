@@ -124,6 +124,48 @@ The render in `GET /signup` and the scan in step 2 are both synchronous: while
 they run, Node can't answer anyone else. Under load this slows every route,
 not just sign-up. The waits in `cms.js` and `emailValidation.js` don't.
 
+## 4. Load test with metrics (`npm run load`)
+
+```
+  load-tests/run.sh
+     │ 1. npm run seed
+     │ 2. starts poll-metrics.mjs in the background
+     │ 3. runs k6
+     ▼
+  ┌──────────────┐   HTTP (browse +    ┌─────────────────────────────────────┐
+  │ k6           │   signup traffic)   │ server.js                           │
+  │ main.js      │ ──────────────────▶ │                                     │
+  └──────┬───────┘                     │  metrics.js samples every second:   │
+         │                             │  CPU, event loop, DB query times    │
+         │                             │  (timeQuery), cms.js getStats()     │
+         │                             └─────────────────────────────────────┘
+         │                                  ▲ GET /metrics, every second
+         │                             ┌────┴─────────────┐
+         │                             │ poll-metrics.mjs │
+         │                             └────┬─────────────┘
+         ▼                                  ▼
+  load-tests/results/<run>/
+    summary.json, raw.csv.gz           metrics.jsonl
+```
+
+The poller stops when k6 finishes. Then:
+
+```
+  load-tests/results/<run>/
+    raw.csv.gz + metrics.jsonl + options.json
+         │  analyzer/timeline.mjs (run.sh runs it after k6)
+         ▼
+    timeline.json  (one entry per second, per route + server)
+         │  npm run analyze -- <run folder>
+         │  analyze.mjs → rules.mjs → describe.mjs
+         │  reads test-config.json + route-context.json
+         ▼
+    findings.json  (one finding per problem, plus the funnel)
+```
+
+Both k6 tests import `load-tests/lib.js`, which reads `test-config.json`
+(funnel percentages) and `analyzer/route-context.json` (timeouts).
+
 ## Legend
 
 | Arrow label    | Meaning                                          |

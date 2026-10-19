@@ -22,7 +22,12 @@ function rateCard({ product, ratePercent }) {
   return card;
 }
 
-fetch('/api/rates')
+// Give up after 3 seconds and show the fallback instead of "Loading…" forever
+const RATES_TIMEOUT_MS = 3000;
+const controller = new AbortController();
+const timer = setTimeout(() => controller.abort(), RATES_TIMEOUT_MS);
+
+fetch('/api/rates', { signal: controller.signal })
   .then((res) => {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
@@ -33,4 +38,5 @@ fetch('/api/rates')
     message.className = 'rates-error';
     message.textContent = 'Couldn’t load rates right now.';
     grid.replaceChildren(message);
-  });
+  })
+  .finally(() => clearTimeout(timer));

@@ -1,0 +1,40 @@
+{
+  "_about": "What each route means to a visitor, read by k6 and the analyser. timeout_ms is the site's own timeout and must match public/home.js and public/signup.js (null = the site has none). on_failure says what a visitor does when the request fails or runs out of patience (patience_seconds in load-tests/test-config.json): \"left\" = leaves the site, \"degraded\" = carries on with a fallback.",
+
+  "GET /": {
+    "powers": "The homepage",
+    "while_slow": "the page takes longer to appear",
+    "fallback": null,
+    "timeout_ms": null,
+    "on_failure": "left",
+    "critical": false
+  },
+
+  "GET /api/rates": {
+    "powers": "Savings rate cards on the homepage",
+    "while_slow": "the cards show \"Loading…\"",
+    "fallback": "the cards show \"Couldn't load rates right now.\"",
+    "timeout_ms": 3000,
+    "on_failure": "degraded",
+    "critical": false
+  },
+
+  "GET /signup": {
+    "powers": "The sign-up page",
+    "while_slow": "the page takes longer to appear",
+    "fallback": "a blank loading tab or the browser's own error page (the site has no fallback of its own here)",
+    "timeout_ms": null,
+    "on_failure": "left",
+    "critical": false
+  },
+
+  "POST /api/signup": {
+    "powers": "Submitting an email to create an account",
+    "while_slow": "the button waits after submit",
+    "fallback": "after 3 seconds: \"We couldn't confirm your sign-up. Check your inbox, or try again in a moment.\" If the connection fails: \"We couldn't save your details just now. Nothing was submitted, please try again in a moment.\"",
+    "timeout_ms": 3000,
+    "on_failure": "left",
+    "critical": true,
+    "impact_if_failed": "A person who wanted to open an account couldn't. For a bank this also costs trust."
+  }
+}

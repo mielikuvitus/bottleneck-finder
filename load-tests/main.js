@@ -1,90 +1,48 @@
-// Main load test: ~90% of virtual users browse, ~10% sign up, stepping up
-// through 10, 50, 100 and 200 virtual users.
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-import exec from 'k6/execution';
+// Main load test: every visitor lands on the homepage (which loads the rates),
+// and some go on to sign up.
+//
+// It uses an "open" model: k6 starts a set number of visits per second
+// however slow the site gets, like real public traffic.
+import { config, request, signUp, step, think, stagesFor, thresholdsFor } from './lib.js';
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
-const RUN_ID = __ENV.RUN_ID || `${Date.now()}`;
-
-// Each level ramps up for RAMP, then holds for HOLD.
-// Override both for a quick dry run, e.g. RAMP=5s HOLD=5s.
-const RAMP = __ENV.RAMP || '30s';
-const HOLD = __ENV.HOLD || '1m';
-const LEVELS = [10, 50, 100, 200];
-
-function stagesFor(share) {
-  const stages = [];
-  for (const total of LEVELS) {
-    const target = Math.round(total * share);
-    stages.push({ duration: RAMP, target }, { duration: HOLD, target });
-  }
-  stages.push({ duration: RAMP, target: 0 });
-  return stages;
-}
-
-const ROUTES = ['GET /', 'GET /api/rates', 'GET /signup', 'POST /api/signup'];
-const perRouteThresholds = Object.fromEntries(
-  ROUTES.map((route) => [`http_req_duration{route:${route}}`, ['p(95)<500']])
-);
+// Peaks in visitors at once -> visits started per second
+const expected = Math.round(config.expected_peak_visitors / config.planning_visit_seconds);
+const campaign = Math.round(config.campaign_peak_visitors / config.planning_visit_seconds);
+// 35 and 45 sit just under and just over the rates route's measured capacity
+// (about 40/s), so the knee shows up clearly
+const LEVELS = [Math.round(expected * 0.2), Math.round(expected * 0.5), expected, 35, 45, campaign];
+const funnel = config.main_funnel;
 
 export const options = {
   scenarios: {
-    browse: {
-      executor: 'ramping-vus',
-      exec: 'browse',
-      startVUs: 0,
-      stages: stagesFor(0.9),
-    },
-    signup: {
-      executor: 'ramping-vus',
-      exec: 'signup',
-      startVUs: 0,
-      stages: stagesFor(0.1),
+    visitors: {
+      executor: 'ramping-arrival-rate',
+      exec: 'visit',
+      startRate: 0,
+      timeUnit: '1s', // targets are visits started per second
+      // One virtual user per visit in progress. A healthy visit is about 4.6s,
+      // so 57/s needs about 265; a slow one (rates waiting its full 3s) about
+      // 7.5s, so about 430. The longest possible visit is about 18s.
+      preAllocatedVUs: 500,
+      maxVUs: 1500,
+      stages: stagesFor(LEVELS),
     },
   },
-  thresholds: {
-    http_req_duration: ['p(95)<500'],
-    http_req_failed: ['rate<0.01'],
-    ...perRouteThresholds,
-  },
+  thresholds: thresholdsFor(['GET /', 'GET /api/rates', 'GET /signup', 'POST /api/signup']),
 };
 
-// 1-3 seconds, like a person reading or typing
-function think() {
-  sleep(1 + Math.random() * 2);
-}
+export function visit() {
+  const home = request('GET', 'GET /', '/');
+  if (home.left) return; // the homepage didn't load: the visitor leaves
+  step('landed');
 
-export function browse() {
-  const home = http.get(`${BASE_URL}/`, { tags: { route: 'GET /' } });
-  check(home, { 'homepage is 200': (r) => r.status === 200 });
-
-  // The homepage's script (home.js) fetches the rates straight after loading
-  const rates = http.get(`${BASE_URL}/api/rates`, { tags: { route: 'GET /api/rates' } });
-  check(rates, { 'rates is 200': (r) => r.status === 200 });
-
+  // The homepage's script (home.js) fetches the rates straight after loading.
+  // If it fails, the cards show a fallback and the visit carries on.
+  request('GET', 'GET /api/rates', '/api/rates');
   think(); // reading the page
-  think(); // before the next visit
-}
 
-export function signup() {
-  const page = http.get(`${BASE_URL}/signup`, { tags: { route: 'GET /signup' } });
-  check(page, { 'signup page is 200': (r) => r.status === 200 });
-  think();
-
-  // About 1 in 10 sign-ups reuses a seeded email, to hit the "already taken" path
-  const reuse = Math.random() < 0.1;
-  const email = reuse
-    ? `user${1 + Math.floor(Math.random() * 100000)}@example.com`
-    : `load-${RUN_ID}-${exec.vu.idInTest}-${exec.vu.iterationInScenario}@example.com`;
-  const expected = reuse ? 409 : 201;
-
-  const res = http.post(`${BASE_URL}/api/signup`, JSON.stringify({ email }), {
-    headers: { 'Content-Type': 'application/json' },
-    tags: { route: 'POST /api/signup', email_type: reuse ? 'taken' : 'new' },
-    // Tell k6 which status is correct, so a 409 here isn't counted as a failure
-    responseCallback: http.expectedStatuses(expected),
-  });
-  check(res, { [`signup is ${expected}`]: (r) => r.status === expected });
-  think();
+  if (Math.random() < funnel.go_to_signup) {
+    signUp({ submitShare: funnel.submit_signup, reuseShare: funnel.reuse_seeded_email });
+  }
+  think(); // before leaving
 }

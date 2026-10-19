@@ -73,3 +73,19 @@ Sanity check
 [x] Write a short README listing the planted problems, so you can check later whether the tool found them
 
 Tip: comment each planted problem in the code with something like // TRAP: no index on email.
+
+Day 3: the analyser
+
+[x] Check whether the server already records metrics during a run. If not, add GET /metrics (CPU, event loop delay, DB query time, CMS in-flight and queued) and poll it every second during k6 runs, saving it next to the results
+[x] Add a sign-up-heavy k6 scenario using ramping-arrival-rate so traps 1 and 3 show up
+[x] Timeouts and fallbacks: home.js gives up on /api/rates after 3s ("Couldn't load rates right now."); signup.js gives up after 5s with a message that doesn't claim it failed, and a "Nothing was submitted" message for connection errors; k6 uses the same timeouts and counts fallback_shown per route
+[x] Per-second timeline.json per run folder: each route's requests/s, p50, p95, errors and timeouts from k6, merged with the /metrics samples by timestamp
+[x] Config: load-tests/test-config.json (expected peak 110 and campaign peak 260 visitors at once, avg_visit_seconds, funnel percentages, table size) and analyzer/route-context.json (what each route means to a visitor, its timeout and fallback; POST /api/signup is critical)
+[x] Main k6 test as a funnel: everyone lands on / and loads /api/rates, ~10% go to /signup, ~60% of those submit. The sign-up test stays as visitors landing directly on /signup (an ad campaign)
+[x] Analyser (analyzer/): one finding per problem with title, route, knee_at, evidence, likely_cause, suggested_fix, confidence, user_impact_now / at_campaign / at_limit, capacity, fallback_point (predicted and measured), if_ignored, headroom, can_wait, severity; fallback finding when nothing measured was saturated; funnel drop-off and lost sign-ups at both peaks
+[x] Run both tests and the analyser, and show the findings
+[x] Main test as an open model (ramping-arrival-rate): 5, 12, 24 (expected peak), 35, 45, 57 (campaign peak) visits/s from test-config.json; funnel click-through 30%, 60% submit; measured visitors at once per stage
+[x] Visitors have 3s patience (patience_seconds): a timed-out or failed sign-up page or POST ends the visit as "left" (a failed POST is also a lost sign-up); a failed rates call is "degraded" and the visit carries on; findings report left, lost sign-ups and degraded visits in plain English
+[x] Old runs renamed -superseded with run.json labels; new runs record the git commit in run.json
+[x] Sign-up test treated as a campaign scenario: judged at campaign peak, normal-day numbers from the latest main run (critical if normal days fail too), with a warning when the two runs used different code; fallback findings note ramp vs sudden jump; connection failures note the Mac's 128-connection queue
+[ ] Later, once the analyser works: a combined k6 test that runs the main and sign-up scenarios at the same time, to check the analyser can untangle mixed causes

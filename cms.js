@@ -29,6 +29,10 @@ function releaseSlot() {
   else inFlight--;
 }
 
+function getStats() {
+  return { inFlight, queued: queue.length, limit: MAX_IN_FLIGHT };
+}
+
 async function getRates() {
   await takeSlot();
   try {
@@ -39,4 +43,4 @@ async function getRates() {
   }
 }
 
-module.exports = { getRates };
+module.exports = { getRates, getStats };

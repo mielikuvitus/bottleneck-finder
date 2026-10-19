@@ -5,6 +5,7 @@ const { renderToString } = require('react-dom/server');
 const db = require('./db');
 const { getRates } = require('./cms');
 const { validateEmail } = require('./emailValidation');
+const { timeQuery, timeRender, getMetrics } = require('./metrics');
 const SignupPage = require('./build/views/SignupPage').default;
 
 const app = express();
@@ -18,6 +19,12 @@ app.use(express.json());
 
 app.get('/hello', (req, res) => {
   res.send('hello');
+});
+
+// How busy the server was in the last second (see metrics.js)
+app.get('/metrics', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json(getMetrics());
 });
 
 app.get('/', (req, res) => {
@@ -38,7 +45,7 @@ app.get('/api/rates', async (req, res) => {
 app.get('/signup', (req, res) => {
   // TRAP: renders the React page from scratch on every request (~15ms of
   // blocking CPU work), never cached
-  const html = renderToString(React.createElement(SignupPage));
+  const html = timeRender('SignupPage', () => renderToString(React.createElement(SignupPage)));
   res.set('Cache-Control', 'no-store');
   res.send('<!doctype html>' + html);
 });
@@ -50,7 +57,7 @@ app.post('/api/signup', async (req, res) => {
   }
 
   // TRAP: no index on email, so this scans every row (and blocks while it does)
-  if (findUserByEmail.get(email)) {
+  if (timeQuery('findUserByEmail', () => findUserByEmail.get(email), 'read')) {
     return res.status(409).json({ error: 'That email already has an account.' });
   }
 
@@ -58,7 +65,7 @@ app.post('/api/signup', async (req, res) => {
   // sign-ups with the same email can both pass the check and both insert
   await validateEmail(email);
 
-  const { lastInsertRowid } = insertUser.run(email);
+  const { lastInsertRowid } = timeQuery('insertUser', () => insertUser.run(email), 'write');
   res.status(201).json({ id: Number(lastInsertRowid), email });
 });
 
