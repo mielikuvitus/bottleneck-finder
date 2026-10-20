@@ -67,6 +67,7 @@ for (const name of readdirSync(RESULTS).sort().reverse()) {
     test: findings.test ?? info.test ?? null,
     date: dateOf(name),
     date_label: dateLabel(dateOf(name)),
+    variant: findings.variant ?? info.variant ?? 'before',
     superseded: Boolean(findings.superseded ?? info.superseded),
     superseded_reason: info.reason ?? null,
     scenario: findings.scenario ?? null,

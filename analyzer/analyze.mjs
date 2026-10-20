@@ -44,8 +44,10 @@ const runInfoOf = (dir) =>
     ? readJson(join(dir, 'run.json'))
     : { test: basename(dir).replace(/-superseded$/, '').split('-').pop(), superseded: basename(dir).endsWith('-superseded'), git: null };
 const runInfo = runInfoOf(runDir);
+// "before" or "after" the Day 5 fixes (runs without a variant are "before")
+const variantOf = (info) => info.variant ?? 'before';
 // The sign-up test is a campaign scenario: judged at the campaign peak, with
-// normal-day numbers taken from the latest main run
+// normal-day numbers taken from the latest main run of the same variant
 // (how to judge the test, so older runs without it use the current config)
 const scenario =
   runInfo.test === 'signup'
@@ -56,10 +58,10 @@ function loadNormalDay() {
   const resultsDir = dirname(runDir);
   const mains = readdirSync(resultsDir)
     .map((name) => join(resultsDir, name))
-    .filter((dir) => { const info = runInfoOf(dir); return info.test === 'main' && !info.superseded; })
+    .filter((dir) => { const info = runInfoOf(dir); return info.test === 'main' && !info.superseded && variantOf(info) === variantOf(runInfo); })
     .sort();
   const dir = mains.pop();
-  if (!dir) return { missing: 'No main run found, so there are no normal-day numbers: run npm run load first.' };
+  if (!dir) return { missing: `No ${variantOf(runInfo)} main run found, so there are no normal-day numbers: run npm run load first.` };
   if (!existsSync(join(dir, 'findings.json'))) {
     return { missing: `The main run ${basename(dir)} hasn't been analysed yet: run npm run analyze -- ${dir} first, then this one.` };
   }
@@ -322,6 +324,7 @@ const healthyRoutes = routes
 const output = {
   run: basename(runDir),
   test: runInfo.test,
+  variant: variantOf(runInfo),
   superseded: Boolean(runInfo.superseded),
   ...(runInfo.superseded ? { superseded_reason: runInfo.reason } : {}),
   scenario,

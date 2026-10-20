@@ -2,14 +2,17 @@
 # Runs a k6 load test and saves its results in load-tests/results/<run>/.
 #
 # Usage: load-tests/run.sh [test name, default: main]
+# VARIANT=after labels a run made after the Day 5 fixes (default: before).
 # Start the server first (npm start) in another terminal.
 
 set -e
 cd "$(dirname "$0")/.."
 
 TEST=${1:-main}
+VARIANT=${VARIANT:-before}
 BASE_URL=${BASE_URL:-http://localhost:3000}
 RUN_ID="$(date +%Y-%m-%d_%H%M%S)-$TEST"
+[ "$VARIANT" != before ] && RUN_ID="$RUN_ID-$VARIANT"
 RUN_DIR="load-tests/results/$RUN_ID"
 
 if ! curl -s -o /dev/null "$BASE_URL/hello"; then
@@ -39,6 +42,7 @@ DIRTY=$([ -n "$(git status --porcelain 2>/dev/null)" ] && echo true || echo fals
 cat > "$RUN_DIR/run.json" <<EOF
 {
   "test": "$TEST",
+  "variant": "$VARIANT",
   "superseded": false,
   "git": { "commit": "$COMMIT", "uncommitted_changes": $DIRTY }
 }
