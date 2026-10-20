@@ -243,6 +243,28 @@
   .findings { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* All clear (AllClearCard): the verdict card's frame and headline, the
+   summary under it, and the keep-it-fresh note in italics */
+.all-clear-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+}
+.all-clear-summary {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  line-height: 1.5;
+}
+.all-clear-note {
+  margin: 0 var(--verdict-gutter);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+  font-style: italic;
+}
+
 /* Critical and high findings: a red border, short or full */
 .finding-card:is([data-severity='critical'], [data-severity='high']),
 .verdict-card:is([data-severity='critical'], [data-severity='high']) { border-color: var(--color-severity-critical-border); }

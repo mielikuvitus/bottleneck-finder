@@ -21,24 +21,33 @@ curl localhost:3000/hello   # in a second terminal: should print "hello"
 - **`npm run seed`** clears the table first, so it's safe to re-run, and you always get exactly 100,000 users (ids 1 to 100,000). Users added since the last seed are deleted.
 - **`npm start`** compiles the React sign-up page (`views/*.jsx` → `build/`) with esbuild, then runs the server with `NODE_ENV=production`. This matters for load tests: React's development build renders about 10 times slower.
 
-## Quiet Tuesday baseline
+## Routes
 
-Response times with nothing else hitting the server, measured with
-`./baseline.sh` (1 warm-up request, then the median of 5). Run `npm run seed`
-afterwards. Measured on 2026-10-18: Apple M4, macOS 15.3.2, Node 24.21.0.
+"Quiet" is the median response time with nothing else hitting the server,
+measured with `./baseline.sh` (1 warm-up request, then the median of 5; run
+`npm run seed` afterwards). Before: 2026-10-18, with the planted traps. After:
+2026-10-20, with the Day 5 fixes for traps 1-3. Both on an Apple M4, macOS
+15.3.2, Node 24.21.0.
 
-| Route                            | Status | Median | Slowest | What the time is                                                                            |
-| -------------------------------- | ------ | -----: | ------: | ------------------------------------------------------------------------------------------- |
-| `GET /hello`                     | 200    |  0.6ms |   0.9ms | Express doing nothing                                                                       |
-| `GET /`                          | 200    |  0.7ms |   1.0ms | Static file                                                                                 |
-| `GET /styles.css`                | 200    |  0.8ms |   0.8ms | Static file                                                                                 |
-| `GET /api/rates`                 | 200    |  243ms |   288ms | Fake CMS wait, random 200-300ms (trap 2)                                                    |
-| `GET /signup`                    | 200    |   17ms |    18ms | React render, about 14ms (trap 3)                                                           |
-| `POST /api/signup` (new email)   | 201    |  132ms |   148ms | Full table scan, about 4-6ms (trap 1), plus fake email validation, random 50-150ms (trap 4) |
-| `POST /api/signup` (taken email) | 409    |  4.3ms |   4.5ms | Full table scan only (trap 1)                                                               |
+| Route                                                                   | What it does                                                                                                                                                                           | Quiet before | Quiet after |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -----------: | ----------: |
+| `GET /hello`                                                            | `hello`, to check the server is up                                                                                                                                                     |        0.6ms |       0.8ms |
+| `GET /metrics`                                                          | How busy the server was in the last second (JSON), not cached                                                                                                                          |            – |           – |
+| `GET /`                                                                 | Homepage (HTML), a static file, cacheable for 1 hour. Its script `home.js` loads `/api/rates` and gives up after 3s                                                                    |        0.7ms |       1.4ms |
+| `GET /styles.css`, `/home.js`, `/signup.js`, `/icons/*`, `/favicon.svg` | Static files, cacheable for 1 hour (time measured for `styles.css`)                                                                                                                    |        0.8ms |       1.1ms |
+| `GET /api/rates`                                                        | Savings rates (JSON). Before: a fake CMS call on every request, 200-300ms (trap 2). After: cached for 60s, so one request a minute waits for the CMS                                   |        243ms |       1.0ms |
+| `GET /signup`                                                           | Sign-up page (HTML). Before: rendered by React on every request, about 14ms (trap 3). After: pre-rendered at build time. Its script `signup.js` submits the form and gives up after 3s |         17ms |       0.9ms |
+| `POST /api/signup` (new email)                                          | `201` created. Email lookup (before: a full table scan, trap 1; after: the index) plus fake email validation, random 50-150ms (trap 4)                                                 |        132ms |       114ms |
+| `POST /api/signup` (taken email)                                        | `409` already taken: the email lookup only. `400` if it isn't an email                                                                                                                 |        4.3ms |       0.9ms |
 
-The rates and new-email times include random waits, so they vary by a few
-dozen milliseconds between runs.
+The rates (before) and new-email times include random waits, so they vary by
+a few dozen milliseconds between runs.
+
+To try a sign-up from the terminal:
+
+```sh
+curl -i -H 'Content-Type: application/json' -d '{"email":"me@example.com"}' localhost:3000/api/signup
+```
 
 ## Load tests
 
@@ -151,6 +160,11 @@ Each finding has:
 highest load tested, and per route its `p95` at that load (plus `note`, the
 whole sentence).
 
+When a run has no findings and no knees, `findings.json` also has
+`all_clear`: `title` ("No problems found."), `summary` (tested up to which
+load, and how many requests failed) and `keep_fresh` (it only holds for the
+code that was tested).
+
 `findings.json` also has the funnel: how many visitors reached each step, the
 voluntary drop-off (left the sign-up page), and the lost sign-ups (the
 submission failed or timed out) at both peaks. Each step has a `kind` (`path`,
@@ -167,24 +181,6 @@ npm run dashboard        # http://localhost:5173/monzo/dashboard/
 ```
 
 Run `npm install` inside `dashboard/` the first time. [dashboard/COMPONENTS.md](dashboard/COMPONENTS.md) lists every component, its props and the data it shows.
-
-## Routes
-
-| Route                                                                   | What it does                                                                                                                       |
-| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /hello`                                                            | `hello`, to check the server is up                                                                                                 |
-| `GET /metrics`                                                          | How busy the server was in the last second (JSON), not cached                                                                      |
-| `GET /`                                                                 | Homepage (HTML), cacheable for 1 hour. Its script `home.js` loads `/api/rates` and gives up after 3s                               |
-| `GET /styles.css`, `/home.js`, `/signup.js`, `/icons/*`, `/favicon.svg` | Static files, cacheable for 1 hour                                                                                                 |
-| `GET /api/rates`                                                        | Savings rates (JSON), 200-300ms when quiet, slower under load                                                                      |
-| `GET /signup`                                                           | Sign-up page (HTML), rendered by React on every request, not cached. Its script `signup.js` submits the form and gives up after 3s |
-| `POST /api/signup`                                                      | Creates a user from `{"email": "..."}`: `201` created, `400` not an email, `409` already taken                                     |
-
-To try a sign-up from the terminal:
-
-```sh
-curl -i -H 'Content-Type: application/json' -d '{"email":"me@example.com"}' localhost:3000/api/signup
-```
 
 ## Planted problems
 

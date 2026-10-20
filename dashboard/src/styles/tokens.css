@@ -15,6 +15,7 @@
   --color-option-hover: #f6f7f8; /* not in Figma: a light grey hover */
   --color-option-hover-strong: #eceef1;
   --color-danger: #b82d23; /* "Superseded" */
+  --color-success: #246754; /* "Fixes applied" (the green used for safe and success) */
   --color-check: #111827;
   --color-switch-on: #112231;
   --color-switch-thumb: #ffffff;
@@ -61,15 +62,6 @@
   --color-chart-fallback: #b82d23; /* hatched block, dotted outline */
   --color-chart-fallback-fill: #fde2de; /* not in Figma: from the reference image */
   --color-chart-annotation: #52606a; /* knee, capacity line, campaign marker */
-
-  /* Other chart series (placeholders until the chart design) */
-  --color-chart-1: #091723;
-  --color-chart-2: #52606a;
-  --color-chart-3: #ff4f40;
-  --color-chart-4: #a4abb0;
-  --color-chart-5: #218157;
-  --color-chart-6: #7b858d;
-  --color-chart-grid: #e4e7e2;
 
   /* Spacing */
   --space-1: 4px;
@@ -122,5 +114,4 @@
   --page-max-width: 1240px;
   --page-gutter: 40px;
   --page-gutter-phone: 24px;
-  --chart-height: 240px;
 }

@@ -1,0 +1,109 @@
+{
+  "pool:cms": {
+    "summary": "Cache the rates first. All 10 slots with the rates CMS were busy from about 160 visitors at once, and a short cache means almost no request needs a slot, so the limit stops mattering at the campaign's 260.",
+    "check_first": [
+      {
+        "step": "Check how quickly a rate change in the CMS has to show on the site.",
+        "reason": "It sets the cache time: 30–60 seconds suits rates that change a few times a day; if an edit must show at once, clear the cache when rates are published."
+      }
+    ],
+    "ranked_fixes": [
+      {
+        "fix": "Cache the rates CMS's answers for a short time (for example 30–60 seconds), so most requests never need a slot.",
+        "reason": "The CMS then gets one call per cache period, down from 35 a second, so the bottleneck goes away.",
+        "source": "analyser"
+      },
+      {
+        "fix": "Combine identical requests that are in flight at the same moment.",
+        "reason": "When the cache expires during a busy second, the requests waiting for the new rates share one CMS call and leave the other slots free.",
+        "source": "analyser"
+      },
+      {
+        "fix": "When the CMS is slow, show the last rates it sent and refresh them in the background.",
+        "reason": "Visitors at campaign peak keep seeing real rates when the CMS slows down for any reason, and on a savings page the rate is what they came for.",
+        "source": "added"
+      },
+      {
+        "fix": "On the server, drop queued requests whose visitor has already given up, so the slots go to people still waiting.",
+        "reason": "Successful requests fell from 35/s to 10.8/s because slots went to answers nobody was waiting for; this keeps the throughput if a queue forms anyway.",
+        "source": "analyser"
+      },
+      {
+        "fix": "Keep the timeout and fallback for when it's slow anyway.",
+        "reason": "It already works: visitors saw the fallback message during the collapse, so keep it as the safety net.",
+        "source": "analyser"
+      },
+      {
+        "fix": "Ask the provider for a higher limit.",
+        "reason": "Last: it takes time and money and only moves the limit, and with caching 10 slots should be plenty.",
+        "source": "analyser"
+      }
+    ]
+  },
+  "db:findUserByEmail": {
+    "summary": "Confirm the full scan with the query plan, then add the index. It can wait, but it's a small change and the cost of each sign-up grows with the table.",
+    "check_first": [
+      {
+        "step": "Check the query plan (EXPLAIN QUERY PLAN) to confirm.",
+        "reason": "Confidence is medium because the analyser only sees timings; SCAN in the plan confirms the full table scan."
+      }
+    ],
+    "ranked_fixes": [
+      {
+        "fix": "Add an index on the column the query looks up.",
+        "reason": "The database then finds the row directly, so a lookup stays fast however many users sign up.",
+        "source": "analyser"
+      },
+      {
+        "fix": "Check that the query compares the email column directly (WHERE email = ?).",
+        "reason": "Wrapping the column in LOWER() or matching with LIKE stops the database using the index, so the fix would quietly do nothing.",
+        "source": "added"
+      },
+      {
+        "fix": "Run the sign-up test again with about 10 times today's users in the table.",
+        "reason": "The finding says it gets slower as the table grows; a bigger table shows how much the index saves before real data gets there.",
+        "source": "added"
+      }
+    ]
+  },
+  "render:SignupPage": {
+    "summary": "Cache the rendered page first. The page is the same for every visitor and its render took about 80% of the server's time, so caching removes most of the load in one change; profile it afterwards to make the first render faster.",
+    "check_first": [
+      {
+        "step": "Profile a single render (node --cpu-prof, or React DevTools' Profiler) and look at how many components the page renders and what each one does while rendering.",
+        "reason": "It explains why one render takes about 14ms. Caching helps whatever the answer, so this can come second."
+      },
+      {
+        "step": "Check the query plan (EXPLAIN QUERY PLAN) for the email lookup.",
+        "reason": "It confirms the full table scan before adding the index."
+      }
+    ],
+    "ranked_fixes": [
+      {
+        "fix": "Cache the rendered HTML (it's the same for every visitor), or generate it once at build time.",
+        "reason": "At about 14ms a page the server can render only about 70 pages a second; a cached page costs almost nothing.",
+        "source": "analyser"
+      },
+      {
+        "fix": "Add an index on the column the query looks up, so the database finds the row directly.",
+        "reason": "The email lookup is the next biggest share of the server's time (about 16%), and the change is small.",
+        "source": "analyser"
+      },
+      {
+        "fix": "Keep anything that differs per visitor (a form token, a name) out of the cached HTML, and load it separately.",
+        "reason": "Otherwise the first visitor-specific change to the page would quietly turn the cache off.",
+        "source": "added"
+      },
+      {
+        "fix": "Simplify the component tree: fewer components, and no heavy work while rendering.",
+        "reason": "Worth doing once profiling shows where the time goes, but with a cache it only speeds up the first render.",
+        "source": "analyser"
+      },
+      {
+        "fix": "If it has to stay dynamic, run several server processes (Node's cluster module) so renders don't all share one event loop.",
+        "reason": "Last: it multiplies capacity by the number of cores but still pays for every render, and a cache makes it unnecessary.",
+        "source": "analyser"
+      }
+    ]
+  }
+}

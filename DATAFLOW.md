@@ -25,7 +25,7 @@ the server reads and writes it through the same `db.js` when people sign up.
   ┌─────────────────────────────────────────────────────┐
   │  bank.db  (SQLite file on disk)                     │
   │  users: id, email, created_at                       │
-  │  TRAP #1: no index on email                         │
+  │  idx_users_email (Day 5 fix for trap #1)            │
   └─────────────────────────────────────────────────────┘
 ```
 
@@ -49,10 +49,10 @@ the server reads and writes it through the same `db.js` when people sign up.
   │  GET /styles.css → express.static reads public/      │
   │  GET /icons/*      Cache-Control: public, 1 hour     │
   │                                                      │
-  │  GET /api/rates  → asks cms.js on every request ─────┼──┐
+  │  GET /api/rates  → asks cms.js when the cache is old ┼──┐
   │                    → rates as JSON                   │  │ require('./cms')
-  │                    Cache-Control: no-store           │  │ getRates()
-  │                    TRAP #2: never cached             │  │
+  │                    Cache-Control: public, 60s        │  │ getRates()
+  │                    cached 60s, one shared refresh    │  │
   └──────────────────────────────────────────────────────┘  ▼
          ▲    │                                   ┌─────────────────────────┐
   HTTP   │    │  response                         │  cms.js  (fake outside  │
@@ -68,6 +68,12 @@ the server reads and writes it through the same `db.js` when people sign up.
 The CMS wait doesn't block: while rates requests wait, Node keeps answering
 other requests, so the homepage stays fast.
 
+Day 5 fix for trap #2: the server keeps the rates for 60s, so at most one
+rates request a minute reaches the CMS. When the cache is old, everyone who
+asks shares one CMS call. A visitor who gives up (the connection closes)
+stops waiting, and when nobody is left waiting, the call leaves the CMS
+queue. The paragraph below describes the site before the fix.
+
 The CMS can only finish about 40 requests a second (10 slots, ~250ms each).
 Below that, rates take ~250ms. Above it, the queue grows and every rates
 request waits longer and longer. That's the knee.
@@ -76,7 +82,8 @@ A browser loading the homepage makes about 11 requests: the HTML, then
 `styles.css`, `home.js` and 7 icons from our server, plus the Manrope font
 from Google Fonts (which never touches our server). Then `home.js` calls
 `GET /api/rates` straight away and fills in the "Our savings rates" cards, so
-**every homepage visit triggers one CMS call**. k6 only fetches what its script
+**every homepage visit triggers one rates request** (before the Day 5 fix,
+that meant one CMS call). k6 only fetches what its script
 asks for, so the load test requests `/` and `/api/rates` itself.
 
 ## 3. Sign-up (the homepage buttons link to `/signup`)
@@ -87,11 +94,11 @@ asks for, so the load test requests `/` and `/api/rates` itself.
      ▼
   ┌──────────────────────────────────────────────────────┐
   │  server.js                                           │
-  │  renderToString(SignupPage)  ◀── build/views/        │
-  │  ~15ms of CPU, blocks the       SignupPage.js        │
-  │  event loop, every request      (React, compiled     │
-  │  Cache-Control: no-store         from views/*.jsx)   │
-  │  TRAP #3: never cached                               │
+  │  sends build/signup.html     ◀── prerender.js        │
+  │  no CPU work per request        renders SignupPage   │
+  │  Cache-Control: public, 1 hour  once, in npm run     │
+  │  Day 5 fix for trap #3          build                │
+  │  (before: a ~15ms React render on every request)     │
   └──────────────────────────────────────────────────────┘
      │  HTML page + public/signup.js
      ▼
@@ -103,7 +110,7 @@ asks for, so the load test requests `/` and `/api/rates` itself.
   │  1. trim + lowercase, check it looks like an email   │
   │     → 400 if not                                     │
   │  2. SELECT ... WHERE email = ?  ──── db.js ──▶ bank.db
-  │     TRAP #1: full scan, ~3.5ms, blocks               │
+  │     uses idx_users_email (Day 5 fix, trap #1)        │
   │     → 409 if taken                                   │
   │  3. await validateEmail()  ──── emailValidation.js   │
   │     50-150ms, doesn't block     (fake outside        │
@@ -120,9 +127,11 @@ asks for, so the load test requests `/` and `/api/rates` itself.
 Two sign-ups with the same new email can both pass step 2 before either reaches
 step 4, so both insert. There's no `UNIQUE` constraint to stop the second.
 
-The render in `GET /signup` and the scan in step 2 are both synchronous: while
-they run, Node can't answer anyone else. Under load this slows every route,
-not just sign-up. The waits in `cms.js` and `emailValidation.js` don't.
+Before the Day 5 fixes, the render in `GET /signup` and the full scan in
+step 2 were both synchronous: while they ran, Node couldn't answer anyone
+else, so under load they slowed every route, not just sign-up. Now the page
+is a file and the lookup uses the index. The waits in `cms.js` and
+`emailValidation.js` never blocked.
 
 ## 4. Load test with metrics (`npm run load`)
 

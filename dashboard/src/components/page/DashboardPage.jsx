@@ -7,6 +7,7 @@ import { pageTitle } from '../../data/runLabels.js';
 import RunPicker from '../molecules/RunPicker.jsx';
 import SummaryStrip from './SummaryStrip.jsx';
 import FindingCard from '../organisms/FindingCard.jsx';
+import AllClearCard from '../organisms/AllClearCard.jsx';
 import Funnel from '../organisms/Funnel.jsx';
 import HealthyRoutes from '../organisms/HealthyRoutes.jsx';
 import DashboardSkeleton from './DashboardSkeleton.jsx';
@@ -68,6 +69,9 @@ export default function DashboardPage() {
               {run.findings.findings.map((f) => (
                 <FindingCard key={run.name + f.title} finding={f} timeline={run.timeline} routeContext={run.routeContext} peaks={run.findings?.peaks} />
               ))}
+              {run.findings.all_clear ? (
+                <AllClearCard allClear={run.findings.all_clear} dateLabel={selectedRun?.date_label} commit={run.runInfo?.git?.commit} />
+              ) : null}
             </div>
             {run.findings.healthyRoutes?.length ? (
               <>

@@ -42,8 +42,11 @@ and data).
 
 ## Planted problems
 
-Deliberate performance traps are marked `// TRAP:`.
-Don't fix or flag them unless I ask.
+Deliberate performance traps were marked `// TRAP:`. On Day 5, traps
+1-3 were fixed: the old code is kept as `// BEFORE (trap N)` comments next
+to `// FIXED (trap N)`. Trap 4 is still in place. Runs made after the fixes
+are labelled `VARIANT=after` (folder suffix `-after`).
+Don't fix or flag the remaining trap unless I ask.
 
 1. No index on email: sign-up checks for an existing email with a full
    table scan.
@@ -56,72 +59,12 @@ Don't fix or flag them unless I ask.
    between the existence check and the insert lets duplicate emails
    through under concurrency.
 
-## To Do list
+## To Do list: Day 5
 
-Day 4: the dashboard
+### Write-up and presentation
 
-[ ] Later, once the analyser works: a combined k6 test that runs the main and sign-up scenarios at the same time, to check the analyser can untangle mixed causes
-
-## Day 5 tasks
-
-### 1. Before/after fix run
-
-Apply one fix per trap, re-run both tests, and compare with the
-current runs. Keep the trap code commented as "before" so the
-change is easy to show.
-
-- [ ] Trap 2 (rates): cache CMS rates on the server for ~60s, and
-      drop queued CMS requests whose visitor has already left
-- [ ] Trap 3 (sign-up page): pre-render /signup at build time,
-      like the homepage
-- [ ] Trap 1 (email lookup): add an index on users.email
-- [ ] Re-run main + sign-up tests, run the analyser, save as
-      "after" runs
-- [ ] Dashboard: before/after toggle per finding
-
-### 2. LLM layer (designed, not connected)
-
-- [ ] Define the input: a compact summary built from findings.json
-      (no raw timeline data)
-- [ ] Define the output schema the LLM should return
-- [ ] Write the prompt template
-- [ ] Fix ranking: hand the LLM each finding's metrics and
-      `suggested_fixes` and have it rank them most recommended first
-      (with a reason per fix) and add any fixes it thinks are missing.
-      The analyser's lists aren't ranked today (some mix in checks like
-      EXPLAIN QUERY PLAN or profiling), so it also separates "check
-      first" steps from fixes. The dashboard title then says "most
-      recommended first"
-- [ ] Dashboard panel: "Prompt preview" (exactly what would be sent)
-      and a canned response rendered in the same verdict card style
-- [ ] Note in the UI: "Not connected. Shows the planned contract."
-
-### 3. Ship it
-
-- [ ] Re-publish the dashboard if the analyser changed or tests were
-      re-run today: re-analyse the runs (main first), npm run
-      dashboard:data, npm --prefix dashboard run build, then copy the
-      contents of dashboard/dist/ into monzo/dashboard/ on the build
-      log site
-- [ ] Deploy the dashboard to Vercel as a static site (recorded
-      runs only, no test site, no live tests)
-- [ ] Make the repo public, with a README: what it is, how to run
-      it locally, the traps, the assumptions, and attribution
-      ("I direct; Claude Code types")
-- [ ] Remove anything that shouldn't be public (local paths, .db
-      files, large raw results)
-- [ ] Remove unused components and tokens (`Stat`, `ScenarioTag`,
-      the `--color-chart-1` to `-6`, `--color-chart-grid` and
-      `--chart-height` tokens)
-
-### 4. Write-up and presentation
-
-- [ ] Day 4 and Day 5 build log entries
 - [ ] Final summary at the top of the case study: what it found,
       what the fixes changed, what I learned
-- [ ] Screenshots: dashboard, the collapse chart, before/after,
-      a fallback screenshot
-- [ ] Presentation slides
 
 ### Stretch (only if time allows)
 
@@ -130,3 +73,6 @@ change is easy to show.
 - [ ] Confirm whether "couldn't connect" failures came from the
       macOS listen queue (somaxconn 128)
 - [ ] One Toxiproxy run with ~100ms network latency
+- [ ] A combined k6 test that runs the main and sign-up scenarios
+      at the same time, to check the analyser can untangle mixed
+      causes

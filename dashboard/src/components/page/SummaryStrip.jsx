@@ -32,6 +32,7 @@ export default function SummaryStrip({ run }) {
       <button type="button" className="disclosure-toggle" aria-expanded={open} aria-controls={`${id}-content`} onClick={() => setOpen(!open)}>
         <span className="disclosure-label">
           {findings.superseded ? <span className="superseded-label">Superseded</span> : null}
+          {!findings.superseded && findings.variant === 'after' ? <span className="fixes-label">Fixes applied</span> : null}
           {label}
         </span>
         <span className={`run-selector-chevron${open ? ' is-up' : ''}`} aria-hidden="true" />

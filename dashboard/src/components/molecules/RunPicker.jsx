@@ -157,6 +157,8 @@ export default function RunPicker({ runs, selected, onSelect, showSuperseded, on
                     <span className="run-option-title">{titleOf(run)}</span>
                     {run.superseded ? (
                       <span className="run-option-superseded">Superseded</span>
+                    ) : run.variant === 'after' ? (
+                      <span className="run-option-fixes">Fixes applied</span>
                     ) : isSelected ? (
                       <span className="run-option-check" aria-hidden="true">
                         ✓

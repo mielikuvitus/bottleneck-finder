@@ -124,6 +124,13 @@
   font-size: var(--font-size-label);
   font-weight: var(--font-weight-extrabold);
 }
+/* "Fixes applied" (runs made after the Day 5 fixes): the same, in green */
+.run-option-fixes,
+.fixes-label {
+  color: var(--color-success);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-extrabold);
+}
 .run-option-description {
   color: var(--color-text-muted);
   font-size: var(--font-size-small);

@@ -17,11 +17,16 @@ import AppHeader from '../components/page/AppHeader.jsx';
 import ProjectContext from '../components/page/ProjectContext.jsx';
 import EmptyReport from '../components/page/EmptyReport.jsx';
 import DashboardSkeleton from '../components/page/DashboardSkeleton.jsx';
+import PromptComposer from '../components/molecules/PromptComposer.jsx';
+import AiResponse from '../components/molecules/AiResponse.jsx';
 import VerdictCard from '../components/organisms/VerdictCard.jsx';
+import AiAnalysisDisclosure from '../components/organisms/AiAnalysisDisclosure.jsx';
+import { ATTACHMENT_NAME, MODELS, PROMPT_TEMPLATE } from '../data/aiContract.js';
+import CANNED_AI from '../data/cannedAiResponses.json';
 import FindingCard from '../components/organisms/FindingCard.jsx';
 
 const SEVERITIES = ['critical', 'high', 'medium', 'low', 'info'];
-const ICONS = ['error', 'priorityHigh', 'warningAmber', 'arrowDownward', 'check', 'checkCircle', 'visibility', 'schedule', 'bolt'];
+const ICONS = ['error', 'priorityHigh', 'warningAmber', 'arrowDownward', 'check', 'checkCircle', 'visibility', 'schedule', 'bolt', 'description', 'arrowUpward', 'autoAwesome'];
 const WAIT_VARIANTS = ['safe', 'caution', 'soon', 'now'];
 const LEGEND_KINDS = [
   { kind: 'line', label: 'Arrivals' },
@@ -61,6 +66,9 @@ export default function ComponentsPage() {
       })
       .catch(setError);
   }, []);
+
+  const [model, setModel] = useState(MODELS[0].id);
+  const [typingKey, setTypingKey] = useState(0); // remounts AiResponse to type it again
 
   const firstFinding = main?.findings.findings[0];
   const picker = <RunPicker runs={runs} selected={selected} onSelect={setSelected} showSuperseded={showSuperseded} onToggleSuperseded={setShowSuperseded} />;
@@ -119,6 +127,25 @@ export default function ComponentsPage() {
           <CanWaitCallout key={v} variant={v} size="inline" />
         ))}
       </Specimen>
+      <Specimen name="PromptComposer (send replays AiResponse's typing below)">
+        <div style={{ width: '100%', maxWidth: 720 }}>
+          <PromptComposer
+            prompt={PROMPT_TEMPLATE}
+            attachment={{ name: ATTACHMENT_NAME, size: '4 KB' }}
+            models={MODELS}
+            model={model}
+            onModelChange={setModel}
+            onSend={() => setTypingKey((k) => k + 1)}
+          />
+        </div>
+      </Specimen>
+      {Object.entries(CANNED_AI).map(([key, response]) => (
+        <Specimen key={key} name={`AiResponse · ${key}`}>
+          <div style={{ width: '100%', maxWidth: 720 }}>
+            <AiResponse key={typingKey} response={response} modelName={MODELS.find((m) => m.id === model)?.name} typing={typingKey > 0} />
+          </div>
+        </Specimen>
+      ))}
       <Specimen name="RunPicker">
         <div style={{ width: '100%', maxWidth: 520 }}>{picker}</div>
       </Specimen>
@@ -138,6 +165,13 @@ export default function ComponentsPage() {
       ) : null}
 
       <h2 className="dev-level">Organisms</h2>
+      {firstFinding ? (
+        <Specimen name="AiAnalysisDisclosure (main run, first finding)">
+          <div className="verdict-card" style={{ width: '100%', paddingTop: 'var(--verdict-gutter)' }}>
+            <AiAnalysisDisclosure finding={firstFinding} peaks={main.findings.peaks} />
+          </div>
+        </Specimen>
+      ) : null}
       {[main, signup].filter(Boolean).flatMap((run) =>
         run.findings.findings.map((f) => (
           <Specimen key={run.name + f.title} name={`VerdictCard · ${run.name} · ${f.severity}`}>

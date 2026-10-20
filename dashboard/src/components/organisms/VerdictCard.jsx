@@ -6,6 +6,7 @@ import ConfidenceIndicator from '../atoms/ConfidenceIndicator.jsx';
 import KeyNumbers from '../molecules/KeyNumbers.jsx';
 import CanWaitCallout from '../molecules/CanWaitCallout.jsx';
 import CustomerView from '../molecules/CustomerView.jsx';
+import AiAnalysisDisclosure from './AiAnalysisDisclosure.jsx';
 import EvidenceDisclosure from './EvidenceDisclosure.jsx';
 
 // Which can-it-wait look each severity gets
@@ -68,6 +69,8 @@ export default function VerdictCard({ finding, timeline, routeContext, peaks, on
         </div>
         <CustomerView customerView={finding.customer_view} />
       </div>
+
+      <AiAnalysisDisclosure finding={finding} peaks={peaks} />
 
       <EvidenceDisclosure finding={finding} timeline={timeline} peaks={peaks} />
 

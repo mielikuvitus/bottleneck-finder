@@ -90,7 +90,7 @@ hidden from screen readers; the label is read out.
 
 | Prop | Example |
 | ---- | ------- |
-| `name` | `"priorityHigh"`: one of `error`, `priorityHigh`, `warningAmber`, `arrowDownward`, `check` (severity badges), `checkCircle`, `visibility`, `schedule`, `bolt` (can it wait) |
+| `name` | `"priorityHigh"`: one of `error`, `priorityHigh`, `warningAmber`, `arrowDownward`, `check` (severity badges), `checkCircle`, `visibility`, `schedule`, `bolt` (can it wait), `description`, `arrowUpward`, `autoAwesome` (AI analysis) |
 | `size` | `14` (px, default) |
 
 Google's Material Icons, copied as SVG paths into
@@ -98,15 +98,6 @@ Google's Material Icons, copied as SVG paths into
 Apache License 2.0 (notice in the file), so no MUI packages are needed. To add
 an icon, copy its path data into `ICONS`. It uses the text colour
 (`currentColor`).
-
-### ScenarioTag
-
-| Prop | Field | Example |
-| ---- | ----- | ------- |
-| `test` | `findings.test` | `"signup"` |
-| `scenario` | `findings.scenario` | `"campaign"` (`null` for the main test) |
-
-Renders "Main test" or "Sign-up test · campaign scenario".
 
 ### HeadroomComponent
 
@@ -119,17 +110,6 @@ Renders "Main test" or "Sign-up test · campaign scenario".
 
 `headroom` is `null` when nothing broke yet (for example the slow-lookup
 finding). Percentages below 0 mean over the limit.
-
-### Stat
-
-| Prop | Example |
-| ---- | ------- |
-| `label` | `"Visit length"` |
-| `value` | `4.65` |
-| `unit` | `"s"` |
-| `note` | `"measured from the healthy stages (5 visits/s, 12 visits/s, 24 visits/s, 35 visits/s)"` |
-
-Generic; used by the summary strip.
 
 ### ConfidenceIndicator
 
@@ -195,6 +175,7 @@ Each option and the button show:
 | Description | `test`, options only: "Testing / → /signup funnel" or "Testing /signup with assumed campaign traffic" | `"Testing / → /signup funnel"` |
 | Date | `date_label`: the run's start, in the time zone of the machine it ran on | `"19 Oct 2026 · 00:01 BST"` |
 | "Superseded" | `superseded` | shown in red on superseded runs |
+| "Fixes applied" | `variant` | shown in green on runs made after the Day 5 fixes (`"after"`), in the same place; "Superseded" wins if a run is both |
 
 The button shows "Select a run" until a run is chosen; the dashboard opens with
 no run selected. `?run=<name>` in the address opens a run directly.
@@ -343,6 +324,44 @@ outside the image, or Esc; focus then returns to the thumbnail.
 | `caption` | `"The homepage"` (the dialog's label and the image's alt text) |
 | `onClose` | called once it has closed |
 
+### PromptComposer
+
+A chat-style prompt box, used by `AiAnalysisDisclosure`: a file chip for the
+attachment (an icon, the name and size; not clickable), the prompt as
+read-only text, the conversation (`children`, under a
+divider: "Thinking…" and then the reply), and a bottom bar with the model picker
+on the left and the round send
+button on the right. The box keeps one height (340px): everything above the
+bar scrolls, and once sent it scrolls to the bottom and follows the reply as
+it types, unless the reader scrolls up. To change the prompt or the models, edit
+`PROMPT_TEMPLATE` and `MODELS` in
+[src/data/aiContract.js](src/data/aiContract.js).
+
+| Prop | Example |
+| ---- | ------- |
+| `prompt` | `PROMPT_TEMPLATE` |
+| `attachment` | `{ name: "findings.json", size: "4 KB" }` |
+| `models` | `MODELS`: `[{ id: "claude-sonnet-5-5", name: "Claude Sonnet 5.5" }, …]` |
+| `model`, `onModelChange` | the picked model's `id`, and called with a new one |
+| `onSend` | called by the send button |
+| `children` | shown under the prompt once sent: the thinking state or `AiResponse` |
+| `sendDisabled` | `true` once sent, or when there's no reply for the finding |
+
+### AiResponse
+
+The AI's reply, in the shape of `OUTPUT_SCHEMA`: the model's name with a
+sparkle, `summary`, "Check first" (`check_first[]`: `step` and `reason`; left
+out when empty), then "Fixes, most recommended first" (`ranked_fixes[]`, a
+numbered list: `fix`, `reason` under it, and an "Added by AI" pill when
+`source` is `"added"`). With `typing`, it appears one word every 18ms
+(`WORD_MS`); all at once with reduced motion.
+
+| Prop | Example |
+| ---- | ------- |
+| `response` | one entry of [src/data/cannedAiResponses.json](src/data/cannedAiResponses.json) |
+| `modelName` | `"Claude Sonnet 5.5"` |
+| `typing` | `true` to type it out (default `false`) |
+
 ---
 
 ## Organisms
@@ -377,7 +396,8 @@ Figma: "Expanded verdict". One finding, important things first:
 1. **Heading:** `SeverityBadge` (`severity`) and `ConfidenceIndicator` (`confidence`); the headline (`headline`, what visitors experienced, e.g. `"At campaign peak, every visit showed “Couldn't load rates right now.”"`); a subline from `route-context.json` `powers` plus `customer_view.shown_on` (`"Savings rate cards on the homepage · /"`).
 2. **`KeyNumbers`** (`load_levels`), with a divider under them. Left out when there's no break point.
 3. **Body** (3:2 columns; one column below 960px): `CanWaitCallout size="large"` (`can_wait_title`, `can_wait`) and "Suggested fix" (`suggested_fix_groups`: a list per cause under its name and share of the server's time; else `suggested_fixes` as bullet points when there are several, else one sentence) on the left; `CustomerView` (`customer_view`) on the right.
-4. **`EvidenceDisclosure`** (`evidence_summary`, `cause`, `title`, `evidence`, and the run's timeline).
+4. **`AiAnalysisDisclosure`** (the planned LLM layer, not connected).
+5. **`EvidenceDisclosure`** (`evidence_summary`, `cause`, `title`, `evidence`, and the run's timeline).
 
 | Prop | Example |
 | ---- | ------- |
@@ -413,6 +433,33 @@ screenshot opens the current tab's image large in `ScreenshotModal`.
 | `shown_on` | `"/"` |
 | `state` | `"fallback"`: the tab it opens on (what most visitors saw) |
 | `caption` | `"Savings rate cards on the homepage at campaign peak"` |
+
+### AiAnalysisDisclosure
+
+"AI analysis for the suggested fixes", closed by default, between the body
+and the evidence. It shows the planned LLM layer, which isn't connected:
+
+1. A note with a `warningAmber` icon: "Not connected yet: this shows the planned LLM layer. The prompt is read-only and the reply is pre-written."
+2. `PromptComposer` with `PROMPT_TEMPLATE` and a `findings.json` chip. Its size is that of `buildAiInput(finding, peaks)`: the attachment that would be sent, a compact summary of the finding with no timeline data.
+3. After send, inside the same box under the prompt: "Thinking…" for 0.9s, then `AiResponse` typing out the canned reply. Send works once, then the button turns grey. Closing the panel hides it without removing it, so the reply stays and doesn't type again.
+
+The canned reply is picked by the finding's cause (`"pool:cms"`,
+`"db:findUserByEmail"`, `"render:SignupPage"`, from `cannedKey`). A finding
+without one gets a note and a disabled send button.
+
+| Prop | Example |
+| ---- | ------- |
+| `finding` | one item of `findings.findings` |
+| `peaks` | `findings.peaks` (part of the attachment) |
+
+The contract is in [src/data/aiContract.js](src/data/aiContract.js):
+`PROMPT_TEMPLATE`, `buildAiInput` (the input), and `OUTPUT_SCHEMA` (what the
+model must return, sent as its structured output format):
+
+```
+{ summary, check_first: [{ step, reason }],
+  ranked_fixes: [{ fix, reason, source: "analyser" | "added" }] }
+```
 
 ### EvidenceDisclosure
 
@@ -451,6 +498,21 @@ Extra cards, only where they explain the finding (from `cause.kind`):
 
 None of them appear when the run has no server samples. `server` is `null` for
 seconds without a sample, or `{ pollFailed: true }` when `/metrics` didn't answer.
+
+### AllClearCard
+
+| Prop | Field | Example (main after run) |
+| ---- | ----- | ------- |
+| `allClear` | `findings.all_clear`: `title`, `summary`, `keep_fresh` | `{ title: "No problems found.", summary: "Every route stayed healthy up to 57 visits/s, about 249 visitors at once. …", keep_fresh: "This is true for the code this run tested. …" }` |
+| `dateLabel` | `runs.json[].date_label` | `"20 Oct 2026 · 20:52 BST"` |
+| `commit` | `run.json` `git.commit` | `"479539e"` |
+
+Shown in place of the finding cards when the run found nothing. The verdict
+card's frame, one column wide like a short finding card (the full row on phones): the "Healthy" severity badge (`SeverityBadge`, `info`) at the top, then the title in the verdict headline style with
+"As of … · commit …" on the right of the same line (under it on narrow
+screens), the summary under it (body size), then the `keep_fresh` note (muted,
+small, italic). Runs with findings
+have no `all_clear`, so it doesn't appear.
 
 ### HealthyRoutes
 
@@ -527,3 +589,4 @@ so there's no separate evidence or charts section.
 | `findings.test` | also picks the screenshots (`SiteScreenshots`), above the assumptions |
 | `findings.normal_day_warning` (campaign scenario) | `"Normal-day numbers come from main run 2026-10-19_000132-main. Both runs are on commit 93ba655, but with uncommitted changes…"` |
 | `findings.superseded`, `.superseded_reason` | `false` |
+| `findings.variant` | `"after"`: "Fixes applied" (green) in front of the details title, where "Superseded" goes |

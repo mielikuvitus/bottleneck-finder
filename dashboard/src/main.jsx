@@ -7,6 +7,7 @@ import './styles/skeleton.css';
 import './styles/run-picker.css';
 import './styles/atoms.css';
 import './styles/verdict-card.css';
+import './styles/ai-analysis.css';
 import './styles/summary.css';
 import { RunProvider } from './data/RunContext.jsx';
 import DashboardPage from './components/page/DashboardPage.jsx';

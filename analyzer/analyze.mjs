@@ -321,6 +321,23 @@ const healthyRoutes = routes
     return { route, p95, note: `No knee up to ${healthyUpTo}: p95 ${p95} at the highest load.` };
   });
 
+// Share of requests that failed in the hold stages, all routes together
+const holdTotals = (key) => stages.reduce((a, s) => a + Object.values(s.routes).reduce((b, r) => b + r[key], 0), 0);
+const errorShare = holdTotals('errors') / Math.max(1, holdTotals('requests'));
+
+// Nothing found: a sentence for the dashboard's all-clear card, and a
+// reminder that it only holds for the code this run tested
+const atCampaign = limit.index === peaks.campaign.closestStage && !peaks.campaign.aboveTested;
+const allClear =
+  findings.length === 0 && !Object.values(knees).some(Boolean)
+    ? {
+        title: 'No problems found.',
+        summary: `Every route stayed healthy up to ${limit.label}${timeline.loadKind === 'vus' ? '' : `, about ${Math.round(limit.visitorsAtOnce)} visitors at once`}.${atCampaign ? " That's the test level closest to the expected campaign peak," : ''} ${atCampaign ? 'and ' : ''}${percent(errorShare)} of requests failed.`,
+        keep_fresh:
+          'This is true for the code this run tested. Run the tests on a schedule (nightly or before a release) in a fixed, production-like environment to catch changes that make it slower.',
+      }
+    : null;
+
 const output = {
   run: basename(runDir),
   test: runInfo.test,
@@ -338,6 +355,7 @@ const output = {
   funnel,
   healthy_up_to: healthyUpTo,
   healthyRoutes,
+  ...(allClear ? { all_clear: allClear } : {}),
   findings,
 };
 writeFileSync(join(runDir, 'findings.json'), JSON.stringify(output, null, 2));
@@ -358,4 +376,5 @@ if (funnel.lost_signups) {
   for (const level of Object.values(funnel.lost_signups)) console.log(`  ${level.summary}`);
 }
 for (const h of healthyRoutes) console.log(`\nHealthy: ${h.route}: ${h.note}`);
-console.log(`\nErrors overall: ${percent(stages.reduce((a, s) => a + Object.values(s.routes).reduce((b, r) => b + r.errors, 0), 0) / Math.max(1, stages.reduce((a, s) => a + Object.values(s.routes).reduce((b, r) => b + r.requests, 0), 0)))} of requests in the hold stages`);
+console.log(`\nErrors overall: ${percent(errorShare)} of requests in the hold stages`);
+if (allClear) console.log(`\n${allClear.title} ${allClear.summary}`);
