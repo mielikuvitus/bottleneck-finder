@@ -29,7 +29,14 @@ if (!runDir) {
 // Prefer the config copied into the run folder (what the run used)
 const fromRun = (name, fallback) => readJson(existsSync(join(runDir, name)) ? join(runDir, name) : fallback);
 const config = fromRun('test-config.json', 'load-tests/test-config.json');
-const routeContext = fromRun('route-context.json', 'analyzer/route-context.json');
+// The run's copy wins, but fields added since (e.g. shown_on) come from the current file
+const currentContext = readJson('analyzer/route-context.json');
+const runContext = fromRun('route-context.json', 'analyzer/route-context.json');
+// Plain-English names for the code names in the metrics (always the current file)
+const names = Object.fromEntries(Object.entries(readJson('analyzer/names.json')).filter(([k]) => !k.startsWith('_')));
+const routeContext = Object.fromEntries(
+  Object.entries(currentContext).map(([route, ctx]) => [route, typeof ctx === 'object' ? { ...ctx, ...(runContext[route] ?? {}) } : ctx])
+);
 
 // The run's label (run.json): which test, whether it's superseded, which code version
 const runInfoOf = (dir) =>
@@ -151,6 +158,8 @@ function serverStats(secs) {
         avgMs: round(mean(present.map((p) => p.avgMs)), 2),
         calls: present.reduce((sum, p) => sum + p.count, 0),
         op: present.find((p) => p.op)?.op ?? null,
+        // Output size per call (renders only; runs before this was recorded have none)
+        avgBytes: present.some((p) => p.avgBytes) ? Math.round(mean(present.filter((p) => p.avgBytes).map((p) => p.avgBytes))) : null,
       };
     }
   }
@@ -297,12 +306,18 @@ const peaks = {
 const limit = stages[stages.length - 1];
 
 const normalDay = scenario === 'campaign' ? loadNormalDay() : null;
-const ctx = { scenario, normalDay, loadLabel, runDir, config, routeContext, timeline, stages, routes, knees, visit, visitSeconds, requestsPerVisit, totalRequestsPerVisit, peaks, limit };
+const ctx = { scenario, normalDay, loadLabel, runDir, config, routeContext, names, timeline, stages, routes, knees, visit, visitSeconds, requestsPerVisit, totalRequestsPerVisit, peaks, limit };
 const findings = buildFindings(ctx);
 const funnel = funnelReport(ctx, totalFunnel);
+// Routes without a knee: one shared "checked up to" load, and each route's
+// p95 at the highest load (note keeps the whole sentence for the console)
+const healthyUpTo = loadLabel(limit);
 const healthyRoutes = routes
   .filter((route) => !knees[route])
-  .map((route) => ({ route, note: `No knee up to ${loadLabel(limit)}: p95 ${seconds(limit.routes[route]?.p95)} at the highest load.` }));
+  .map((route) => {
+    const p95 = seconds(limit.routes[route]?.p95);
+    return { route, p95, note: `No knee up to ${healthyUpTo}: p95 ${p95} at the highest load.` };
+  });
 
 const output = {
   run: basename(runDir),
@@ -318,6 +333,7 @@ const output = {
   stages: stages.map(({ iterationMs, ...s }) => s),
   knees,
   funnel,
+  healthy_up_to: healthyUpTo,
   healthyRoutes,
   findings,
 };

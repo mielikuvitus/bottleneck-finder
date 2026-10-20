@@ -11,7 +11,9 @@
     "load:smoke": "k6 run load-tests/smoke.js",
     "load": "load-tests/run.sh main",
     "load:signup": "load-tests/run.sh signup",
-    "analyze": "node analyzer/analyze.mjs"
+    "analyze": "node analyzer/analyze.mjs",
+    "dashboard:data": "npm --prefix dashboard run data",
+    "dashboard": "npm --prefix dashboard run dev"
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,184 @@
+/* The test details (SummaryStrip): a .disclosure box, key numbers on the
+   left and the stage table on the right, like the verdict card's body. */
+
+/* In the app frame under the run picker, on white like it. The same padding
+   as the picker, so the title starts where the picker's text does */
+.summary-strip-section {
+  margin-top: 0;
+  padding: var(--space-card);
+  background: var(--color-surface);
+  line-height: normal;
+}
+.summary-content { display: flex; flex-direction: column; gap: var(--space-5); padding-top: var(--space-5); }
+.summary-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+.summary-numbers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+.summary-stages { display: flex; flex-direction: column; gap: var(--space-2); }
+.summary-stages-title { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-small); }
+/* "Superseded" before the toggle label, in the run picker's case and size */
+.disclosure-label .superseded-label { margin-right: var(--space-2); text-transform: none; }
+/* Why the run was superseded ("Superseded" itself is in the title) */
+.summary-superseded { margin: 0; color: var(--color-text); font-size: var(--font-size-label); line-height: 1.5; }
+.summary-note { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-small); line-height: 1.5; }
+
+/* Row dividers only; numbers right-aligned in the chart axis font */
+.stage-table { width: 100%; margin: 0; font-size: var(--font-size-label); }
+.stage-table th,
+.stage-table td {
+  padding: var(--space-2) 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.stage-table th {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+  font-weight: normal;
+}
+.stage-table th:not(:first-child),
+.stage-table td:not(:first-child) {
+  padding-left: var(--space-3);
+  text-align: right;
+  font-family: var(--font-family-mono);
+}
+.stage-table th:not(:first-child) { font-family: inherit; }
+.stage-table tbody tr:last-child td { border-bottom: 0; }
+
+/* Tablets and phones: the table goes under the numbers */
+@media (max-width: 760px) {
+  .summary-columns { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .summary-numbers { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* The assumptions (AssumptionsList): an underlined "read more" style link,
+   then a grid of traffic numbers, one line of visitor behaviour and a routes
+   table with row dividers, numbers in mono */
+.text-link {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-label);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.text-link:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 4px; }
+.assumptions-list { display: flex; flex-direction: column; gap: var(--space-4); }
+.assumptions-content { display: flex; flex-direction: column; gap: var(--space-4); }
+.assumptions-group { display: flex; flex-direction: column; gap: var(--space-1); }
+.assumptions-heading { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-small); }
+.assumptions-number { font-family: var(--font-family-mono); }
+
+.assumptions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-3) var(--space-5);
+  margin: 0;
+}
+.assumptions-item { display: flex; flex-direction: column; gap: 2px; }
+.assumptions-item dt { color: var(--color-text-muted); font-size: var(--font-size-small); }
+.assumptions-item dd { margin: 0; color: var(--color-text); font-size: var(--font-size-label); }
+
+.assumptions-behaviour { margin: 0; color: var(--color-text); font-size: var(--font-size-label); line-height: 1.6; }
+
+.assumptions-routes { width: 100%; margin: 0; font-size: var(--font-size-label); line-height: 1.4; }
+.assumptions-routes th,
+.assumptions-routes td {
+  padding: var(--space-2) var(--space-4) var(--space-2) 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+.assumptions-routes th { color: var(--color-text-muted); font-size: var(--font-size-small); font-weight: normal; white-space: nowrap; }
+.assumptions-routes tbody tr:last-child td { border-bottom: 0; }
+.assumptions-route { font-family: var(--font-family-mono); white-space: nowrap; }
+/* Where the assumptions live, for developers */
+.assumptions-source { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-small); line-height: 1.6; }
+.assumptions-source code { font-family: var(--font-family-mono); color: var(--color-text); }
+
+/* Phones: the routes table scrolls sideways rather than squashing */
+@media (max-width: 600px) {
+  .assumptions-group:has(.assumptions-routes) { overflow-x: auto; }
+}
+
+/* Screenshots of the test site (SiteScreenshots), above the assumptions */
+.site-screenshots { display: flex; flex-direction: column; gap: var(--space-2); }
+.site-screenshots-title { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-small); }
+.site-screenshots-row { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+.site-screenshot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 240px;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: zoom-in;
+}
+.site-screenshot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+.site-screenshot:hover img { border-color: var(--color-text-muted); }
+.site-screenshot-caption { color: var(--color-text); font-size: var(--font-size-small); }
+.site-screenshot:hover .site-screenshot-caption { text-decoration: underline; }
+.site-screenshot:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 4px; border-radius: var(--radius-card); }
+
+/* The screenshot, large (ScreenshotModal). No padding, so a click on the
+   dialog itself is a click outside the image. */
+.screenshot-modal {
+  max-width: 90vw;
+  max-height: 90vh;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-card-large);
+  background: var(--color-surface);
+  overflow: visible;
+}
+.screenshot-modal::backdrop { background: var(--color-backdrop); }
+.screenshot-modal img {
+  display: block;
+  max-width: 90vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-card-large);
+}
+.screenshot-modal-close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-popover);
+  cursor: pointer;
+}
+.screenshot-modal-close:hover { background: var(--color-option-hover-strong); }
+.screenshot-modal-close:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 2px; }
+/* The page behind doesn't scroll while the modal is open */
+body:has(.screenshot-modal[open]) { overflow: hidden; }

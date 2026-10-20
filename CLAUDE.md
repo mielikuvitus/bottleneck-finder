@@ -1,12 +1,38 @@
 # Bottleneck finder
 
-A 4-day learning project: a concept tool that load tests a fictional
+A 5-day learning project: a concept tool that load tests a fictional
 fintech site and explains what breaks first.
+
+## Where things are
+
+Read the docs before the code: [README.md](README.md) (setup, tests, metrics
+fields, analyser fields), [DATAFLOW.md](DATAFLOW.md) (how the server files talk),
+[dashboard/COMPONENTS.md](dashboard/COMPONENTS.md) (every component, its props
+and data).
+
+- **Test site:** `server.js` (routes), `db.js`, `cms.js` (fake CMS, trap 2),
+  `emailValidation.js` (trap 4), `metrics.js` (GET /metrics), `seed.js`,
+  `views/SignupPage.jsx` (trap 3), `public/` (homepage, `home.js`, `signup.js`)
+- **Load tests:** `load-tests/` — `main.js`, `signup.js`, `smoke.js`, `lib.js`
+  (shared), `run.sh` (runs k6 and saves results), `poll-metrics.mjs`,
+  `test-config.json` (assumptions)
+- **Analyser:** `analyzer/` — `analyze.mjs` (numbers, knees), `rules.mjs`
+  (findings), `describe.mjs` (wording), `timeline.mjs` (builds timeline.json),
+  `route-context.json`, `names.json`
+- **Dashboard:** `dashboard/src/` — `components/{atoms,molecules,organisms,page}`,
+  `data/` (useRun, `series.js` chart rows), `styles/tokens.css`;
+  `dashboard/scripts/copy-data.mjs` (npm run dashboard:data)
+- **Run results:** `load-tests/results/<run>/`. Read `findings.json` or
+  `run.json`; `timeline.json` is large, so search it rather than reading it whole.
+- **Don't read:** `node_modules/`, `dashboard/dist/`, `build/`, `*.db`,
+  `raw.csv.gz`, `metrics.jsonl`, `dashboard/public/data/` (copies of results)
 
 ## How to help me
 
 - I'm learning these concepts. Explain the approach before writing code.
 - Keep explanations concise unless I ask for more.
+- When a to-do is done, delete it from the To Do list below. Don't keep a
+  list of finished to-dos.
 
 ## Stack
 
@@ -30,62 +56,77 @@ Don't fix or flag them unless I ask.
    between the existence check and the insert lets duplicate emails
    through under concurrency.
 
-Sign-up only asks for an email (like monzo.com); the account is finished
-in the app, so passwords never touch the website.
-
 ## To Do list
 
-[x] Install express and better-sqlite3 (synchronous, which makes the slowdowns easy to see)
-[x] Add a start script and check that a “hello” route responds
+Day 4: the dashboard
 
-Database
-
-[x] Create a users table with id, email and created date
-[x] Leave out an index on email. That’s planted problem #1
-[x] Write a seed script that inserts about 100k fake users. Wrap the inserts in a single transaction, or seeding will take ages
-[x] Check it worked by counting the rows
-
-Homepage (GET /)
-
-[x] Serve a simple static HTML page with one “Open an account” button
-[x] Set a Cache-Control header on it, since it’s meant to be the fast, cached part
-
-Rates (GET /api/rates)
-
-[x] Return a small JSON of savings rates
-[x] Fake a slow CMS call with a 200 to 300ms delay on every request, and don’t cache it. That’s planted problem #2
-[x] Limit the fake CMS to 10 requests at once and queue the rest, so latency climbs under load
-
-Sign-up page
-
-[x] Render the sign-up page (email field only) from React on the server, on every request, with no caching. That’s planted problem #3
-
-Sign-up (POST /api/signup)
-
-[x] Accept an email only.
-[x] Look up the email to check it isn’t taken. This query scans the whole table without the index (planted problem #1)
-[x] Await a fake “email validation” call between the check and the insert, so duplicates get through under concurrency. That’s planted problem #4 (bonus)
-[x] Insert the new user and return 201
-
-Sanity check
-
-[x] Hit each route once with curl or Postman and note the response times. This is your “quiet Tuesday” baseline
-[x] Write a short README listing the planted problems, so you can check later whether the tool found them
-
-Tip: comment each planted problem in the code with something like // TRAP: no index on email.
-
-Day 3: the analyser
-
-[x] Check whether the server already records metrics during a run. If not, add GET /metrics (CPU, event loop delay, DB query time, CMS in-flight and queued) and poll it every second during k6 runs, saving it next to the results
-[x] Add a sign-up-heavy k6 scenario using ramping-arrival-rate so traps 1 and 3 show up
-[x] Timeouts and fallbacks: home.js gives up on /api/rates after 3s ("Couldn't load rates right now."); signup.js gives up after 5s with a message that doesn't claim it failed, and a "Nothing was submitted" message for connection errors; k6 uses the same timeouts and counts fallback_shown per route
-[x] Per-second timeline.json per run folder: each route's requests/s, p50, p95, errors and timeouts from k6, merged with the /metrics samples by timestamp
-[x] Config: load-tests/test-config.json (expected peak 110 and campaign peak 260 visitors at once, avg_visit_seconds, funnel percentages, table size) and analyzer/route-context.json (what each route means to a visitor, its timeout and fallback; POST /api/signup is critical)
-[x] Main k6 test as a funnel: everyone lands on / and loads /api/rates, ~10% go to /signup, ~60% of those submit. The sign-up test stays as visitors landing directly on /signup (an ad campaign)
-[x] Analyser (analyzer/): one finding per problem with title, route, knee_at, evidence, likely_cause, suggested_fix, confidence, user_impact_now / at_campaign / at_limit, capacity, fallback_point (predicted and measured), if_ignored, headroom, can_wait, severity; fallback finding when nothing measured was saturated; funnel drop-off and lost sign-ups at both peaks
-[x] Run both tests and the analyser, and show the findings
-[x] Main test as an open model (ramping-arrival-rate): 5, 12, 24 (expected peak), 35, 45, 57 (campaign peak) visits/s from test-config.json; funnel click-through 30%, 60% submit; measured visitors at once per stage
-[x] Visitors have 3s patience (patience_seconds): a timed-out or failed sign-up page or POST ends the visit as "left" (a failed POST is also a lost sign-up); a failed rates call is "degraded" and the visit carries on; findings report left, lost sign-ups and degraded visits in plain English
-[x] Old runs renamed -superseded with run.json labels; new runs record the git commit in run.json
-[x] Sign-up test treated as a campaign scenario: judged at campaign peak, normal-day numbers from the latest main run (critical if normal days fail too), with a warning when the two runs used different code; fallback findings note ramp vs sudden jump; connection failures note the Mac's 128-connection queue
 [ ] Later, once the analyser works: a combined k6 test that runs the main and sign-up scenarios at the same time, to check the analyser can untangle mixed causes
+
+## Day 5 tasks
+
+### 1. Before/after fix run
+
+Apply one fix per trap, re-run both tests, and compare with the
+current runs. Keep the trap code commented as "before" so the
+change is easy to show.
+
+- [ ] Trap 2 (rates): cache CMS rates on the server for ~60s, and
+      drop queued CMS requests whose visitor has already left
+- [ ] Trap 3 (sign-up page): pre-render /signup at build time,
+      like the homepage
+- [ ] Trap 1 (email lookup): add an index on users.email
+- [ ] Re-run main + sign-up tests, run the analyser, save as
+      "after" runs
+- [ ] Dashboard: before/after toggle per finding
+
+### 2. LLM layer (designed, not connected)
+
+- [ ] Define the input: a compact summary built from findings.json
+      (no raw timeline data)
+- [ ] Define the output schema the LLM should return
+- [ ] Write the prompt template
+- [ ] Fix ranking: hand the LLM each finding's metrics and
+      `suggested_fixes` and have it rank them most recommended first
+      (with a reason per fix) and add any fixes it thinks are missing.
+      The analyser's lists aren't ranked today (some mix in checks like
+      EXPLAIN QUERY PLAN or profiling), so it also separates "check
+      first" steps from fixes. The dashboard title then says "most
+      recommended first"
+- [ ] Dashboard panel: "Prompt preview" (exactly what would be sent)
+      and a canned response rendered in the same verdict card style
+- [ ] Note in the UI: "Not connected. Shows the planned contract."
+
+### 3. Ship it
+
+- [ ] Re-publish the dashboard if the analyser changed or tests were
+      re-run today: re-analyse the runs (main first), npm run
+      dashboard:data, npm --prefix dashboard run build, then copy the
+      contents of dashboard/dist/ into monzo/dashboard/ on the build
+      log site
+- [ ] Deploy the dashboard to Vercel as a static site (recorded
+      runs only, no test site, no live tests)
+- [ ] Make the repo public, with a README: what it is, how to run
+      it locally, the traps, the assumptions, and attribution
+      ("I direct; Claude Code types")
+- [ ] Remove anything that shouldn't be public (local paths, .db
+      files, large raw results)
+- [ ] Remove unused components and tokens (`Stat`, `ScenarioTag`,
+      the `--color-chart-1` to `-6`, `--color-chart-grid` and
+      `--chart-height` tokens)
+
+### 4. Write-up and presentation
+
+- [ ] Day 4 and Day 5 build log entries
+- [ ] Final summary at the top of the case study: what it found,
+      what the fixes changed, what I learned
+- [ ] Screenshots: dashboard, the collapse chart, before/after,
+      a fallback screenshot
+- [ ] Presentation slides
+
+### Stretch (only if time allows)
+
+- [ ] Trap 4 race test: many sign-ups with the same new email at once
+- [ ] Blind test: plant an unknown trap and see if the tool finds it
+- [ ] Confirm whether "couldn't connect" failures came from the
+      macOS listen queue (somaxconn 128)
+- [ ] One Toxiproxy run with ~100ms network latency

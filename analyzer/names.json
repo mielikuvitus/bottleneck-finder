@@ -1,0 +1,7 @@
+{
+  "_about": "Plain-English names for the code names the server's metrics report (pools, timed renders and queries), used in the findings' wording. The evidence keeps the code name once in brackets, so it can be found in the code. A name missing here is shown as the quoted code name.",
+  "cms": "the rates CMS",
+  "SignupPage": "the sign-up page render",
+  "findUserByEmail": "the email lookup",
+  "insertUser": "saving a new user"
+}

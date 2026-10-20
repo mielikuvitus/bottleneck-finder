@@ -1,0 +1,144 @@
+/* The app frame, header and project context (Figma: Loading dashboard layout) */
+
+.app-frame {
+  line-height: normal; /* Figma: "leading normal" */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: var(--page-max-width);
+  margin: var(--space-5) auto;
+  padding: var(--space-5);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-frame);
+}
+.app-frame-wrap {
+  padding: 0 var(--page-gutter);
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.app-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-logo);
+}
+.app-monogram {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border-radius: var(--radius-card);
+  background: var(--color-brand);
+  color: var(--color-on-brand);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-extrabold);
+  transform: rotate(-8deg);
+}
+.app-wordmark {
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-extrabold);
+}
+.app-tool-name {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.project-context {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.project-title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-heading-1);
+  font-weight: var(--font-weight-extrabold);
+}
+.run-selector {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-card);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  color: var(--color-text-muted);
+}
+.run-selector-label {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-bold);
+}
+/* A small downward chevron */
+.run-selector-chevron {
+  width: 7px;
+  height: 7px;
+  margin-right: var(--space-1);
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.section-title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-heading-2);
+  font-weight: var(--font-weight-extrabold);
+}
+
+/* No run selected (Figma: No run selected layout) */
+.empty-report {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-empty-gap);
+  min-height: 525px;
+  padding: var(--space-empty-y) var(--space-empty-x);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card-large);
+  text-align: center;
+}
+.empty-report-symbol {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-symbol);
+  background: var(--color-symbol-surface);
+  color: var(--color-text-muted);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-symbol);
+}
+.empty-report-title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-extrabold);
+}
+.empty-report-text {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lead);
+  line-height: var(--line-height-lead);
+}
+
+@media (max-width: 600px) {
+  .app-frame-wrap { padding: 0 var(--page-gutter-phone); }
+  .app-frame { margin: var(--space-4) auto; }
+  .empty-report { padding: var(--space-6) var(--space-5); }
+}
+
+/* Report sections: no divider or extra space above their headings. The
+   first sits right under the header box (its own margin); the rest are 24px
+   below the section before, the same gap */
+main > section { margin-top: var(--space-5); padding-top: 0; border-top: 0; }
+main > section:first-child { margin-top: 0; }
+main > section > h2 { margin-top: 0; }
+/* Healthy routes, under the verdict cards: the same 24px gap */
+main > section > h3 { margin-top: var(--space-5); }

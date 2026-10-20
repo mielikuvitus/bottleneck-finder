@@ -68,6 +68,7 @@ once / `planning_visit_seconds`), so they move if you change the peaks.
 
 - **Assumptions** are in [load-tests/test-config.json](load-tests/test-config.json): the peaks (110 visitors at once on a busy hour, 260 after an ad), the funnel percentages, visitor patience (3s) and the table size.
 - **Route context:** [analyzer/route-context.json](analyzer/route-context.json) says what each route means to a visitor, its fallback, the site's own timeout, and what a visitor does when it fails (`on_failure`).
+- **Names:** [analyzer/names.json](analyzer/names.json) gives the code names in the server's metrics (`cms`, `findUserByEmail`, …) plain-English names for the findings' wording; the evidence keeps the code name in brackets.
 - **Patience:** visitors leave after 3s on the homepage, the sign-up page and the form. Rates fails quietly after 3s instead (the cards show the fallback), and the visit carries on as *degraded*. k6 uses the site's own timeout or the visitor's patience, whichever is shorter.
 - **Counters:** `fallback_shown` counts every request where a visitor would see a fallback, by route and reason (`timeout`, `connection`, `server_error`). `funnel` records each step, including `left` and `degraded` (with where and why), and `signup_lost` for a failed submission.
 - **Pass or fail:** a run fails if p95 goes over 500ms (overall or for any route), or if more than 1% of requests fail. Failing is expected: the point is to see which route crosses first.
@@ -134,18 +135,38 @@ Each finding has:
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `knee_at`                                      | The stage, its load, and the p95 before and after                                                                                                                                                                                                       |
 | `evidence`, `likely_cause`, `suggested_fix`    | Plain sentences with the measured numbers                                                                                                                                                                                                               |
+| `suggested_fix_groups`, `cause.contributors`  | When several timed operations fill the event loop, they're one finding (one event loop, one bottleneck): the main cause is the biggest share, `cause.contributors` lists each with its share, and the fixes are also grouped by cause. Fixing the main cause leaves the rest in the next run's finding, or as its own slow-lookup finding |
 | `confidence`                                   | high: 2+ signals that weren't there at the previous stage; medium: 1; low: nothing measured was saturated                                                                                                                                               |
+| `confidence_reason`, `confidence_signals`    | One plain sentence on what the confidence rests on (shown in the dashboard's evidence), and the signals behind it, each marked new at the knee or already there before |
 | `user_impact_now`, `_at_campaign`, `_at_limit` | At the stage closest to the expected peak, the campaign peak and the highest load, first the outcomes: visitors who left (and why), lost sign-ups and degraded visits. Then the waits for those who got an answer ("half over X, 1 in 20 over Y") and visits with at least one wait in the slowest 5%, 1 - 0.95^(requests per visit) |
 | `capacity`                                     | The most successful requests/s reached at any stage up to the knee (past it, useful throughput can collapse), and visitors at once = visits/s x visit length (Little's law)                                                                                                                                                        |
 | `headroom`                                     | (break point - peak) / peak, at both peaks; below 0 means already over                                                                                                                                                                                  |
 | `fallback_point`                               | Predicted: the wait reaches the timeout after timeout x capacity / (arrivals - capacity) seconds. Measured: the first timeout, when timeouts become sustained (1%+ for 3s), and refused connections. A closed test can't confirm the prediction         |
 | `if_ignored`                                   | "capacity cliff" (fine, then it tips over), "grows with data" (a slow single-row read suggests a full scan) or "stable"                                                                                                                                 |
 | `severity`                                     | critical: over the limit or failing at expected peak; high: under 50% headroom at expected peak, or over at campaign peak; medium: under 50% at campaign peak; low: the rest. For a campaign scenario: high if over the limit or failing at campaign peak, medium if under 50% to spare there, low otherwise, but critical if the main test shows normal days failing too. A failure on a critical route (`POST /api/signup`) makes it at least high |
-| `can_wait`                                     | One sentence from the severity and headroom                                                                                                                                                                                                             |
+| `can_wait`                                     | One sentence from the severity and headroom, plus `can_wait_title`, a short heading chosen from the reason (it only mentions a campaign when the campaign peak is the reason)                                                                                                                                                                                                             |
+| `headline`, `load_levels`, `customer_view`, `evidence_summary`, `cause` | For the dashboard: what visitors experienced in one line, how much traffic it carries against both peaks (room only when it fits), which page and screenshot state to show, the evidence in one sentence, and what filled up |
+
+`findings.json` also has the healthy routes (no knee): `healthy_up_to`, the
+highest load tested, and per route its `p95` at that load (plus `note`, the
+whole sentence).
 
 `findings.json` also has the funnel: how many visitors reached each step, the
 voluntary drop-off (left the sign-up page), and the lost sign-ups (the
-submission failed or timed out) at both peaks.
+submission failed or timed out) at both peaks. Each step has a `kind` (`path`,
+`exit` or `degraded`) and `why`, its reasons in words ("878 couldn't connect,
+13,585 got no answer within 3s").
+
+## Dashboard
+
+An unstyled React dashboard for recorded runs lives in [dashboard/](dashboard/). After analysing a run:
+
+```sh
+npm run dashboard:data   # copy runs and screenshots into dashboard/public/data
+npm run dashboard        # http://localhost:5173/monzo/dashboard/
+```
+
+Run `npm install` inside `dashboard/` the first time. [dashboard/COMPONENTS.md](dashboard/COMPONENTS.md) lists every component, its props and the data it shows.
 
 ## Routes
 

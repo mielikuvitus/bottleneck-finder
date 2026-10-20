@@ -1,5 +1,13 @@
 {
   "_about": "Traffic assumptions, read by the k6 tests and the analyser.",
+  "_labels": {
+    "_about": "Short labels for the dashboard's assumptions (unit after the value). Keys without a label aren't shown there.",
+    "expected_peak_visitors": { "label": "Busy-hour peak", "unit": "visitors at once" },
+    "campaign_peak_visitors": { "label": "Campaign peak", "unit": "visitors at once" },
+    "avg_visit_seconds": { "label": "Visit length", "unit": "s" },
+    "patience_seconds": { "label": "Visitor patience", "unit": "s" },
+    "dataset_rows": { "label": "Users in the database" }
+  },
 
   "expected_peak_visitors": 110,
   "_expected_peak_visitors": "Visitors on the site at once during a normal busy hour.",
@@ -26,7 +34,12 @@
     "reuse_seeded_email": 0.1,
     "_go_to_signup": "Assumption: share of visitors who click through from / to /signup.",
     "_submit_signup": "Assumption: share of those who submit the form. The rest leave (voluntary drop-off).",
-    "_reuse_seeded_email": "Share of submissions using an existing email, to hit the 'already taken' path."
+    "_reuse_seeded_email": "Share of submissions using an existing email, to hit the 'already taken' path.",
+    "_labels": {
+      "go_to_signup": { "label": "go on to sign-up" },
+      "submit_signup": { "label": "submit the form" },
+      "reuse_seeded_email": { "label": "use an existing email" }
+    }
   },
 
   "signup_test": {
@@ -34,6 +47,10 @@
     "submit_signup": 0.75,
     "reuse_seeded_email": 0.1,
     "scenario": "campaign",
+    "_labels": {
+      "submit_signup": { "label": "submit the form" },
+      "reuse_seeded_email": { "label": "use an existing email" }
+    },
     "_scenario": "Every visitor lands straight on /signup, which only happens during a sign-up ad campaign. On a normal day about 30% of visitors reach sign-up (the main test), so the analyser judges this test at the campaign peak, and takes normal-day sign-up numbers from the latest main run."
   }
 }

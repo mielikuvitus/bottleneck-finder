@@ -12,11 +12,25 @@ const POOL_FULL_SHARE = 0.5; // every slot in use in at least half the samples
 const POLL_SLOW_MS = 500; // /metrics itself takes 500ms+ to answer
 const CONTRIBUTOR_SHARE = 0.1; // timed work using 10%+ of the server's time
 const SLOW_LOOKUP_MS = 1; // a single-row lookup slower than this suggests a full scan
+// A render slower than this per KB of HTML is slow for its size: the time goes
+// into building the component tree, not the markup. A plain React page renders
+// at about 0.02ms per KB, so this is about 25 times that.
+const SLOW_RENDER_MS_PER_KB = 0.5;
 const GROWTH = 10; // "if the data grows 10x"
 
 const loopSaturated = (srv) => Boolean(srv) && (srv.loopUtil >= LOOP_BUSY || srv.delayMs >= DELAY_MS);
 const poolSaturated = (p) => Boolean(p) && p.fullShare >= POOL_FULL_SHARE && p.queuedAvg > 0;
 const pct = (share) => Math.round(share * 100);
+
+// Names from the code ("cms", "findUserByEmail") in plain English, from
+// analyzer/names.json: plain() for the wording, withCode() for the evidence,
+// which keeps the code name once so it can be found in the code
+const plain = (ctx, name) => ctx.names?.[name] ?? `"${name}"`;
+const withCode = (ctx, name) => (ctx.names?.[name] ? `${ctx.names[name]} (${name})` : `"${name}"`);
+const cap = (text) => text.charAt(0).toUpperCase() + text.slice(1);
+// What a timed operation is, e.g. "the email lookup" or 'the database query "x"'
+const operation = (ctx, kind, name, code = false) =>
+  ctx.names?.[name] ? (code ? withCode : plain)(ctx, name) : kind === 'render' ? `rendering "${name}"` : `the database query "${name}"`;
 
 export function buildFindings(ctx) {
   const { stages, routes, knees } = ctx;
@@ -24,13 +38,17 @@ export function buildFindings(ctx) {
   const previousOf = (stage) => stages[stages.indexOf(stage) - 1] ?? null;
 
   // Which route a timed operation belongs to: the one requested about as
-  // often as the operation ran. Only successful requests count: a request that
-  // failed to connect never reached the code that does the work.
+  // often as the operation ran. Requests that failed to connect don't count:
+  // they never reached the code that does the work. Ones the visitor gave up
+  // on (timeouts) do: the server still did the work.
+  // Only stages where every /metrics poll got through: a missed poll loses
+  // that second's call counts, which would skew the ratio.
   function routeForTimed(key) {
-    const calls = stages.reduce((sum, s) => sum + (s.server?.timed[key]?.calls ?? 0), 0);
+    const counted = stages.filter((s) => s.server && !s.server.pollFailures);
+    const calls = counted.reduce((sum, s) => sum + (s.server?.timed[key]?.calls ?? 0), 0);
     let best = null;
     for (const route of routes) {
-      const requests = stages.reduce((sum, s) => sum + (s.routes[route] ? s.routes[route].requests - s.routes[route].errors : 0), 0);
+      const requests = counted.reduce((sum, s) => sum + (s.routes[route] ? s.routes[route].requests - (s.routes[route].fallbacks?.connection ?? 0) : 0), 0);
       const ratio = calls / requests;
       if (ratio >= 0.7 && ratio <= 1.4 && (!best || Math.abs(Math.log(ratio)) < Math.abs(Math.log(best.ratio)))) {
         best = { route, ratio, calls, requests };
@@ -62,9 +80,16 @@ export function buildFindings(ctx) {
     } else if (loopSaturated(srv)) {
       const contributors = Object.entries(srv.timed).filter(([, t]) => t.share >= CONTRIBUTOR_SHARE);
       if (!contributors.length) add('loop:untimed', { kind: 'loop', stage }, route);
+      // One event loop, so one problem: every timed operation filling it is a
+      // contributor, and the biggest share is the main cause
       for (const [key, t] of contributors) {
-        const owner = routeForTimed(key);
-        add(key, { kind: t.kind, name: t.name, primary: owner?.route ?? route, owner, stage }, route);
+        add('loop:busy', { contributors: [] }, route);
+        const busy = problems.get('loop:busy');
+        if (!busy.contributors.includes(key)) busy.contributors.push(key);
+        if (!(t.share <= busy.mainShare)) {
+          const owner = routeForTimed(key);
+          Object.assign(busy, { kind: t.kind, name: t.name, primary: owner?.route ?? route, owner, stage, mainShare: t.share });
+        }
       }
     } else {
       add(`unexplained:${route}`, { kind: 'unexplained', primary: route, stage }, route);
@@ -81,9 +106,11 @@ export function buildFindings(ctx) {
     const avgMs = present.reduce((sum, t) => sum + t.avgMs * t.calls, 0) / present.reduce((sum, t) => sum + t.calls, 0);
     const calls = present.reduce((sum, t) => sum + t.calls, 0);
     if (avgMs >= SLOW_LOOKUP_MS && calls >= 20) {
-      const existing = problems.get(key);
-      if (existing) existing.slowLookup = { avgMs, calls, present };
-      else {
+      const existing = problems.get(key) ?? [...problems.values()].find((p) => p.contributors?.includes(key));
+      if (existing) {
+        // Only the main cause's lookup speaks for the whole finding (if_ignored)
+        if (`${existing.kind}:${existing.name}` === key) existing.slowLookup = { avgMs, calls, present };
+      } else {
         const owner = routeForTimed(key);
         add(key, { kind: 'db', name: key.slice(3), primary: owner?.route ?? null, owner, latent: true, slowLookup: { avgMs, calls, present } }, owner?.route);
       }
@@ -94,6 +121,49 @@ export function buildFindings(ctx) {
 }
 
 // ---------- Step 2: one finding per problem ----------
+
+// One timed operation's own evidence, signals, likely cause and fixes (a
+// render or a query filling the event loop)
+function timedCause(ctx, kind, name, t) {
+  const evidence = [];
+  const signals = [];
+  let likely_cause, fixes;
+  const what = cap(operation(ctx, kind, name));
+  if (kind === 'render') {
+    // Slow for its size? Then the page is expensive to build, not big
+    const kb = t.avgBytes ? t.avgBytes / 1024 : null;
+    const slowToBuild = kb !== null && t.avgMs / kb >= SLOW_RENDER_MS_PER_KB;
+    if (kb !== null) {
+      evidence.push(
+        `Each render produced about ${round(kb, 1)}KB of HTML, so it took ${round(t.avgMs / kb, 1)}ms per KB` +
+          (slowToBuild
+            ? `. That's slow for so little output (a plain React page takes about 0.02ms per KB), so the time goes into building the component tree, not the markup.`
+            : ', a normal speed for that much HTML: the page is simply big.')
+      );
+      signals.push({ name: slowToBuild ? 'slow for its size' : 'big page', isNew: false });
+    }
+    likely_cause =
+      `${what} is synchronous CPU work: about ${t.avgMs}ms per page, during which Node can't do anything else. One process has about 1,000ms of time a second, so it can render only about ${Math.round(1000 / t.avgMs)} pages a second before requests start to queue, for every route, not just this one.` +
+      (slowToBuild ? ` The page itself is small, so most of that time goes into building it: how its components are put together.` : '');
+    const profile =
+      "Find out why one render takes so long: profile a single render (node --cpu-prof, or React DevTools' Profiler in the browser) and look at how many components the page renders and what each one does while rendering, e.g. many small or invisible components, or heavy work inside render.";
+    const cache = "Cache the rendered HTML (it's the same for every visitor), or generate it once at build time.";
+    const cluster = "If it has to stay dynamic, run several server processes (Node's cluster module) so renders don't all share one event loop.";
+    fixes = slowToBuild
+      ? [profile, 'Then simplify the component tree: fewer components, and no heavy work while rendering.', `${cache} This is still worth doing once it's faster.`, cluster]
+      : kb !== null
+        ? [cache, 'Send less HTML: split the page, or load the parts below the fold later.', cluster]
+        : [cache, profile, cluster];
+  } else if (t.op === 'write') {
+    likely_cause = `${what} is synchronous: about ${t.avgMs}ms per call, during which Node can't do anything else. Each write is saved to disk on its own.`;
+    fixes = ['Batch writes into one transaction.', "Or turn on SQLite's write-ahead log (PRAGMA journal_mode=WAL) so each write costs less."];
+  } else {
+    likely_cause = `${what} is synchronous: about ${t.avgMs}ms per call, during which Node can't do anything else. For a lookup of one row that's slow, which suggests the database reads the whole table (a full scan).`;
+    fixes = ['Add an index on the column the query looks up, so the database finds the row directly.', 'Check the query plan (EXPLAIN QUERY PLAN) to confirm.'];
+  }
+  return { evidence, signals, likely_cause, fixes };
+}
+
 
 function buildFinding(p, ctx, { byIndex, previousOf }) {
   const { knees, routeContext, requestsPerVisit, visitSeconds, peaks, config } = ctx;
@@ -106,7 +176,8 @@ function buildFinding(p, ctx, { byIndex, previousOf }) {
 
   const evidence = [];
   const signals = []; // { name, isNew }
-  let title, likely_cause, suggested_fix;
+  let title, likely_cause;
+  let fixes = []; // one sentence per fix (suggested_fixes); suggested_fix joins them
 
   if (knee && route && stage.routes[route]) {
     evidence.push(
@@ -132,30 +203,46 @@ function buildFinding(p, ctx, { byIndex, previousOf }) {
   if (p.kind === 'pool') {
     const pool = srv.pools[p.name];
     const before = prevSrv?.pools[p.name];
-    title = `"${p.name}" is at its concurrency limit, so ${route} queues up`;
+    title = `${cap(plain(ctx, p.name))} is at its concurrency limit, so ${route} queues up`;
     evidence.push(
-      `"${p.name}" had ${pool.inFlightAvg} of ${pool.limit} slots in use on average at ${knee.load}, all slots busy ${percent(pool.fullShare)} of the time, with ${pool.queuedAvg} requests waiting on average (up to ${pool.queuedMax}).` +
+      `${cap(withCode(ctx, p.name))} had ${pool.inFlightAvg} of ${pool.limit} slots in use on average at ${knee.load}, all slots busy ${percent(pool.fullShare)} of the time, with ${pool.queuedAvg} requests waiting on average (up to ${pool.queuedMax}).` +
         (before ? ` At ${knee.previousLoad}: ${before.inFlightAvg} of ${before.limit} in use, ${before.queuedAvg} waiting.` : '')
     );
     evidence.push(`The server's event loop was only ${percent(srv.loopUtil)} busy, so the server itself wasn't the limit.`);
     const others = Object.entries(stage.routes).filter(([r]) => !p.affected.has(r));
     if (others.length) evidence.push(`Other routes stayed fast at ${knee.load}: ${others.map(([r, s]) => `${r} p95 ${seconds(s.p95)}`).join(', ')}.`);
-    evidence.push(`The analyser can't see which route calls "${p.name}": ${route} is the route that slowed down while its slots filled up.`);
+    evidence.push(`The analyser can't see which route calls ${plain(ctx, p.name)}: ${route} is the route that slowed down while its slots filled up.`);
     signals.push({ name: 'all slots busy', isNew: !before || before.fullShare < POOL_FULL_SHARE });
     signals.push({ name: 'requests queueing', isNew: !before || before.queuedAvg === 0 });
-    likely_cause = `Every ${route} request waits for one of ${pool.limit} slots with "${p.name}", an outside service with a fixed concurrency limit, and the answers aren't cached. Once requests arrive faster than the slots free up, they queue, and each one waits for everyone ahead of it.`;
-    suggested_fix = `Cache "${p.name}"'s answers for a short time (for example 30–60 seconds), so most requests never need a slot; combine identical requests that are in flight at the same moment; ask the provider for a higher limit; keep the timeout and fallback for when it's slow anyway. On the server, drop queued requests whose visitor has already given up (for example, a queue timeout that matches the 3s client timeout, or cancelling when the connection closes), so the slots go to people still waiting.`;
+    likely_cause = `Every ${route} request waits for one of ${pool.limit} slots with ${plain(ctx, p.name)}, an outside service with a fixed concurrency limit, and the answers aren't cached. Once requests arrive faster than the slots free up, they queue, and each one waits for everyone ahead of it.`;
+    fixes = [
+      `Cache ${plain(ctx, p.name)}'s answers for a short time (for example 30–60 seconds), so most requests never need a slot.`,
+      'Combine identical requests that are in flight at the same moment.',
+      'Ask the provider for a higher limit.',
+      'On the server, drop queued requests whose visitor has already given up (for example, a queue timeout that matches the 3s client timeout, or cancelling when the connection closes), so the slots go to people still waiting.',
+      "Keep the timeout and fallback for when it's slow anyway.",
+    ];
   } else if (p.kind === 'render' || (p.kind === 'db' && !p.latent)) {
-    const t = srv.timed[`${p.kind}:${p.name}`];
-    const what = p.kind === 'render' ? `Rendering "${p.name}"` : `The database query "${p.name}"`;
-    title = `${what} fills up the server's time, so every request waits`;
+    // Everything filling the event loop at this stage, biggest share first:
+    // one finding, so fixing the main cause leaves the rest visible
+    const keys = (p.contributors ?? [`${p.kind}:${p.name}`]).filter((k) => srv.timed[k]).sort((a, b) => srv.timed[b].share - srv.timed[a].share);
+    const parts = keys.map((k) => ({ key: k, t: srv.timed[k], ...timedCause(ctx, srv.timed[k].kind, srv.timed[k].name, srv.timed[k]) }));
+    const main = parts[0];
+    const opName = (part, code = false) => operation(ctx, part.t.kind, part.t.name, code);
+    title =
+      parts.length > 1
+        ? `The server's time is full: ${listOf(parts.map((part) => `${opName(part)} (${percent(part.t.share)})`))}, so every request waits`
+        : `${cap(opName(main))} fills up the server's time, so every request waits`;
     evidence.push(
       `The event loop was ${percent(srv.loopUtil)} busy at ${knee.load} (${prevSrv ? percent(prevSrv.loopUtil) : 'unknown'} at ${knee.previousLoad}); new requests waited about ${seconds(srv.delayMs)} just to start (1 in 10 over ${seconds(srv.delayP90Ms)}).`
     );
-    evidence.push(`${what} took ${t.avgMs}ms per call on average and used ${percent(t.share)} of the server's time at ${knee.load}.`);
-    const others = Object.entries(srv.timed).filter(([k]) => k !== `${p.kind}:${p.name}` && srv.timed[k].share >= 0.01);
-    if (others.length) evidence.push(`Other timed work at the same stage: ${others.map(([, o]) => `"${o.name}" ${percent(o.share)}`).join(', ')}.`);
-    if (p.owner) evidence.push(`It ran about once per ${p.owner.route} request (${num(p.owner.calls)} calls, ${num(p.owner.requests)} requests), so it belongs to that route.`);
+    for (const part of parts) {
+      evidence.push(`${cap(opName(part, true))} took ${part.t.avgMs}ms per call on average and used ${percent(part.t.share)} of the server's time at ${knee.load}.`);
+      evidence.push(...part.evidence);
+    }
+    const others = Object.entries(srv.timed).filter(([k]) => !keys.includes(k) && srv.timed[k].share >= 0.01);
+    if (others.length) evidence.push(`Other timed work at the same stage: ${others.map(([, o]) => `${withCode(ctx, o.name)} ${percent(o.share)}`).join(', ')}.`);
+    if (p.owner) evidence.push(`${parts.length > 1 ? cap(opName(main)) : 'It'} ran about once per ${p.owner.route} request (${num(p.owner.calls)} calls, ${num(p.owner.requests)} requests), so it belongs to that route.`);
     const slowed = [...p.affected].filter((r) => r !== route);
     if (slowed.length) evidence.push(`Other routes on the same server slowed down at the same stage: ${slowed.map((r) => `${r} p95 ${seconds(stage.routes[r]?.p95)}`).join(', ')}.`);
     if (srv.pollMs >= POLL_SLOW_MS || srv.pollFailures) evidence.push(`Even /metrics took ${seconds(srv.pollMs)} to answer, and ${srv.pollFailures} polls timed out.`);
@@ -165,43 +252,40 @@ function buildFinding(p, ctx, { byIndex, previousOf }) {
     signals.push({ name: 'requests waiting to start', isNew: srv.delayMs >= DELAY_MS && !(prevSrv?.delayMs >= DELAY_MS) });
     if (srv.pollMs >= POLL_SLOW_MS || srv.pollFailures) signals.push({ name: 'server slow to answer /metrics', isNew: !(prevSrv?.pollMs >= POLL_SLOW_MS) });
     if (conn.length) signals.push({ name: 'connection failures', isNew: true });
-    if (p.kind === 'render') {
-      likely_cause = `${what} is synchronous CPU work: about ${t.avgMs}ms per page, during which Node can't do anything else. One process has about 1,000ms of time a second, so it can render only about ${Math.round(1000 / t.avgMs)} pages a second before requests start to queue, for every route, not just this one.`;
-      suggested_fix = `Cache the rendered HTML (it's the same for every visitor) or generate it once at build time; render less (fewer components); if it has to stay dynamic, run several server processes (Node's cluster module) so renders don't all share one event loop.`;
-    } else if (t.op === 'write') {
-      likely_cause = `${what} is synchronous: about ${t.avgMs}ms per call, during which Node can't do anything else. Each write is saved to disk on its own.`;
-      suggested_fix = `Batch writes into one transaction, or turn on SQLite's write-ahead log (PRAGMA journal_mode=WAL) so each write costs less.`;
-    } else {
-      likely_cause = `${what} is synchronous: about ${t.avgMs}ms per call, during which Node can't do anything else. For a lookup of one row that's slow, which suggests the database reads the whole table (a full scan).`;
-      suggested_fix = `Add an index on the column the query looks up, so the database finds the row directly; check the query plan (EXPLAIN QUERY PLAN) to confirm.`;
-    }
+    signals.push(...parts.flatMap((part) => part.signals));
+    likely_cause = parts.map((part) => part.likely_cause).join(' ');
+    // Several causes: the fixes in one list (main cause first), and grouped by
+    // cause for the dashboard (suggested_fix_groups)
+    fixes = parts.flatMap((part) => part.fixes);
+    if (parts.length > 1) p.fixGroups = parts.map((part) => ({ cause: cap(opName(part)), share: part.t.share, fixes: part.fixes }));
+    p.contributorShares = parts.map((part) => ({ kind: part.t.kind, name: part.t.name, label: ctx.names?.[part.t.name] ?? null, share: part.t.share }));
   } else if (p.kind === 'db' && p.latent) {
     const first = p.slowLookup.present[0];
     const last = p.slowLookup.present[p.slowLookup.present.length - 1];
-    title = `The database query "${p.name}" is slow for a single-row lookup`;
-    evidence.push(`"${p.name}" took ${round(p.slowLookup.avgMs, 2)}ms per call on average over ${num(p.slowLookup.calls)} calls.`);
+    title = `${cap(operation(ctx, 'db', p.name))} is slow for a single-row query`;
+    evidence.push(`${cap(withCode(ctx, p.name))} took ${round(p.slowLookup.avgMs, 2)}ms per call on average over ${num(p.slowLookup.calls)} calls.`);
     evidence.push(`Its time didn't change with load (${first.avgMs}ms at the lowest stage, ${last.avgMs}ms at the highest), so it's the work per call, not contention.`);
     evidence.push(`An indexed lookup of one row usually takes well under 0.1ms; ${round(p.slowLookup.avgMs, 1)}ms suggests the database reads the whole table (a full scan).`);
     if (p.owner) evidence.push(`It ran about once per ${p.owner.route} request, so it belongs to that route.`);
     evidence.push(`Nothing broke because of it in this run: it used at most ${percent(Math.max(...p.slowLookup.present.map((t) => t.share)))} of the server's time.`);
-    signals.push({ name: 'slow per-call time', isNew: true });
+    signals.push({ name: 'slow per-call time', isNew: true, note: 'at every load level' });
     likely_cause = `The query reads the whole table to find one row (no index on the column it looks up), so each call costs time in proportion to the table's size.`;
-    suggested_fix = `Add an index on the column the query looks up; check the query plan (EXPLAIN QUERY PLAN) to confirm.`;
+    fixes = ['Add an index on the column the query looks up.', 'Check the query plan (EXPLAIN QUERY PLAN) to confirm.'];
   } else if (p.kind === 'loop') {
     title = 'The server is saturated by work that isn\'t timed';
     evidence.push(`The event loop was ${percent(srv.loopUtil)} busy at ${knee.load}, but no timed render or query used more than ${percent(CONTRIBUTOR_SHARE)} of the time.`);
     signals.push({ name: 'event loop busy', isNew: !loopSaturated(prevSrv) });
     likely_cause = 'Synchronous work the server doesn\'t time (for example JSON handling, logging or middleware) is filling the event loop.';
-    suggested_fix = 'Profile the server under load (node --cpu-prof) to find the busy code, then time it in metrics.js.';
+    fixes = ['Profile the server under load (node --cpu-prof) to find the busy code, then time it in metrics.js.'];
   } else {
     title = `${route} slows down, but nothing measured was saturated`;
     if (p.noMetrics) evidence.push('This run has no server metrics, so the analyser can\'t check what was saturated.');
     else {
-      const pools = Object.entries(srv.pools).map(([n, pl]) => `"${n}" ${pl.inFlightAvg}/${pl.limit} in use, ${pl.queuedAvg} waiting`).join('; ');
+      const pools = Object.entries(srv.pools).map(([n, pl]) => `${plain(ctx, n)} ${pl.inFlightAvg}/${pl.limit} in use, ${pl.queuedAvg} waiting`).join('; ');
       evidence.push(`At ${knee.load} the event loop was ${percent(srv.loopUtil)} busy, new requests waited about ${seconds(srv.delayMs)} to start${pools ? `, pools: ${pools}` : ''}: none of these was saturated.`);
     }
     likely_cause = 'Something the server doesn\'t measure: an outside service without metrics, garbage-collection pauses, the network, or the load-test machine itself running out of capacity.';
-    suggested_fix = `Add timing around ${route}'s dependencies, and check the load-test machine's CPU during the run.`;
+    fixes = [`Add timing around ${route}'s dependencies.`, "Check the load-test machine's CPU during the run."];
   }
 
   // ---------- Capacity, impact, headroom, fallback point ----------
@@ -224,6 +308,7 @@ function buildFinding(p, ctx, { byIndex, previousOf }) {
     headroom.summary = `at campaign peak (${peaks.campaign.visitors}), breaks at about ${headroom.break_point_visitors} visitors at once: ${headroom.campaign_pct >= 0 ? `${headroom.campaign_pct}% to spare` : `${-headroom.campaign_pct}% over the limit`}. On a normal day: ${normal.headroomNote ?? 'unknown (no main run)'}.`;
   }
   const fallback_point = route && capacity ? fallbackPoint(route, capacity.requests_per_second, ctx) : null;
+  const shown = presentation({ p, ctx, route, affected, knee, srv, capacity, campaign, normal, impacts: { now: user_impact_now, campaign: user_impact_at_campaign, limit: user_impact_at_limit } });
 
   // if_ignored: what happens as traffic or data grows
   let if_ignored;
@@ -263,8 +348,15 @@ function buildFinding(p, ctx, { byIndex, previousOf }) {
 
   const newSignals = signals.filter((s) => s.isNew);
   const confidence = p.kind === 'unexplained' ? 'low' : newSignals.length >= 2 ? 'high' : 'medium';
+  const confidence_reason = confidenceReason(p, signals, knee);
 
   return {
+    // For the dashboard: plain-language wording first
+    headline: shown.headline,
+    load_levels: shown.loadLevels,
+    customer_view: shown.customerView,
+    evidence_summary: shown.evidenceSummary,
+    cause: { kind: p.kind, name: p.name ?? null, label: p.name ? (ctx.names?.[p.name] ?? null) : null, ...(p.contributorShares?.length > 1 ? { contributors: p.contributorShares } : {}) },
     title,
     severity,
     route: route ?? affected[0] ?? null,
@@ -274,9 +366,12 @@ function buildFinding(p, ctx, { byIndex, previousOf }) {
       : null,
     evidence,
     likely_cause,
-    suggested_fix,
+    suggested_fix: fixes.join(' '),
+    suggested_fixes: fixes,
+    ...(p.fixGroups ? { suggested_fix_groups: p.fixGroups } : {}),
     confidence,
-    confidence_signals: signals.map((s) => `${s.name}${s.isNew ? ' (new at the knee)' : ' (already there before)'}`),
+    confidence_reason,
+    confidence_signals: signals.map((s) => `${s.name} (${s.note ?? (s.isNew ? 'new at the knee' : 'already there before')})`),
     user_impact_now,
     user_impact_at_campaign,
     user_impact_at_limit,
@@ -284,6 +379,7 @@ function buildFinding(p, ctx, { byIndex, previousOf }) {
     fallback_point,
     if_ignored,
     headroom,
+    can_wait_title: canWaitTitle({ severity, campaign, headroom, criticalFailures, ifIgnored: if_ignored }),
     can_wait: campaign
       ? canWaitCampaign(severity, normal, user_impact_at_campaign, if_ignored)
       : canWait(severity, headroom, if_ignored, criticalFailures, capacity, peaks, routeContext),
@@ -303,6 +399,40 @@ function buildFinding(p, ctx, { byIndex, previousOf }) {
 // The break point: the route's request rate at the knee (what it managed when
 // it tipped over), and the last healthy rate before it.
 // Visitors at once (Little's law) = visits/s x visit length, where
+// What each confidence signal means, for confidence_reason
+const SIGNAL_TEXT = {
+  'useful throughput collapsed': 'fewer requests succeeded even as more arrived',
+  'throughput plateau': 'successful requests stopped rising with the load',
+  'all slots busy': 'every slot was in use',
+  'requests queueing': 'requests queued for a slot',
+  'event loop busy': 'the server was fully busy',
+  'requests waiting to start': 'new requests waited to start',
+  'server slow to answer /metrics': 'the server was slow to answer its own /metrics check',
+  'connection failures': 'connections failed',
+  'slow for its size': 'the page was slow to build for its size',
+  'big page': 'the page was large',
+};
+const listOf = (items) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`);
+
+// One plain sentence on why the finding has its confidence, for the reader.
+// The level itself is in confidence; this says what it rests on.
+function confidenceReason(p, signals, knee) {
+  if (p.kind === 'unexplained') {
+    return "The route slowed down, but nothing the server measures was full, so the cause is a guess.";
+  }
+  if (p.kind === 'db' && p.latent) {
+    return "The time per call points to a full table scan, but the analyser only sees timings: it didn't check the query plan (EXPLAIN QUERY PLAN), which would confirm it.";
+  }
+  const text = (s) => SIGNAL_TEXT[s.name] ?? s.name;
+  const fresh = signals.filter((s) => s.isNew).map(text);
+  const before = signals.filter((s) => !s.isNew).map(text);
+  const at = knee ? ` at ${knee.load}` : '';
+  const already = before.length ? ` (${listOf(before)} already before that, so ${before.length > 1 ? "they don't" : "it doesn't"} count)` : '';
+  if (fresh.length >= 2) return `${cap(['', 'one', 'two', 'three', 'four', 'five'][fresh.length] ?? String(fresh.length))} separate signs appeared at the same point${at}: ${listOf(fresh)}${already}.`;
+  if (fresh.length === 1) return `Only one sign appeared at the break point${at}: ${fresh[0]}${already}. A second one would make the cause more certain.`;
+  return `Nothing new appeared at the break point${at}${already}, so the link to the cause is weaker.`;
+}
+
 // visits/s = route requests/s / route requests per visit.
 // Capacity is the most successful requests/s the route reached at any stage
 // up to the knee. Past the knee, useful throughput can fall (requests that
@@ -539,6 +669,21 @@ function fallbackPoint(route, capacityRps, ctx) {
   return { timeout_seconds: timeout, predicted, measured };
 }
 
+// A short heading for the can-it-wait sentence, from why the finding got its
+// severity, so it only mentions a campaign when the campaign peak is the reason
+function canWaitTitle({ severity, campaign, headroom, criticalFailures, ifIgnored }) {
+  if (severity === 'critical') return 'Fix now'; // normal-day visitors are affected
+  if (severity === 'high') {
+    if (campaign) return 'Fix before campaign'; // judged at the campaign peak
+    if (criticalFailures.length) return 'Fix before next release';
+    if (headroom && headroom.campaign_pct < 0) return 'Fix before campaign'; // breaks at the campaign peak
+    return 'Fix before traffic grows'; // little to spare at the expected peak
+  }
+  if (severity === 'medium') return 'Watch closely';
+  if (ifIgnored.class === 'grows with data') return 'Safe for now';
+  return 'Safe to wait';
+}
+
 // Normal-day impact for a campaign scenario, from the latest main run's
 // findings.json: the stage closest to the expected peak
 function normalDayImpact(routes, ctx) {
@@ -564,26 +709,34 @@ function normalDayImpact(routes, ctx) {
   if (!knee) {
     const top = main.stages[main.stages.length - 1];
     headroomPct = round(((top.visitorsAtOnce - expected) / expected) * 100, 0);
-    headroomNote = `no limit reached up to ${top.label} (about ${Math.round(top.visitorsAtOnce)} visitors at once) in the main test, so at least ${headroomPct}% to spare at expected peak (${expected})`;
+    const reached = Math.round(top.visitorsAtOnce);
+    headroomNote = `the main test reached about ${reached} visitors at once without hitting a limit, ${reached >= expected * 1.5 ? 'well above' : 'above'} the expected peak of ${expected}`;
   } else {
     const f = main.findings.find((x) => x.affected_routes.includes(route) && x.headroom);
     if (f) {
       headroomPct = f.headroom.expected_pct;
-      headroomNote = `the main test found a limit at about ${f.headroom.break_point_visitors} visitors at once: ${headroomPct >= 0 ? `${headroomPct}% to spare` : `${-headroomPct}% over the limit`} at expected peak (${expected})`;
+      headroomNote = `the main test found a limit at about ${round10(f.headroom.break_point_visitors)} visitors at once, ${f.headroom.break_point_visitors >= expected ? 'above' : 'below'} the expected peak of ${expected}`;
     }
   }
   const kneeStage = knee ? main.stages.find((s) => s.index === knee.stage) : null;
   const failing = (impact.failures ?? 0) > 0 || (impact.left ?? 0) > 0 || Boolean(kneeStage && kneeStage.visitorsAtOnce <= expected);
-  return { impact, headroomPct, headroomNote, failing };
+  // The limit found on a normal day, or how far the main test got without one
+  const limitVisitors = knee ? (main.findings.find((x) => x.affected_routes.includes(route) && x.headroom)?.headroom.break_point_visitors ?? null) : main.stages[main.stages.length - 1].visitorsAtOnce;
+  return { impact, headroomPct, headroomNote, failing, limitVisitors, lowerBound: !knee };
 }
 
+// Can it wait? Plain sentences: visitor numbers rather than percentages, and
+// no brackets
 function canWaitCampaign(severity, normal, atCampaign, ifIgnored) {
   const growth = ifIgnored.class === 'grows with data' ? ' It also gets slower as the data grows.' : '';
   const lost = atCampaign.lost_signups?.lost ?? 0;
   const what = [atCampaign.left ? `${num(atCampaign.left)} visitors left` : null, lost ? `${num(lost)} sign-ups were lost` : null].filter(Boolean).join(' and ');
-  const warn = normal.impact.warning ? ' (Check the normal-day numbers are current: see normal_day_warning.)' : '';
+  const warn = normal.impact.warning ? ' The normal-day numbers may be out of date: re-run the main test to check.' : '';
   if (severity === 'critical') return `No: the main test shows sign-up failing on a normal day too, not just during a campaign.${growth}`;
-  if (severity === 'high') return `Fine on a normal day (${normal.headroomNote ?? 'no main run to check'}), but don't run a sign-up campaign until it's fixed${what ? `: at campaign peak ${what}` : ''}.${growth}${warn}`;
+  if (severity === 'high') {
+    const normalDay = normal.headroomNote ? `Fine on a normal day: ${normal.headroomNote}.` : "Probably fine on a normal day, but there's no main run to check.";
+    return `${normalDay} Don't run a sign-up campaign until it's fixed${what ? `: at campaign peak, ${what}` : ''}.${growth}${warn}`;
+  }
   if (severity === 'medium') return `For now: it copes with a sign-up campaign, but with little to spare.${growth}${warn}`;
   return `Yes: it copes with a sign-up campaign.${growth}${warn}`;
 }
@@ -595,14 +748,16 @@ function canWait(severity, headroom, ifIgnored, criticalFailures, capacity, peak
   }
   if (!headroom) {
     return ifIgnored.class === 'grows with data'
-      ? `Yes for now: nothing broke because of it, but it gets slower as the table grows; fix it before the data grows about ${GROWTH}x.`
+      ? `Yes for now: nothing broke because of it, but it gets slower as the table grows. Fix it before the data grows about ${GROWTH} times.`
       : 'Probably: nothing measured explains the slowdown yet, so measure more before deciding.';
   }
-  const word = (p) => (p >= 0 ? `${p}% to spare` : `${-p}% over its limit`);
-  if (severity === 'critical') return `No: at a normal busy hour (${peaks.expected.visitors} visitors) it's already ${word(headroom.expected_pct)}, so visitors are affected today.${growth}`;
-  if (severity === 'high') return `Not past the next campaign: it copes with a normal busy hour (${word(headroom.expected_pct)}), but an ad would push it ${word(headroom.campaign_pct)}.${growth}`;
-  if (severity === 'medium') return `For now: it copes at both peaks, but with only ${headroom.campaign_pct}% to spare at campaign peak.${growth}`;
-  return `Yes: even at campaign peak it has ${headroom.campaign_pct}% to spare; revisit if traffic grows.${growth}`;
+  const handles = `it handles about ${round10(headroom.break_point_visitors)} visitors at once`;
+  const busy = peaks.expected.visitors;
+  const campaign = peaks.campaign.visitors;
+  if (severity === 'critical') return `No: ${handles}, fewer than a normal busy hour of ${busy}, so visitors are affected today.${growth}`;
+  if (severity === 'high') return `Not past the next campaign: ${handles}, enough for a normal busy hour of ${busy} but not an ad campaign of ${campaign}.${growth}`;
+  if (severity === 'medium') return `For now: ${handles}, enough for both peaks, but only about ${round10(headroom.break_point_visitors - campaign)} more than the campaign peak of ${campaign}.${growth}`;
+  return `Yes: ${handles}, comfortably more than the campaign peak of ${campaign}. Revisit if traffic grows.${growth}`;
 }
 
 // ---------- Sign-up funnel and lost sign-ups ----------
@@ -667,6 +822,9 @@ export function funnelReport(ctx, totalFunnel) {
     const degraded = outcomeAt(f, 'degraded', 'GET /api/rates');
     steps.push({ step: 'degraded@GET /api/rates', name: 'Carried on with degraded rate cards', count: degraded.total, share_of_previous: f.landed ? round(degraded.total / f.landed, 3) : null, by_reason: degraded.byReason });
     add('tried_signup', tried, f.landed);
+  } else {
+    // The sign-up test starts at the sign-up page
+    add('tried_signup', tried, null);
   }
   steps.push({ step: `left@${PAGE}`, name: "Left: the sign-up page didn't appear", count: pageLeft.total, share_of_previous: tried ? round(pageLeft.total / tried, 3) : null, by_reason: pageLeft.byReason });
   add('opened_signup', f.opened_signup, tried);
@@ -676,13 +834,28 @@ export function funnelReport(ctx, totalFunnel) {
   add('email_taken', f.email_taken, f.submitted);
   steps.push({ step: 'signup_lost', name: STEP_NAMES.signup_lost, count: f.signup_lost ?? 0, share_of_previous: f.submitted ? round((f.signup_lost ?? 0) / f.submitted, 3) : null, by_reason: submitLeft.byReason });
 
+  // For the dashboard: kind (the main path, a way out of it, or carrying on
+  // degraded) and why, the reasons in words ("7,944 got no answer within 3s")
+  const REASON_ROUTE = { 'left@GET /': 'GET /', 'degraded@GET /api/rates': 'GET /api/rates', [`left@${PAGE}`]: PAGE, signup_lost: SUBMIT };
+  const EXITS = ['left_without_submitting', 'email_taken', 'signup_lost'];
+  for (const step of steps) {
+    step.kind = step.step.startsWith('degraded@') ? 'degraded' : step.step.startsWith('left@') || EXITS.includes(step.step) ? 'exit' : 'path';
+    const reasons = Object.entries(step.by_reason ?? {}).filter(([, n]) => n);
+    step.why = reasons.length ? reasonList(Object.fromEntries(reasons), effectiveTimeoutMs(REASON_ROUTE[step.step], ctx)) : null;
+  }
+
   const byStage = ctx.stages.map((s) => ({ load: s.label, ...s.funnel }));
   const lostAt = (level) => lostSignupsAt(ctx.stages.find((s) => s.index === level.closestStage), ctx);
   const lost = {};
   const exp = lostAt(ctx.peaks.expected);
   const camp = lostAt(ctx.peaks.campaign);
-  if (exp) lost.expected = { ...exp, summary: `At expected peak (${ctx.peaks.expected.visitors} visitors, closest: ${exp.stage}): ${exp.summary}` };
-  if (camp) lost.campaign = { ...camp, summary: `At campaign peak (${ctx.peaks.campaign.visitors} visitors, closest: ${camp.stage}): ${camp.summary}` };
+  // label and detail let the dashboard set the level apart from the sentence
+  const peakSummary = (name, peak, l) => {
+    const label = `At ${name} peak (${peak.visitors} visitors, closest: ${l.stage})`;
+    return { ...l, label, detail: l.summary, summary: `${label}: ${l.summary}` };
+  };
+  if (exp) lost.expected = peakSummary('expected', ctx.peaks.expected, exp);
+  if (camp) lost.campaign = peakSummary('campaign', ctx.peaks.campaign, camp);
 
   const voluntary = f.left_without_submitting ?? 0;
   return {
@@ -693,4 +866,114 @@ export function funnelReport(ctx, totalFunnel) {
       : null,
     lost_signups: Object.keys(lost).length ? lost : null,
   };
+}
+
+// ---------- Plain-language fields for the dashboard ----------
+
+// The quoted message in a fallback description:
+// 'the cards show "Couldn't load rates right now."' -> 'Couldn't load rates right now.'
+const quotedMessage = (text) => text?.match(/"([^"]+)"/)?.[1] ?? null;
+const round10 = (n) => Math.round(n / 10) * 10;
+
+// headline, load_levels, customer_view and evidence_summary: what visitors
+// experienced, how much traffic it carries, which screenshot to open on, and
+// the evidence in one sentence. All wording is placeholder, to be revisited.
+function presentation({ p, ctx, route, affected, knee, srv, capacity, campaign, normal, impacts }) {
+  const name = (r) => routeName(r, ctx.routeContext);
+
+  // The first level where visitors saw a fallback or left, on a finding route
+  const LEVELS = [
+    ['now', 'On a normal busy hour'],
+    ['campaign', 'At campaign peak'],
+    ['limit', 'At the highest load tested'],
+  ];
+  let hit = null;
+  for (const [key, label] of LEVELS) {
+    for (const r of affected) {
+      const s = impacts[key]?.routes?.[r];
+      if (s?.requests && s.fallback_shown > 0) {
+        hit = { key, label, route: r, share: s.fallback_shown / s.requests };
+        break;
+      }
+    }
+    if (hit) break;
+  }
+
+  let headline;
+  if (hit) {
+    const rc = ctx.routeContext[hit.route] ?? {};
+    const who = hit.share >= 0.95 ? 'every visit' : hit.share >= 0.5 ? 'most visits' : `${percent(hit.share)} of visits`;
+    const message = quotedMessage(rc.fallback);
+    headline =
+      rc.on_failure === 'degraded'
+        ? `${hit.label}, ${who} showed “${message ?? `a degraded ${name(hit.route).toLowerCase()}`}”`
+        : `${hit.label}, ${percent(hit.share)} of visitors gave up on ${name(hit.route).toLowerCase()}`;
+  } else if (knee && capacity) {
+    headline = `${name(route)} slowed down once traffic passed about ${round10(capacity.visitors_at_once)} visitors at once`;
+  } else if (p.slowLookup) {
+    headline = `${cap(plain(ctx, p.name))} reads the whole table on every call: about ${round(p.slowLookup.avgMs, 1)}ms each, and growing with the data`;
+  } else {
+    headline = null;
+  }
+
+  // How much traffic it carries, against both peaks. Room is only given when
+  // a level fits: being over the limit means losing most visitors either way.
+  let loadLevels = null;
+  if (capacity) {
+    const handles = capacity.visitors_at_once;
+    const level = (peak, label) => {
+      if (campaign && label === 'Normal busy hour') {
+        // A campaign scenario's normal day comes from the main test
+        if (!normal?.impact?.source) return { name: label, visitors: peak.visitors, fits: null, note: 'no main run to check' };
+        const fits = !normal.failing;
+        const room = normal.limitVisitors ? round10(normal.limitVisitors - peak.visitors) : null;
+        return {
+          name: label,
+          visitors: peak.visitors,
+          fits,
+          note: fits && room > 0 ? `room for ${normal.lowerBound ? 'at least ' : 'about '}${room} more (main test)` : fits ? 'fits (main test)' : null,
+        };
+      }
+      const fits = handles >= peak.visitors;
+      const room = round10(handles - peak.visitors);
+      return { name: label, visitors: peak.visitors, fits, note: fits ? (room > 0 ? `room for about ${room} more` : 'right at the limit') : null };
+    };
+    loadLevels = {
+      handles_visitors: round10(handles),
+      handles_requests_per_second: capacity.requests_per_second,
+      handles_what: campaign ? 'visitors going straight to sign-up, at once' : 'visitors at once',
+      levels: [level(ctx.peaks.expected, 'Normal busy hour'), level(ctx.peaks.campaign, 'Ad campaign')],
+    };
+  }
+
+  // Which screenshot the customer view opens on
+  const viewLevel = hit ?? (knee ? { key: 'campaign', label: 'At campaign peak' } : { key: 'now', label: 'On a normal busy hour' });
+  const viewRoute = hit?.route ?? route ?? affected[0] ?? null;
+  const customerView = {
+    route: viewRoute,
+    shown_on: ctx.routeContext[viewRoute]?.shown_on ?? null,
+    caption: `${name(hit?.route ?? route ?? affected[0])} ${viewLevel.label.replace(/^(On|At) /, (m) => m.toLowerCase())}`,
+    state: hit ? 'fallback' : knee ? 'slow' : 'normal',
+  };
+
+  // The evidence in one sentence
+  let evidenceSummary = null;
+  const around = capacity ? `Once traffic passed about ${round10(capacity.visitors_at_once)} visitors at once, ` : '';
+  if (p.kind === 'pool' && srv) {
+    const pool = srv.pools[p.name];
+    evidenceSummary =
+      `${around}successful ${route} requests ` +
+      (knee?.rpsAfter < knee?.rpsBefore ? `fell from ${knee.rpsBefore}/s to ${knee.rpsAfter}/s` : 'stopped growing') +
+      `, response times rose, and all ${pool.limit} slots with ${plain(ctx, p.name)} stayed busy with up to ${pool.queuedMax} requests waiting.`;
+  } else if ((p.kind === 'render' || p.kind === 'db') && !p.latent && srv) {
+    const t = srv.timed[`${p.kind}:${p.name}`];
+    const rest = (p.contributorShares ?? []).slice(1);
+    evidenceSummary = rest.length
+      ? `${around}the server was ${percent(srv.loopUtil)} busy: ${plain(ctx, p.name)} used ${percent(t.share)} of its time and ${listOf(rest.map((c) => `${plain(ctx, c.name)} ${percent(c.share)}`))}, so every request waited.`
+      : `${around}the server was ${percent(srv.loopUtil)} busy, and ${plain(ctx, p.name)} alone used ${percent(t.share)} of its time, so every request waited.`;
+  } else if (p.slowLookup) {
+    evidenceSummary = `${cap(plain(ctx, p.name))} took about ${round(p.slowLookup.avgMs, 1)}ms per call at every load level, which points to a full table scan rather than load.`;
+  }
+
+  return { headline, loadLevels, customerView, evidenceSummary };
 }

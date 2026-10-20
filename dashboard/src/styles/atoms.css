@@ -1,0 +1,149 @@
+/* Atoms */
+
+/* Confidence indicator (Figma: Confidence / all three levels) */
+.confidence-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: normal;
+}
+.confidence-scale {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+.confidence-bar {
+  width: 3px;
+  border-radius: 1px;
+  background: var(--color-confidence-empty);
+}
+.confidence-bar:nth-child(1) { height: 6px; }
+.confidence-bar:nth-child(2) { height: 10px; }
+.confidence-bar:nth-child(3) { height: 14px; }
+.confidence-bar.is-filled { background: var(--color-confidence-filled); }
+.confidence-label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+  white-space: nowrap;
+}
+
+/* Can it wait? (Figma: Can it wait variants) */
+.can-wait {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-4);
+  border: 1px solid;
+  border-radius: var(--radius-card-large);
+  font-size: var(--font-size-lead);
+}
+.can-wait-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-weight: var(--font-weight-extrabold);
+  line-height: normal;
+}
+.can-wait-title .icon { flex: none; }
+.can-wait-text {
+  margin: 0;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+.can-wait[data-variant='safe'] {
+  background: var(--color-wait-safe-surface);
+  border-color: var(--color-wait-safe);
+}
+.can-wait[data-variant='safe'] .can-wait-title { color: var(--color-wait-safe); }
+.can-wait[data-variant='caution'] {
+  background: var(--color-wait-caution-surface);
+  border-color: var(--color-wait-caution-border);
+}
+.can-wait[data-variant='caution'] .can-wait-title { color: var(--color-wait-caution); }
+.can-wait[data-variant='soon'] {
+  background: var(--color-wait-soon-surface);
+  border-color: var(--color-wait-soon-border);
+}
+.can-wait[data-variant='now'] {
+  background: var(--color-wait-now-surface);
+  border-color: var(--color-wait-now-border);
+  box-shadow: var(--shadow-wait-now);
+}
+.can-wait[data-variant='soon'] .can-wait-title,
+.can-wait[data-variant='now'] .can-wait-title { color: var(--color-danger); }
+/* Inline: just the coloured title, no box (the short finding card) */
+.can-wait[data-size='inline'] .can-wait-title { display: inline-flex; gap: 5px; }
+.can-wait[data-size='inline'] {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font-size: inherit;
+}
+
+/* Severity badges (Figma: Severity badges) */
+.severity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 5px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-option);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-extrabold);
+  line-height: normal;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.severity-badge .icon { flex: none; }
+.severity-badge[data-severity='critical'] {
+  color: var(--color-severity-critical);
+  background: var(--color-severity-critical-surface);
+  border-color: var(--color-severity-critical-border);
+}
+.severity-badge[data-severity='high'] {
+  color: var(--color-severity-high);
+  background: var(--color-severity-high-surface);
+  border-color: var(--color-severity-high-border);
+}
+.severity-badge[data-severity='medium'] {
+  color: var(--color-severity-medium);
+  background: var(--color-severity-medium-surface);
+}
+.severity-badge[data-severity='low'] {
+  color: var(--color-severity-low);
+  background: var(--color-severity-low-surface);
+}
+.severity-badge[data-severity='info'] {
+  color: var(--color-severity-info);
+  background: var(--color-severity-info-surface);
+}
+
+/* A bordered box with an uppercase toggle and a chevron (Figma: Evidence
+   disclosure). Used by the evidence and the test details. */
+.disclosure {
+  padding: 15px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+.disclosure-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text); /* navy, label and chevron */
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.disclosure-label {
+  font-size: var(--font-size-lead);
+  font-weight: var(--font-weight-extrabold);
+  text-transform: uppercase;
+}
+.disclosure-toggle:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 4px; }

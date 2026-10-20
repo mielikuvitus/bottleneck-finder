@@ -15,7 +15,7 @@ function timedShares(entries, sample) {
   return Object.fromEntries(
     Object.entries(entries ?? {}).map(([name, s]) => [
       name,
-      { count: s.count, avgMs: s.avgMs, maxMs: s.maxMs, share: round((s.totalMs ?? s.avgMs * s.count) / windowOf(sample), 3), op: s.op },
+      { count: s.count, avgMs: s.avgMs, maxMs: s.maxMs, share: round((s.totalMs ?? s.avgMs * s.count) / windowOf(sample), 3), op: s.op, avgBytes: s.avgBytes },
     ])
   );
 }

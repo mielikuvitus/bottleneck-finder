@@ -1,0 +1,126 @@
+/* Design tokens. Values from the Figma designs; components only use these
+   variables, never raw colours or sizes. */
+:root {
+  /* Colours */
+  --color-text: #091723;
+  --color-text-muted: #52606a;
+  --color-background: #fbfaf7;
+  --color-surface: #ffffff;
+  --color-border: #dde1dd;
+  --color-placeholder: #e4e7e2; /* loading placeholders */
+  --color-text-faint: #7b858d; /* empty values and small print */
+  --color-symbol-surface: #f1f3ef; /* tile behind the empty-report symbol */
+  --color-border-active: #091723; /* the run picker while open */
+  --color-option-selected: #f3f4f6;
+  --color-option-hover: #f6f7f8; /* not in Figma: a light grey hover */
+  --color-option-hover-strong: #eceef1;
+  --color-danger: #b82d23; /* "Superseded" */
+  --color-check: #111827;
+  --color-switch-on: #112231;
+  --color-switch-thumb: #ffffff;
+  --shadow-popover: 0 8px 24px rgba(9, 23, 35, 0.08);
+  --color-backdrop: rgba(9, 23, 35, 0.72); /* not in Figma: behind the screenshot modal */
+  --duration-switch: 240ms; /* keep in step with SWITCH_MS in RunPicker.jsx */
+  --ease-switch: cubic-bezier(0.4, 0, 0.2, 1); /* gentle start and stop */
+  --color-confidence-filled: #52606a;
+  --color-confidence-empty: #dde1dd;
+  /* Can it wait? */
+  --color-wait-safe: #246754;
+  --color-wait-safe-surface: #edf5f0;
+  --color-wait-caution: #8b5e17; /* the design's yellow (severity badges) */
+  --color-wait-caution-border: #e6cf9c; /* not in Figma: a border between the two */
+  --color-wait-caution-surface: #faf2df;
+  --color-wait-soon-border: #ffbdb6;
+  --color-wait-soon-surface: #fff8f5;
+  --color-wait-now-border: #ff4f40;
+  --color-wait-now-surface: #fff0ed;
+  --shadow-wait-now: 0 4px 12px rgba(255, 79, 64, 0.2);
+  --color-brand: #ff4f40; /* the tomorrow logo */
+  --color-on-brand: #ffffff;
+
+  /* Severity badges (Figma: Severity badges). Critical uses the "Fix now"
+     coral, high the "Fix before campaign" pale red */
+  --color-severity-critical: #b82d23;
+  --color-severity-critical-surface: #fff0ed;
+  --color-severity-critical-border: #ff4f40;
+  --color-severity-high: #b82d23;
+  --color-severity-high-surface: #fff8f5;
+  --color-severity-high-border: #ffbdb6;
+  --color-severity-medium: #8b5e17;
+  --color-severity-medium-surface: #faf2df;
+  --color-severity-low: #3b6b8b;
+  --color-severity-low-surface: #edf2f6;
+  --color-severity-info: #246754;
+  --color-severity-info-surface: #edf5f0;
+
+  /* Chart vocabulary (Figma: Legend & chart annotation vocabulary) */
+  --color-chart-arrivals: #112231; /* solid line */
+  --color-chart-success: #246754; /* shaded area's edge (green, like the safe can-it-wait) */
+  --color-chart-success-fill: #d9ebe0; /* not in Figma: the shaded area under success */
+  --color-chart-left: #112231; /* solid block */
+  --color-chart-fallback: #b82d23; /* hatched block, dotted outline */
+  --color-chart-fallback-fill: #fde2de; /* not in Figma: from the reference image */
+  --color-chart-annotation: #52606a; /* knee, capacity line, campaign marker */
+
+  /* Other chart series (placeholders until the chart design) */
+  --color-chart-1: #091723;
+  --color-chart-2: #52606a;
+  --color-chart-3: #ff4f40;
+  --color-chart-4: #a4abb0;
+  --color-chart-5: #218157;
+  --color-chart-6: #7b858d;
+  --color-chart-grid: #e4e7e2;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-section: 22px; /* between report sections */
+  --space-card: 14px; /* inside small cards */
+  --space-card-large: 20px; /* inside section cards */
+  --space-tight: 10px;
+  --space-logo: 9px;
+  --space-empty-y: 50px; /* empty report padding */
+  --space-empty-x: 40px;
+  --space-empty-gap: 20px;
+
+  /* Corner radius */
+  --radius-frame: 16px;
+  --radius-symbol: 16px;
+  --radius-card-large: 10px;
+  --radius-option: 6px;
+  --radius-pill: 100px;
+  --radius-card: 8px;
+  --radius-placeholder: 5px;
+
+  /* Type */
+  --font-family: 'Manrope', system-ui, sans-serif;
+  --font-family-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-weight-regular: 400;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-size-caption: 11px;
+  --font-size-small: 12px;
+  --font-size-label: 13px;
+  --font-size-lead: 14px;
+  --font-size-body: 15px;
+  --font-size-heading-3: 16px;
+  --font-size-heading-2: 16px;
+  --font-size-heading-1: 25px;
+  --font-size-display: 26px; /* empty-report heading */
+  --font-size-stat: 24px;
+  --font-size-symbol: 28px;
+  --line-height: 1.5;
+  --line-height-note: 1.6;
+  --line-height-lead: 1.7;
+
+  /* Layout: same approach as the test site */
+  --page-max-width: 1240px;
+  --page-gutter: 40px;
+  --page-gutter-phone: 24px;
+  --chart-height: 240px;
+}

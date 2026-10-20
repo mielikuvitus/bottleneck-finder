@@ -16,7 +16,7 @@ let lastTime = performance.now();
 let lastCpu = process.cpuUsage();
 let lastLoop = performance.eventLoopUtilization();
 // Timed synchronous work for the current second, by kind ("db", "render"):
-// kind -> name -> { count, totalMs, maxMs }
+// kind -> name -> { count, totalMs, maxMs, totalBytes }
 let timed = { db: {}, render: {} };
 let latest = null;
 
@@ -25,17 +25,22 @@ const nsToMs = (ns) => ns / 1e6;
 // The histogram includes the 10ms the timer was meant to wait; keep only the lateness
 const lateMs = (ns) => Math.max(0, nsToMs(ns) - LOOP_RESOLUTION_MS);
 
-// Runs a synchronous function and records how long it took
+// Runs a synchronous function and records how long it took. When it returns
+// a string (a render's HTML), its size is recorded too, so the analyser can
+// tell a big page from a page that's slow to build.
 function timeSync(kind, name, fn, op) {
   const start = performance.now();
+  let result;
   try {
-    return fn();
+    result = fn();
+    return result;
   } finally {
     const ms = performance.now() - start;
-    const stats = (timed[kind][name] ??= { count: 0, totalMs: 0, maxMs: 0, op });
+    const stats = (timed[kind][name] ??= { count: 0, totalMs: 0, maxMs: 0, totalBytes: 0, op });
     stats.count++;
     stats.totalMs += ms;
     stats.maxMs = Math.max(stats.maxMs, ms);
+    if (typeof result === 'string') stats.totalBytes += Buffer.byteLength(result);
   }
 }
 
@@ -47,7 +52,14 @@ const summarize = (entries) =>
   Object.fromEntries(
     Object.entries(entries).map(([name, s]) => [
       name,
-      { count: s.count, totalMs: round(s.totalMs), avgMs: round(s.totalMs / s.count, 2), maxMs: round(s.maxMs, 2), ...(s.op ? { op: s.op } : {}) },
+      {
+        count: s.count,
+        totalMs: round(s.totalMs),
+        avgMs: round(s.totalMs / s.count, 2),
+        maxMs: round(s.maxMs, 2),
+        ...(s.totalBytes ? { avgBytes: Math.round(s.totalBytes / s.count) } : {}),
+        ...(s.op ? { op: s.op } : {}),
+      },
     ])
   );
 

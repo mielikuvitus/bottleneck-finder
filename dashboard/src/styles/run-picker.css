@@ -1,0 +1,175 @@
+/* The run picker (Figma: Run picker / open) */
+
+.run-picker {
+  position: relative;
+  line-height: normal;
+}
+
+/* The control: the light box when closed, a dark border when open */
+.run-picker-control {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.run-picker-control.is-open {
+  border-color: var(--color-border-active);
+  border-radius: var(--radius-card-large);
+}
+.run-picker-current {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.run-picker-current-title {
+  color: var(--color-text);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-extrabold);
+}
+.run-picker-current-date {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+}
+.run-selector-chevron.is-up {
+  transform: translateY(2px) rotate(-135deg);
+}
+
+/* The list of runs */
+.run-picker-popover {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card-large);
+  box-shadow: var(--shadow-popover);
+}
+.run-picker-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  outline: none;
+}
+.run-option {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-option);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+.run-option.is-selected { background: var(--color-option-selected); }
+.run-option.is-superseded { border-color: var(--color-border); }
+/* Superseded runs growing in when the switch is turned on, and shrinking away
+   when it's turned off, so the list (and the switch under it) moves smoothly
+   instead of jumping. Height comes from max-height; 120px is more than an
+   option's real height. */
+.run-option.is-entering,
+.run-option.is-leaving { overflow: hidden; }
+.run-option.is-entering { animation: run-option-in var(--duration-switch) var(--ease-switch) both; }
+.run-option.is-leaving { animation: run-option-out var(--duration-switch) var(--ease-switch) both; }
+@keyframes run-option-in {
+  from { max-height: 0; padding-top: 0; padding-bottom: 0; margin-top: calc(-1 * var(--space-1)); border-top-width: 0; border-bottom-width: 0; opacity: 0; }
+  to { max-height: 120px; opacity: 1; }
+}
+@keyframes run-option-out {
+  from { max-height: 120px; opacity: 1; }
+  to { max-height: 0; padding-top: 0; padding-bottom: 0; margin-top: calc(-1 * var(--space-1)); border-top-width: 0; border-bottom-width: 0; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .run-option.is-entering,
+  .run-option.is-leaving { animation: none; }
+}
+/* Hover: light grey; a step darker on the selected option, which is already grey */
+.run-option:hover { background: var(--color-option-hover); }
+.run-option.is-selected:hover { background: var(--color-option-hover-strong); }
+/* Where the keyboard is in the list (not in the design, but needed to see what
+   Enter will pick); only while using the keyboard */
+.run-picker-options.is-keyboard .run-option.is-active {
+  outline: 2px solid var(--color-border-active);
+  outline-offset: -2px;
+}
+.run-option-title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.run-option-title {
+  color: var(--color-text);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-extrabold);
+}
+.run-option.is-superseded .run-option-title { color: var(--color-text-muted); }
+.run-option-check {
+  color: var(--color-check);
+  font-size: var(--font-size-small);
+}
+/* "Superseded": the same in the run list and the test details */
+.run-option-superseded,
+.superseded-label {
+  color: var(--color-danger);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-extrabold);
+}
+.run-option-description {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+}
+.run-option-date {
+  color: var(--color-text-faint);
+  font-size: var(--font-size-caption);
+}
+
+/* Show superseded runs */
+.run-picker-setting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3);
+  color: var(--color-text);
+  font-size: var(--font-size-small);
+}
+.switch {
+  display: flex;
+  width: 32px;
+  height: 19px;
+  padding: 3px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+  cursor: pointer;
+  transition: background-color var(--duration-switch) var(--ease-switch);
+}
+.switch.is-on { background: var(--color-switch-on); }
+.switch-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: var(--radius-pill);
+  background: var(--color-switch-thumb);
+  transition: transform var(--duration-switch) var(--ease-switch);
+  will-change: transform;
+}
+/* Slide across: 32px track - 2 x 3px padding - 13px thumb = 13px */
+.switch.is-on .switch-thumb { transform: translateX(13px); }
+@media (prefers-reduced-motion: reduce) {
+  .switch,
+  .switch-thumb { transition: none; }
+}
+.switch:focus-visible,
+.run-picker-control:focus-visible {
+  outline: 2px solid var(--color-border-active);
+  outline-offset: 2px;
+}

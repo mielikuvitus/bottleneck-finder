@@ -1,0 +1,425 @@
+/* The verdict card (Figma: Expanded verdict). One 28px gutter for every
+   section; 24px between sections, 12px within a group. */
+
+/* The card's gutter, page-wide so healthy routes and the funnel can line up */
+:root { --verdict-gutter: 28px; }
+
+.verdict-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-bottom: var(--verdict-gutter);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-frame);
+  line-height: normal;
+  overflow: hidden;
+  /* undo the stub page's section and article spacing */
+  margin-top: 0;
+  padding-top: 0;
+}
+.verdict-card + .verdict-card { margin-top: var(--space-5); }
+
+/* Heading */
+.verdict-heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--verdict-gutter) var(--verdict-gutter) 0;
+}
+.verdict-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+.verdict-headline {
+  margin: 0;
+  color: var(--color-text);
+  font-size: clamp(24px, 3vw, 30px);
+  font-weight: var(--font-weight-extrabold);
+  line-height: 1.2;
+}
+.verdict-subline {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+}
+
+/* Key numbers, with a divider under them */
+.verdict-numbers {
+  margin: 0 var(--verdict-gutter);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+.key-numbers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+.key-number { display: flex; flex-direction: column; gap: var(--space-1); }
+.key-number p { margin: 0; }
+.key-number-label { color: var(--color-text-muted); font-size: var(--font-size-small); }
+.key-number-value {
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: var(--font-weight-extrabold);
+}
+.key-number[data-fits='true'] .key-number-verdict { color: var(--color-wait-safe); }
+.key-number[data-fits='false'] .key-number-verdict { color: var(--color-danger); }
+.key-number-note { color: var(--color-text-muted); font-size: var(--font-size-small); }
+
+/* Decision and fix, next to what visitors see */
+.verdict-body {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--space-5);
+  align-items: start;
+  padding: 0 var(--verdict-gutter);
+}
+.verdict-decision { display: flex; flex-direction: column; gap: var(--space-5); }
+.can-wait[data-size='large'] {
+  gap: var(--space-3);
+  padding: var(--space-card-large);
+  border-radius: 14px;
+}
+.can-wait[data-size='large'] .can-wait-title { font-size: 18px; }
+.verdict-fix { display: flex; flex-direction: column; gap: var(--space-3); }
+.verdict-fix-title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-lead);
+  font-weight: var(--font-weight-extrabold);
+}
+.verdict-fix-text,
+.verdict-fix-list {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lead);
+  line-height: 1.6;
+}
+/* Several fixes: bullet points */
+.verdict-fix-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-left: var(--space-5);
+}
+
+/* Several causes: each cause's fixes under its name */
+.verdict-fix-group { display: flex; flex-direction: column; gap: var(--space-2); }
+.verdict-fix-cause { margin: 0; color: var(--color-text); font-size: var(--font-size-lead); font-weight: var(--font-weight-bold); }
+.verdict-fix-share { color: var(--color-text-muted); font-family: var(--font-family-mono); font-size: var(--font-size-small); font-weight: normal; }
+
+/* Customer view */
+.customer-view {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+.browser-bar {
+  padding: var(--space-tight);
+  background: var(--color-symbol-surface);
+  color: var(--color-text-muted);
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+}
+.browser-tabs {
+  display: flex;
+  gap: 18px;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+.browser-tab {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--font-size-caption);
+  font-weight: 500;
+  cursor: pointer;
+}
+.browser-tab.is-active {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-extrabold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.browser-tab:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 2px; }
+.browser-page { background: var(--color-background); }
+.browser-page img { display: block; width: 100%; height: auto; }
+/* The screenshot opens large (ScreenshotModal) */
+.browser-page-enlarge {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+.browser-page-enlarge:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: -2px; }
+.customer-view-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+.customer-view-title { color: var(--color-text); font-size: var(--font-size-small); font-weight: var(--font-weight-extrabold); }
+.customer-view-caption { color: var(--color-text-muted); font-size: var(--font-size-caption); line-height: 1.5; }
+
+/* Evidence (the box and toggle are .disclosure, in atoms.css) */
+.evidence-disclosure { margin: 0 var(--verdict-gutter); }
+.evidence-content { display: flex; flex-direction: column; gap: var(--space-3); padding-top: var(--space-3); }
+/* Why the finding has its confidence (confidence_reason) */
+.evidence-confidence { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-label); line-height: 1.6; }
+.evidence-confidence strong { display: block; color: var(--color-text); font-weight: var(--font-weight-extrabold); }
+.evidence-summary { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-lead); line-height: 1.6; }
+.evidence-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.evidence-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+.evidence-card-title { margin: 0; color: var(--color-text); font-size: var(--font-size-heading-3); font-weight: var(--font-weight-extrabold); }
+.evidence-card-chart { height: 160px; }
+/* Chart legend (Figma: Legend & chart annotation vocabulary) */
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+.chart-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.chart-legend-item svg { flex: none; }
+/* The unit above the y axis */
+.evidence-card-unit { margin: 0; color: var(--color-text-muted); font-family: var(--font-family-mono); font-size: 11px; }
+.evidence-list {
+  margin: 0;
+  padding-left: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+  line-height: 1.6;
+}
+.evidence-cause { color: var(--color-text); font-weight: var(--font-weight-bold); }
+
+/* Tablets and phones: the customer view goes under the decision, and the
+   evidence charts are one per row */
+@media (max-width: 960px) {
+  .verdict-body,
+  .evidence-cards { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Phones: everything in one column */
+@media (max-width: 600px) {
+  :root { --verdict-gutter: 20px; }
+  .key-numbers,
+  .verdict-body { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Findings: full cards span the row; short ones sit two to a row (one on phones) */
+.findings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+.finding-full { grid-column: 1 / -1; }
+.finding-full:focus { outline: none; }
+.findings .verdict-card + .verdict-card { margin-top: 0; }
+@media (max-width: 760px) {
+  .findings { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Critical and high findings: a red border, short or full */
+.finding-card:is([data-severity='critical'], [data-severity='high']),
+.verdict-card:is([data-severity='critical'], [data-severity='high']) { border-color: var(--color-severity-critical-border); }
+
+/* The short finding card (Figma: Supporting finding) */
+.finding-card {
+  --finding-gutter: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--finding-gutter);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-frame);
+  line-height: normal;
+  /* undo the stub page's section and article spacing */
+  margin-top: 0;
+}
+.finding-card-headline {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: var(--font-weight-extrabold);
+  line-height: 1.3;
+}
+.finding-card-subline {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-label);
+  line-height: 1.6;
+}
+/* The can-it-wait line: opens the full card */
+.finding-card-expand {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-extrabold);
+  text-align: left;
+  cursor: pointer;
+}
+/* → Read more, after the can-it-wait title in its colour */
+.finding-card-more {
+  font-size: var(--font-size-small);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.finding-card-expand:hover .can-wait-title { text-decoration: underline; }
+/* Read less: the last thing in the full card (FindingCard only), styled like Read more */
+.verdict-collapse {
+  align-self: flex-start;
+  margin: 0 var(--verdict-gutter);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-extrabold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.verdict-collapse:hover { text-decoration: underline; }
+.verdict-collapse:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 4px; border-radius: 2px; }
+.finding-card-expand:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 4px; border-radius: 2px; }
+
+/* Healthy routes (HealthyRoutes): the shared load once, then one row per
+   route that opens its charts (the chart cards are .evidence-card above) */
+/* Healthy routes and the funnel: a bordered box on the page (no fill), with
+   the verdict card's gutter so their text starts where a card's does */
+.healthy-routes,
+.funnel {
+  padding: var(--space-card-large) var(--verdict-gutter);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+.healthy-routes { display: flex; flex-direction: column; gap: var(--space-2); }
+.healthy-routes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+}
+.healthy-routes-header p { margin: 0; }
+.healthy-routes-column { text-align: right; }
+.healthy-routes-list { margin: 0; padding: 0; list-style: none; }
+.healthy-route { border-top: 1px solid var(--color-border); }
+.healthy-route-toggle {
+  display: grid;
+  grid-template-columns: minmax(9rem, auto) minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-label);
+  text-align: left;
+  cursor: pointer;
+}
+.healthy-route-toggle:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 2px; }
+.healthy-route-name { font-family: var(--font-family-mono); font-weight: var(--font-weight-bold); }
+.healthy-route-powers { color: var(--color-text-muted); }
+.healthy-route-p95 { font-family: var(--font-family-mono); text-align: right; white-space: nowrap; }
+.healthy-route-p95-prefix { display: none; color: var(--color-text-muted); }
+.healthy-route-toggle .run-selector-chevron { align-self: center; }
+.healthy-route-charts { padding-bottom: var(--space-4); }
+
+/* Tablets and phones: what the route powers goes under the route, and the
+   column label goes, so each p95 says "p95" itself */
+@media (max-width: 760px) {
+  .healthy-routes-column { display: none; }
+  .healthy-route-p95-prefix { display: inline; }
+  .healthy-route-toggle { grid-template-columns: minmax(0, 1fr) auto auto; row-gap: var(--space-1); }
+  .healthy-route-name { overflow-wrap: anywhere; }
+  .healthy-route-powers { grid-row: 2; grid-column: 1 / -1; }
+}
+
+/* The funnel (Funnel): row dividers only and numbers right-aligned in mono,
+   like the stage table in the test details. Exits and degraded visits are
+   indented under the step they came from. */
+.funnel { display: flex; flex-direction: column; gap: var(--space-4); line-height: normal; }
+.funnel-table { width: 100%; margin: 0; font-size: var(--font-size-label); }
+.funnel-table th,
+.funnel-table td {
+  padding: var(--space-2) 0 var(--space-2) var(--space-4);
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+.funnel-table th:first-child,
+.funnel-table td:first-child { padding-left: 0; }
+.funnel-table th {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+  font-weight: normal;
+  white-space: nowrap;
+}
+.funnel-table tbody tr:last-child td { border-bottom: 0; }
+.funnel-table th:nth-child(3),
+.funnel-table th:nth-child(4) { text-align: right; }
+.funnel-number { font-family: var(--font-family-mono); text-align: right; white-space: nowrap; }
+.funnel-name { color: var(--color-text); }
+.funnel-why { color: var(--color-text-muted); font-size: var(--font-size-small); }
+
+/* Ways out and degraded visits: indented, grey. Visitors the site lost (it
+   didn't answer, not their choice) in red when above 0 */
+.funnel-table tr:not([data-kind='path']) .funnel-name { padding-left: var(--space-5); color: var(--color-text-muted); }
+.funnel-table tr:is([data-step^='left@'], [data-step='signup_lost']):not([data-empty]) .funnel-number:nth-child(3) { color: var(--color-danger); }
+.funnel-table tr[data-empty] .funnel-number { color: var(--color-text-faint); }
+
+/* The bar: share of everyone who arrived, in the chart vocabulary */
+.funnel-bar-cell { width: 22%; }
+.funnel-bar { display: block; height: 10px; min-width: 1px; border-radius: 2px; }
+tr[data-kind='path'] .funnel-bar { background: var(--color-chart-success-fill); border-left: 2px solid var(--color-chart-success); }
+tr[data-kind='exit'] .funnel-bar { background: var(--color-chart-left); }
+tr[data-kind='degraded'] .funnel-bar {
+  background: repeating-linear-gradient(45deg, var(--color-chart-fallback-fill) 0 2px, var(--color-chart-fallback) 2px 3px);
+}
+tr[data-empty] .funnel-bar { display: none; }
+
+/* The sentences under the table: notes, so quieter than the table (small,
+   grey, italic; the peak label only slightly heavier) */
+.funnel-notes { display: flex; flex-direction: column; gap: var(--space-1); }
+.funnel-notes p { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-small); font-style: italic; line-height: 1.6; }
+.funnel-notes strong { color: inherit; font-weight: var(--font-weight-bold); }
+
+/* Phones: the bar and why go, so the numbers fit */
+@media (max-width: 600px) {
+  .funnel-bar-cell,
+  .funnel-why,
+  .funnel-table th:last-child { display: none; }
+}
