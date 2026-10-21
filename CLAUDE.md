@@ -5,8 +5,8 @@ fintech site and explains what breaks first.
 
 ## Where things are
 
-Read the docs before the code: [README.md](README.md) (setup, tests, metrics
-fields, analyser fields), [DATAFLOW.md](DATAFLOW.md) (how the server files talk),
+Read the docs before the code: [README.md](README.md) (overview, results, setup),
+[REFERENCE.md](REFERENCE.md) (routes, test settings, metrics fields, analyser fields), [DATAFLOW.md](DATAFLOW.md) (how the server files talk),
 [dashboard/COMPONENTS.md](dashboard/COMPONENTS.md) (every component, its props
 and data).
 
