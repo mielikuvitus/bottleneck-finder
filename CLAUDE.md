@@ -59,13 +59,6 @@ Don't fix or flag the remaining trap unless I ask.
    between the existence check and the insert lets duplicate emails
    through under concurrency.
 
-## To Do list: Day 5
-
-### Write-up and presentation
-
-- [ ] Final summary at the top of the case study: what it found,
-      what the fixes changed, what I learned
-
 ### Stretch (only if time allows)
 
 - [ ] Trap 4 race test: many sign-ups with the same new email at once
