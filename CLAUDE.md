@@ -1,4 +1,4 @@
-# Bottleneck finder
+# Bottleneck finder | Load Testing Tool
 
 A 5-day learning project: a concept tool that load tests a fictional
 fintech site and explains what breaks first.
