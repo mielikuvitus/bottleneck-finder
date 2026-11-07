@@ -52,7 +52,9 @@ No props: the tilted coral "T", "tomorrow", and "Web Performance".
 ### EmptyReport
 
 No props or data. Shown when no run is selected (Figma: "No run selected
-layout"): the header, "Traffic readiness", the "Select a run" box and the "Choose a run to see the story." card. The dashboard
+layout"): the header, "Traffic readiness", the "Select a run" box and the "Choose a run to see the story." card. The card's arrow points up at the box, and
+hovering the card pulses the box once in the info green (with reduced motion,
+the border just turns green). The dashboard
 opens on this. Until the dropdown is designed, open a run with `?run=<name>` in
 the address.
 
@@ -371,7 +373,12 @@ numbered list: `fix`, `reason` under it, and an "Added by AI" pill when
 One finding, short or full. Every finding starts as the short card (Figma:
 "Supporting finding"), `critical` and `high` ones with a red border (the full
 `VerdictCard` keeps it),
-and "→ READ MORE" opens the full card in place (keyboard focus moves to it). "READ LESS",
+and "→ READ MORE" opens the full card in place (keyboard focus moves to it).
+A click anywhere on the short card does the same: the button's click area is
+stretched over the card, so it stays the one real control. Critical and high
+short cards pulse a red ring 3 times when they first appear (critical
+stronger; not again after "READ LESS"; off with reduced motion). Each time a
+critical or high card opens, its can-it-wait box pulses the same ring 3 times. "READ LESS",
 the last thing in the full card, closes it back to the short card (focus
 returns to "→ READ MORE"). Every finding
 gets it.
@@ -379,7 +386,8 @@ gets it.
 The short card: `SeverityBadge` and `ConfidenceIndicator`, the `headline`, a
 grey line (`powers` from `route-context.json` · `customer_view.shown_on` ·
 `evidence_summary`), and `CanWaitCallout size="inline"` (`can_wait_title`)
-followed by "→ READ MORE" on the same line, in its colour (the button: the text is "Read more", capitals come from CSS).
+followed by "→ READ MORE" on the same line, in its colour (the button: the text is "Read more", capitals come from CSS). Hovering the card underlines the whole line. On hover the card also lifts 2px with a
+shadow under it (`--shadow-card-hover`; no lift with reduced motion).
 
 | Prop | Example |
 | ---- | ------- |

@@ -1,6 +1,8 @@
 // One finding, short or full (Figma: Supporting finding, Expanded verdict).
 // Every finding starts short (critical and high ones with a red border), and
-// "→ Read more" opens the full verdict card in place.
+// clicking anywhere on the short card ("→ Read more" is the real button) opens
+// the full verdict card in place. Critical and high cards pulse 3 times when
+// they first appear (not again after Read less).
 import { useRef, useState } from 'react';
 import SeverityBadge from '../atoms/SeverityBadge.jsx';
 import ConfidenceIndicator from '../atoms/ConfidenceIndicator.jsx';
@@ -10,6 +12,8 @@ import VerdictCard, { WAIT_VARIANT } from './VerdictCard.jsx';
 // defaultExpanded: true to start full
 export default function FindingCard({ finding, timeline, routeContext, peaks, defaultExpanded }) {
   const [expanded, setExpanded] = useState(defaultExpanded ?? false);
+  // Once closed with Read less, the short card has been seen: no pulse
+  const [collapsedOnce, setCollapsedOnce] = useState(false);
   const fullRef = useRef(null);
   const shortRef = useRef(null);
 
@@ -23,6 +27,7 @@ export default function FindingCard({ finding, timeline, routeContext, peaks, de
           peaks={peaks}
           onCollapse={() => {
             setExpanded(false);
+            setCollapsedOnce(true);
             // Back to the Read more line; focus() also scrolls it into view if needed
             requestAnimationFrame(() => shortRef.current?.focus());
           }}
@@ -34,7 +39,7 @@ export default function FindingCard({ finding, timeline, routeContext, peaks, de
   const powers = routeContext?.[finding.route]?.powers ?? finding.route;
   const subline = [powers, finding.customer_view?.shown_on, finding.evidence_summary].filter(Boolean).join(' · ');
   return (
-    <article className="finding-card" data-severity={finding.severity}>
+    <article className={collapsedOnce ? 'finding-card' : 'finding-card finding-card--pulse'} data-severity={finding.severity}>
       <div className="verdict-meta">
         <SeverityBadge severity={finding.severity} />
         <ConfidenceIndicator level={finding.confidence} />

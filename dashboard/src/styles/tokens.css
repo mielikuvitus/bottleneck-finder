@@ -20,6 +20,7 @@
   --color-switch-on: #112231;
   --color-switch-thumb: #ffffff;
   --shadow-popover: 0 8px 24px rgba(9, 23, 35, 0.08);
+  --shadow-card-hover: 0 6px 16px rgba(9, 23, 35, 0.1); /* short finding card, lifted on hover */
   --color-backdrop: rgba(9, 23, 35, 0.72); /* not in Figma: behind the screenshot modal */
   --duration-switch: 240ms; /* keep in step with SWITCH_MS in RunPicker.jsx */
   --ease-switch: cubic-bezier(0.4, 0, 0.2, 1); /* gentle start and stop */

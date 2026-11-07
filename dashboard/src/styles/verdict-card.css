@@ -282,6 +282,42 @@
   line-height: normal;
   /* undo the stub page's section and article spacing */
   margin-top: 0;
+  /* for the Read more button's click area, stretched over the card below */
+  position: relative;
+  transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+/* Hover: a darker border, and the card lifts a little with a shadow under it */
+.finding-card:hover {
+  border-color: color-mix(in srgb, var(--color-border), #000 18%);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+.finding-card:is([data-severity='critical'], [data-severity='high']):hover {
+  border-color: color-mix(in srgb, var(--color-severity-critical-border), #000 18%);
+}
+/* Critical and high: a red ring grows out of the border and fades, 3 times
+   when the card first appears. Critical's ring is stronger. */
+.finding-card--pulse[data-severity='critical'] { --pulse-alpha: 0.55; }
+.finding-card--pulse[data-severity='high'] { --pulse-alpha: 0.35; }
+.finding-card--pulse:is([data-severity='critical'], [data-severity='high']) {
+  animation: finding-pulse 1.6s ease-out 300ms 3;
+}
+@keyframes finding-pulse {
+  from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-severity-critical-border) calc(var(--pulse-alpha) * 100%), transparent); }
+  to { box-shadow: 0 0 0 12px color-mix(in srgb, var(--color-severity-critical-border) 0%, transparent); }
+}
+/* An opened critical or high card: its can-it-wait box pulses the same ring,
+   3 times, each time the card opens */
+.finding-full .verdict-card[data-severity='critical'] .can-wait[data-size='large'] { --pulse-alpha: 0.55; }
+.finding-full .verdict-card[data-severity='high'] .can-wait[data-size='large'] { --pulse-alpha: 0.35; }
+.finding-full .verdict-card:is([data-severity='critical'], [data-severity='high']) .can-wait[data-size='large'] {
+  animation: finding-pulse 1.6s ease-out 300ms 3;
+}
+@media (prefers-reduced-motion: reduce) {
+  .finding-card--pulse,
+  .finding-full .can-wait { animation: none !important; }
+  .finding-card { transition: none; }
+  .finding-card:hover { transform: none; }
 }
 .finding-card-headline {
   margin: 0;
@@ -314,7 +350,15 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.finding-card-expand:hover .can-wait-title { text-decoration: underline; }
+.finding-card-expand:hover .can-wait-title,
+.finding-card:hover .can-wait-title { text-decoration: underline; }
+/* The button's click area covers the whole card, so a click anywhere opens it */
+.finding-card-expand::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
 /* Read less: the last thing in the full card (FindingCard only), styled like Read more */
 .verdict-collapse {
   align-self: flex-start;
