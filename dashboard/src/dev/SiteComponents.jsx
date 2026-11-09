@@ -16,9 +16,10 @@ async function fetchOk(file) {
 }
 
 async function loadSite() {
-  const [homeHtml, signupHtml, css, manifest] = await Promise.all([
+  const [homeHtml, signupHtml, tokens, css, manifest] = await Promise.all([
     fetchOk('home.html').then((r) => r.text()),
     fetchOk('signup.html').then((r) => r.text()),
+    fetchOk('tokens.css').then((r) => r.text()),
     fetchOk('styles.css').then((r) => r.text()),
     fetchOk('manifest.json').then((r) => r.json()),
   ]);
@@ -28,7 +29,7 @@ async function loadSite() {
     signup: parser.parseFromString(signupHtml, 'text/html'),
   };
   const sheet = new CSSStyleSheet();
-  sheet.replaceSync(css.replaceAll(':root', ':host') + SPECIMEN_CSS);
+  sheet.replaceSync((tokens + css).replaceAll(':root', ':host') + SPECIMEN_CSS);
   return { pages, sheet, manifest };
 }
 

@@ -13,7 +13,8 @@ and data).
 - **Test site:** `server.js` (routes), `db.js`, `cms.js` (fake CMS, trap 2),
   `emailValidation.js` (trap 4), `metrics.js` (GET /metrics), `seed.js`,
   `views/SignupPage.jsx` (trap 3), `views/ribbon.js` (fictional-bank ribbon, added
-  by `prerender.js`), `public/` (homepage, `home.js`, `signup.js`)
+  by `prerender.js`), `public/` (homepage, `home.js`, `signup.js`, `tokens.css`:
+  the design tokens, shared with the dashboard)
 - **Published demo:** `demo-site/` — `build.js` (npm run build:demo, static copy
   of the test site for /monzo/tomorrow-bank/), `demo-signup.js`, `demo.css`
 - **Load tests:** `load-tests/` — `main.js`, `signup.js`, `smoke.js`, `lib.js`
@@ -25,7 +26,7 @@ and data).
   `route-context.json`, `names.json`
 - **Dashboard:** `dashboard/src/` — `components/{atoms,molecules,organisms,page}`,
   `data/` (useRun, `series.js` chart rows, `findings.js` converts older
-  findings.json shapes, `types.js` JSDoc shapes), `styles/` (`tokens.css`, `base.css`,
+  findings.json shapes, `types.js` JSDoc shapes), `styles/` (`base.css`,
   then one file per layer: `atoms.css`, `molecules.css`, `organisms.css`,
   `page.css`);
   `dashboard/scripts/copy-data.mjs` (npm run dashboard:data)

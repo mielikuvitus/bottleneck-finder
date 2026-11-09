@@ -83,6 +83,10 @@ export function smoothRows(rows, keys, size = 5) {
   });
 }
 
+// Whether any row has a value for any of these keys (0 counts), for a chart
+// card's empty state
+export const hasData = (rows, keys) => rows.some((row) => keys.some((key) => row[key] != null));
+
 // Chart tooltips: hovering shows the real value for that second, also on a
 // smoothed line (its key ends with SMOOTHED)
 export const tooltipValue = (value, name, item) => [item.dataKey.endsWith(SMOOTHED) ? item.payload[item.dataKey.slice(0, -SMOOTHED.length)] : value, name];

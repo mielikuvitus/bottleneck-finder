@@ -104,7 +104,7 @@ export default function AssumptionsList({ config, behaviour, routes }) {
 
   return (
     <div className="assumptions-list">
-      <button type="button" className="text-link" aria-expanded={open} aria-controls={`${id}-list`} onClick={() => setOpen(!open)}>
+      <button type="button" className="text-link" aria-expanded={open} aria-controls={open ? `${id}-list` : undefined} onClick={() => setOpen(!open)}>
         {open ? 'Hide assumptions' : 'Show assumptions'}
       </button>
       {open ? (

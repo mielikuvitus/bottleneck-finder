@@ -38,6 +38,8 @@
   text-align: left;
   cursor: pointer;
 }
+/* Hover: a darker border (open, it already has the dark one) */
+.run-picker-control:not(.is-open):hover { border-color: var(--color-text-muted); }
 .run-picker-control.is-open {
   border-color: var(--color-border-active);
   border-radius: var(--radius-card-large);
@@ -76,8 +78,10 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card-large);
-  box-shadow: var(--shadow-popover);
+  box-shadow: var(--shadow-md); /* on the page */
 }
+/* No runs to pick: why, and what to do */
+.run-picker-empty { margin: 0; padding: var(--space-3); color: var(--color-text-muted); font-size: var(--font-size-small); line-height: var(--line-height); }
 .run-picker-options {
   display: flex;
   flex-direction: column;
@@ -181,6 +185,7 @@
   font-size: var(--font-size-small);
 }
 .switch {
+  position: relative;
   display: flex;
   width: 32px;
   height: 19px;
@@ -192,6 +197,11 @@
   transition: background-color var(--duration-switch) var(--ease-switch);
 }
 .switch.is-on { background: var(--color-switch-on); }
+/* Hover: off a step darker, on a step lighter */
+.switch:hover { background: color-mix(in srgb, var(--color-switch-off), var(--color-hover-shade) 18%); }
+.switch.is-on:hover { background: color-mix(in srgb, var(--color-switch-on), var(--color-surface) 18%); }
+/* A 25px tall tap area around the 19px switch, without changing its look */
+.switch::before { content: ''; position: absolute; inset: -3px 0; }
 .switch-thumb {
   width: 13px;
   height: 13px;
@@ -254,7 +264,7 @@
 .can-wait[data-variant='now'] {
   background: var(--color-wait-now-surface);
   border-color: var(--color-wait-now-border);
-  box-shadow: var(--shadow-wait-now);
+  box-shadow: var(--shadow-coral-md); /* coral border, on the page */
 }
 .can-wait[data-variant='soon'] .can-wait-title,
 .can-wait[data-variant='now'] .can-wait-title { color: var(--color-danger); }
@@ -340,6 +350,7 @@
   border-bottom: 1px solid var(--color-border);
 }
 .browser-tab {
+  position: relative;
   padding: 0;
   border: 0;
   background: none;
@@ -355,6 +366,10 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+.browser-tab:not(.is-active):hover { color: var(--color-text); }
+/* A tap area of at least 24px around the small tab text, without changing its
+   look (half the 18px gap between tabs on each side, so they don't overlap) */
+.browser-tab::before { content: ''; position: absolute; inset: -5px -6px; }
 .browser-tab:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
 .browser-page { background: var(--color-background); }
 .browser-page-enlarge img { display: block; width: 100%; height: auto; }
@@ -368,6 +383,7 @@
   background: none;
   cursor: zoom-in;
 }
+.browser-page-enlarge:not(:disabled):hover { outline: 1px solid var(--color-text-muted); outline-offset: -1px; }
 .browser-page-enlarge:focus-visible { outline: var(--focus-ring); outline-offset: -2px; }
 .customer-view-label {
   display: flex;
@@ -388,6 +404,17 @@
 }
 .evidence-card-title { margin: 0; color: var(--color-text); font-size: var(--font-size-heading-3); font-weight: var(--font-weight-extrabold); }
 .evidence-card-chart { height: 160px; }
+/* Nothing to draw: the chart's space, with a note */
+.evidence-card-empty {
+  display: grid;
+  place-items: center;
+  height: 160px;
+  margin: 0;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-card);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+}
 
 /* The unit above the y axis */
 .evidence-card-unit { margin: 0; color: var(--color-text-muted); font-family: var(--font-family-mono); font-size: var(--font-size-caption); }
@@ -480,10 +507,23 @@
   border-radius: var(--radius-pill);
   color: var(--color-switch-thumb);
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 150ms ease, transform 150ms ease;
+}
+
+/* Hover: a step lighter */
+.prompt-composer-send:not([aria-disabled='true']):hover {
+  background: color-mix(in srgb, var(--color-switch-on), var(--color-surface) 18%);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .prompt-composer-send { transition: none; }
+  .prompt-composer-send:not([aria-disabled='true']):hover { transform: none; }
 }
 
 /* Used once (or no reply for the finding): grey */
-.prompt-composer-send[aria-disabled='true'] { background: var(--color-border); color: var(--color-text-faint); cursor: default; }
+.prompt-composer-send[aria-disabled='true'] { background: var(--color-border); color: var(--color-text-faint); cursor: default; box-shadow: none; }
 :is(.prompt-composer-model, .prompt-composer-send, .prompt-composer-scroll):focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
 .ai-response { display: flex; flex-direction: column; gap: var(--space-4); }
 .ai-response-model {
@@ -547,7 +587,21 @@
 }
 .site-screenshot:hover img { border-color: var(--color-text-muted); }
 .site-screenshot-caption { color: var(--color-text); font-size: var(--font-size-small); }
-.site-screenshot:hover .site-screenshot-caption { text-decoration: underline; }
+.site-screenshot:not(:disabled):hover .site-screenshot-caption { text-decoration: underline; }
+/* The image didn't load: a box with a note in its place (ScreenshotButton) */
+.screenshot-missing {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 80px;
+  padding: var(--space-3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+}
+:is(.site-screenshot, .browser-page-enlarge):disabled { cursor: default; }
 .site-screenshot:focus-visible { outline: var(--focus-ring); outline-offset: 4px; border-radius: var(--radius-card); }
 
 /* The screenshot, large (ScreenshotModal). No padding, so a click on the
@@ -583,10 +637,16 @@
   border-radius: var(--radius-pill);
   background: var(--color-surface);
   color: var(--color-text);
-  box-shadow: var(--shadow-popover);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
+  transition: box-shadow 150ms ease, transform 150ms ease;
 }
-.screenshot-modal-close:hover { background: var(--color-option-hover-strong); }
+/* Hover: a grey fill, and it lifts 2px to the medium shadow */
+.screenshot-modal-close:hover { background: var(--color-option-hover-strong); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+@media (prefers-reduced-motion: reduce) {
+  .screenshot-modal-close { transition: none; }
+  .screenshot-modal-close:hover { transform: none; }
+}
 .screenshot-modal-close:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
 
 /* The page behind doesn't scroll while the modal is open */

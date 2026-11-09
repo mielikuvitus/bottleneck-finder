@@ -12,7 +12,7 @@ import { HatchPattern } from '../atoms/ChartLegend.jsx';
 import ChartCard from '../molecules/ChartCard.jsx';
 import { chartBase } from '../molecules/chartBase.jsx';
 import Disclosure from '../molecules/Disclosure.jsx';
-import { SMOOTHED, bucketRows, chartRows, secondWhenTargetReaches, serverSeries, smoothRows } from '../../data/series.js';
+import { SMOOTHED, bucketRows, hasData, chartRows, secondWhenTargetReaches, serverSeries, smoothRows } from '../../data/series.js';
 
 const BAR_SECONDS = 10; // one bar per 10 seconds
 const SMOOTH_SECONDS = 5; // jumpy series are drawn as a 5-second average
@@ -91,6 +91,7 @@ export default function EvidenceDisclosure({ finding, timeline, peaks, defaultOp
         <div className="evidence-cards">
           <ChartCard
             title="Arrivals vs successful"
+            empty={!hasData(rows, ['target', `${route}|ok`])}
             unit={`${timeline.loadUnit} · requests/s · success: ${SMOOTH_SECONDS}s average`}
             legend={[
               { kind: 'main', label: 'Arrivals' },
@@ -124,6 +125,7 @@ export default function EvidenceDisclosure({ finding, timeline, peaks, defaultOp
 
           <ChartCard
             title="Visitors who left or saw a fallback"
+            empty={!hasData(bars, ['left', 'degraded'])}
             unit={`visitors/s · one bar per ${BAR_SECONDS}s`}
             legend={[
               { kind: 'left', label: 'Left' },
@@ -148,7 +150,7 @@ export default function EvidenceDisclosure({ finding, timeline, peaks, defaultOp
             </BarChart>
           </ChartCard>
 
-          <ChartCard title="Response time (p95)" unit="ms" legend={[{ kind: 'main', label: `${route} p95` }]}>
+          <ChartCard title="Response time (p95)" unit="ms" legend={[{ kind: 'main', label: `${route} p95` }]} empty={!hasData(rows, [`${route}|p95`])}>
             <LineChart data={rows} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
               {chartBase(rows)}
               <Line dataKey={`${route}|p95`} name="p95" stroke="var(--color-chart-arrivals)" strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />
@@ -159,6 +161,7 @@ export default function EvidenceDisclosure({ finding, timeline, peaks, defaultOp
             <ChartCard
               key={filled.key}
               title={filled.title}
+              empty={!hasData(rows, filled.lines.map(([key]) => key))}
               unit={filled.lines[1] ? `${filled.unit} · ${filled.lines[1][1]}: ${SMOOTH_SECONDS}s average` : filled.unit}
               legend={filled.lines.map(([, label], i) => ({ kind: i === 0 ? 'main' : i === 1 ? 'second' : 'other-cause', label }))}
             >
@@ -196,7 +199,7 @@ export default function EvidenceDisclosure({ finding, timeline, peaks, defaultOp
           ))}
 
           {serverCharts.map((c) => (
-            <ChartCard key={c.key} title={c.title} unit={c.unit} legend={[{ kind: 'main', label: c.label }]}>
+            <ChartCard key={c.key} title={c.title} unit={c.unit} legend={[{ kind: 'main', label: c.label }]} empty={!hasData(rows, [c.key])}>
               <LineChart data={rows} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
                 {chartBase(rows)}
                 <Line dataKey={c.key} name={c.label} stroke="var(--color-chart-arrivals)" strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />

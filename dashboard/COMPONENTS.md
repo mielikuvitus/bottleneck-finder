@@ -19,8 +19,12 @@ own) and any other attribute, such as `aria-*`, for that outer element. Each
 atom and molecule lists its props in a JSDoc comment, so the editor shows them
 on hover; the data shapes they use are in [src/data/types.js](src/data/types.js).
 Colours and shadows always come from the CSS variables in
-[src/styles/tokens.css](src/styles/tokens.css) (`npm run check:tokens` checks this);
-spacing, type and corner radius use one when it has the same value. I'm not maintaining a Figma file
+[public/tokens.css](../public/tokens.css), which the bank site shares, so both
+use one brand (`npm run check:tokens` checks the dashboard);
+spacing, type and corner radius use one when it has the same value. Shadows
+come in three sizes, bigger the higher something sits, in navy or in coral for
+coral things (the Tokens tab shows them): buttons rest on `sm` and lift 2px to
+`md` on hover, and boxes on the page use `md`. I'm not maintaining a Figma file
 for this project.
 
 **Where the data comes from** (copied into `public/data/` by `npm run data`):
@@ -138,7 +142,7 @@ of this atom: it's the first line of `EvidenceDisclosure`.
 | `legend` | `[{ kind: "main", label: "Arrivals" }, { kind: "fallback", label: "Fallback" }]` |
 
 A row of small SVG symbols
-with labels. Kinds and colours (tokens in `tokens.css`, `--color-chart-*`):
+with labels. Kinds and colours (tokens in `public/tokens.css`, `--color-chart-*`):
 
 | `kind` | Means | Looks like |
 | ------ | ----- | ---------- |
@@ -183,7 +187,9 @@ Each option and the button show:
 | "Superseded" | `superseded` | shown in red on superseded runs |
 | "Fixes applied" | `variant` | shown in green on runs made after the Day 5 fixes (`"after"`), in the same place; "Superseded" wins if a run is both |
 
-The button shows "Select a run" until a run is chosen; the dashboard opens with
+With no runs to show, the open list says why: "No runs yet. Run a load test,
+then npm run dashboard:data." or, when every run is superseded and the switch is
+off, to turn the switch on. The button shows "Select a run" until a run is chosen; the dashboard opens with
 no run selected. `?run=<name>` in the address opens a run directly.
 
 ### CanWaitCallout
@@ -203,7 +209,7 @@ look comes from `variant`; the words come from the analyser.
 | `safe` | green | `checkCircle` (tick in a circle) | `low`, `info` |
 | `caution` | yellow, `#faf2df` / `#8b5e17` (from the severity badges) | `visibility` (an eye) | `medium` |
 | `soon` | pale red | `schedule` (a clock) | `high` |
-| `now` | coral, with a shadow | `bolt` (a lightning bolt) | `critical` |
+| `now` | coral, with a coral shadow (`--shadow-coral-md`) | `bolt` (a lightning bolt) | `critical` |
 
 The icon says *when* to act, so it's different from
 the severity badge's icons, which say how bad it is. It sits before the title
@@ -234,8 +240,10 @@ title in the variant's colour, no box. Made of spans, so it can sit in a button.
 | `unit` | `"ms"` (shown above the y axis, in mono) |
 | `legend` | `ChartLegend` items: `[{ kind: "main", label: "GET /signup p95" }]`. Left out, there's no legend |
 | `children` | a Recharts chart, starting with `{chartBase(rows)}` |
+| `empty` | `true` shows "No data for this chart" in a dashed box of the chart's height instead. Callers use `hasData(rows, keys)` in `src/data/series.js` |
 
-One chart card. Used by `EvidenceDisclosure` and `HealthyRoutes`.
+One chart card. Used by `EvidenceDisclosure` and `HealthyRoutes`. Screen readers
+hear it as a group named by its title.
 `chartBase(rows)` (in `src/components/molecules/chartBase.jsx`) gives what every
 chart starts with: the grid, the time axis over `rows`' seconds, the value axis
 and the tooltip (which shows the real value even on a smoothed line).
@@ -263,7 +271,11 @@ larger" for screen readers. Used by `SiteScreenshots` and `CustomerView`.
 | `caption` | `"The homepage"` |
 | `className` | `"site-screenshot"`: the button's look comes from its user |
 | `captionClassName` | `"site-screenshot-caption"`: shows the caption under the image. Left out, the caption is the image's alt text instead |
+| `width`, `height` | `2278`, `1584`: the file's pixel size (in `src/data/screenshots.js`), so the page keeps its space while it loads |
 | `loading` | `"lazy"` (optional) |
+
+If the image doesn't load, a dashed box saying "Screenshot not found" takes its
+place, in the same shape, and the button is disabled.
 
 ### Disclosure
 
@@ -288,6 +300,7 @@ outside the image, or Esc; focus then returns to the thumbnail.
 | ---- | ------- |
 | `src` | the image's address: `src` from `siteShots()` or `statesFor()` in `src/data/screenshots.js` |
 | `caption` | `"The homepage"` (the dialog's label and the image's alt text) |
+| `width`, `height` | the file's pixel size |
 | `onClose` | called once it has closed |
 
 ### PromptComposer
@@ -350,7 +363,8 @@ The short card: `SeverityBadge` and `ConfidenceIndicator`, the `headline`, a
 grey line (`powers` from `route-context.json` · `customer_view.shown_on` ·
 `evidence_summary`), and `CanWaitTitle` (`can_wait_title`)
 followed by "→ READ MORE" on the same line, in its colour (the button: the text is "Read more", capitals come from CSS). Hovering the card underlines the whole line. On hover the card also lifts 2px with a
-shadow under it (`--shadow-card-hover`; no lift with reduced motion).
+shadow under it (`--shadow-md`, or `--shadow-coral-md` on critical and high
+cards with their coral border; no lift with reduced motion).
 
 | Prop | Example |
 | ---- | ------- |

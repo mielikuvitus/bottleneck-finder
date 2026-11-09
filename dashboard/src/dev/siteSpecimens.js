@@ -35,7 +35,7 @@ export const SPECIMENS = [
       { label: 'Dark', pick: home('.footer-bottom .logo'), dark: true },
     ],
   },
-  { level: 'Atoms', name: 'Button (small, large, soft shadow, coral)', pick: home('.nav .btn-small', '.hero-cta', '.features-cta .btn', '.footer-cta .btn-coral') },
+  { level: 'Atoms', name: 'Primary button (small, large, coral, sign-up form)', pick: [...home('.nav .btn-small', '.hero-cta', '.footer-cta .btn-coral'), ...signup('.signup-submit')] },
   { level: 'Atoms', name: 'Eyebrow (regular, large)', pick: home('.hero-copy .eyebrow', '.features-head .eyebrow-large') },
   { level: 'Atoms', name: 'Avatar (40, 36, 36 green)', pick: home('.phone-balance .avatar-40', '.activity-list .avatar-36:not(.avatar-green)', '.activity-list .avatar-green') },
   { level: 'Atoms', name: 'Stars', pick: home('.stars') },
@@ -104,15 +104,15 @@ export const SPECIMEN_CSS = `
 :host {
   all: initial;
   display: block;
-  background: var(--cream);
-  color: var(--ink);
-  font-family: 'Manrope', system-ui, sans-serif;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }
 .spec { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 24px; padding: 24px; }
 .spec-stacked { flex-direction: column; flex-wrap: nowrap; align-items: stretch; }
 .spec-full { display: block; padding: 0; }
-.spec-dark { background: var(--navy); }
+.spec-dark { background: var(--color-dark); }
 .spec-glow { background: radial-gradient(circle 424px at 75% 58px, rgba(255, 79, 64, 0.16), rgba(255, 79, 64, 0)) 0 0 / 100% 580px no-repeat; }
 .spec-limit > * { flex: 1 1 100%; }
 .spec-limit { max-width: var(--spec-width); }
@@ -128,7 +128,7 @@ export const SPECIMEN_CSS = `
 .spec > .hero-checks, .spec > .activity { padding-top: 0; }
 .spec-linked, .spec-linked * { cursor: pointer; }
 .spec-icon { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none; font: inherit; }
-.spec-icon code { font-size: 12px; color: var(--grey-text); }
-.spec-icon-tile { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 8px; background: var(--grey-faint); }
+.spec-icon code { font-size: 12px; color: var(--color-text-muted); }
+.spec-icon-tile { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 8px; background: var(--palette-gray-400); }
 .spec-icon-tile img { max-width: 32px; max-height: 32px; }
 `;

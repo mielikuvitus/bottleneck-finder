@@ -127,7 +127,7 @@ function SignupForm({ demo }) {
           By continuing, you agree to our <a href="#">Terms &amp; Conditions</a> and acknowledge
           our <a href="#">Privacy Policy</a>.
         </Text>
-        <button className="signup-submit" {...buttonProps}>
+        <button className="btn-primary signup-submit" {...buttonProps}>
           Continue with email
           <Icon name="arrow-right" width={20} height={20} />
         </button>
@@ -182,6 +182,7 @@ export default function SignupPage({ demo = false }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" />
+        <link rel="stylesheet" href="/tokens.css" />
         <link rel="stylesheet" href="/styles.css" />
       </head>
       <body>

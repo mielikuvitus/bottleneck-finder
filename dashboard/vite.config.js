@@ -7,4 +7,6 @@ export default defineConfig({
   // Served from my domain at /monzo/dashboard/ (data and images load from
   // under it too, via import.meta.env.BASE_URL)
   base: '/monzo/dashboard/',
+  // The design tokens live in ../public/tokens.css, shared with the bank site
+  server: { fs: { allow: ['..'] } },
 })

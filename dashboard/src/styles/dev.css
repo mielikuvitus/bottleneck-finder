@@ -17,7 +17,7 @@
 .dev-used-in:hover, .dev-specimen.is-linked:hover .dev-used-in { background: var(--color-text); color: var(--color-surface); }
 .dev-used-in-note { border: 1px solid var(--color-border); color: var(--color-text); }
 .dev-specimen.is-linked { transition: border-color 120ms ease, box-shadow 120ms ease; }
-.dev-specimen.is-linked:hover { border: 1px solid var(--color-brand); box-shadow: 0 0 0 1px var(--color-brand); }
+.dev-specimen.is-linked:hover { border: 1px solid var(--color-text-muted); box-shadow: 0 0 0 1px var(--color-text-muted); }
 .dev-specimen.is-linked > .dev-specimen-body { cursor: pointer; }
 /* Holds long enough to still be there when a long scroll arrives */
 .dev-specimen.is-jump-target { animation: dev-jump-highlight 3s ease-out; }
@@ -25,8 +25,11 @@
   0%, 60% { box-shadow: 0 0 0 3px var(--color-brand); }
   100% { box-shadow: 0 0 0 3px transparent; }
 }
-.dev-back { position: fixed; left: var(--space-4); bottom: var(--space-4); z-index: 50; padding: var(--space-2) var(--space-4); border: 0; border-radius: 999px; background: var(--color-text); color: var(--color-surface); font: inherit; font-size: var(--font-size-small); font-weight: var(--font-weight-extrabold); cursor: pointer; box-shadow: var(--shadow-floating); }
+.dev-back { position: fixed; left: var(--space-4); bottom: var(--space-4); z-index: 50; padding: var(--space-2) var(--space-4); border: 0; border-radius: 999px; background: var(--color-text); color: var(--color-surface); font: inherit; font-size: var(--font-size-small); font-weight: var(--font-weight-extrabold); cursor: pointer; box-shadow: var(--shadow-sm); transition: box-shadow 150ms ease, transform 150ms ease; }
+.dev-back:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 @media (prefers-reduced-motion: reduce) {
+  .dev-back { transition: none; }
+  .dev-back:hover { transform: none; }
   .dev-specimen.is-jump-target { animation: none; outline: 3px solid var(--color-brand); }
 }
 .dev-toggle { display: inline-flex; margin-bottom: var(--space-3); border: 1px solid var(--color-border); border-radius: 999px; }
@@ -51,6 +54,7 @@
 .dev-tokens th { color: var(--color-text-muted); font-weight: var(--font-weight-bold); white-space: nowrap; }
 .dev-tokens code { display: block; font-family: var(--font-family-mono); white-space: nowrap; }
 .dev-tokens .dev-token-final { color: var(--color-text-muted); }
+.dev-token-used { white-space: nowrap; }
 .dev-token-preview { width: 96px; }
 .dev-token-swatch, .dev-token-box { display: block; width: 40px; height: 28px; border: 1px solid var(--color-border); border-radius: var(--radius-option); }
 .dev-token-box { background: var(--color-surface); }

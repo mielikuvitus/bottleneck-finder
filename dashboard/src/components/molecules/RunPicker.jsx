@@ -5,7 +5,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { DESCRIPTIONS, titleOf } from '../../data/runLabels.js';
 
 // How long the switch and the superseded runs animate: keep in step with
-// --duration-switch in tokens.css
+// --duration-switch in public/tokens.css
 const SWITCH_MS = 240;
 
 /**
@@ -109,7 +109,7 @@ export default function RunPicker({ runs, value, onChange, showSuperseded, onSho
         className={`run-selector run-picker-control${open ? ' is-open' : ''}`}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-controls={`${id}-list`}
+        aria-controls={open ? `${id}-list` : undefined}
         onClick={() => {
           setUsingKeyboard(false);
           if (open) close();
@@ -182,6 +182,12 @@ export default function RunPicker({ runs, value, onChange, showSuperseded, onSho
               );
             })}
           </ul>
+          {/* Nothing to pick: say why, and what to do */}
+          {options.length ? null : (
+            <p className="run-picker-empty">
+              {runs.length ? 'Every run is superseded. Turn on the switch below to see them.' : 'No runs yet. Run a load test, then npm run dashboard:data.'}
+            </p>
+          )}
           <div className="run-picker-setting">
             <span id={`${id}-switch`}>Show superseded runs</span>
             <button

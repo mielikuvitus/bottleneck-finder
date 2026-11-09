@@ -92,6 +92,7 @@ if (existsSync(join(BUILD, 'index.html')) && existsSync(join(BUILD, 'signup.html
   mkdirSync(SITE);
   cpSync(join(BUILD, 'index.html'), join(SITE, 'home.html'));
   cpSync(join(BUILD, 'signup.html'), join(SITE, 'signup.html'));
+  cpSync(join(PUBLIC, 'tokens.css'), join(SITE, 'tokens.css'));
   cpSync(join(PUBLIC, 'styles.css'), join(SITE, 'styles.css'));
   cpSync(join(PUBLIC, 'icons'), join(SITE, 'icons'), { recursive: true, filter: (src) => !src.endsWith('.DS_Store') });
   const icons = readdirSync(join(PUBLIC, 'icons')).filter((file) => file.endsWith('.svg')).sort();

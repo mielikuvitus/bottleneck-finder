@@ -1,9 +1,11 @@
-/* Design tokens, in two layers. The palette holds the raw values; the tokens
-   below it name what each one is for. Components only use the named tokens for
-   colours and shadows (npm run check:tokens checks this). Spacing, type and
-   corner radius use a token when one has the same value; a few one-off sizes
-   are written directly in the component's styles. The components page's Tokens
-   tab shows them all. */
+/* Design tokens for both the tomorrow site and the dashboard: one brand, one
+   source. Each uses the tokens it needs. Two layers: the palette holds the raw
+   values, and the tokens below it name what each one is for. Styles only use
+   the named tokens for colours and shadows (npm run check:tokens checks the
+   dashboard). Spacing, type and corner radius use a token when one has the same
+   value. The site loads this file before styles.css; the dashboard imports it in
+   src/main.jsx. The components page's Tokens tab lists every token and which of
+   the two uses it. */
 :root {
   /* Palette */
   --palette-white: #ffffff;
@@ -22,6 +24,9 @@
   --palette-gray-75: #f3f4f6;
   --palette-gray-50: #f6f7f8;
   --palette-red-700: #b82d23;
+  --palette-red-650: #c9362a;
+  --palette-red-625: #d13a2c;
+  --palette-red-600: #d93c2e;
   --palette-red-500: #ff4f40;
   --palette-red-300: #ffbdb6;
   --palette-red-200: #fde2de;
@@ -60,6 +65,15 @@
   --color-confidence-empty: var(--palette-gray-300);
   --color-brand: var(--palette-red-500); /* the tomorrow logo */
   --color-on-brand: var(--palette-white);
+  --color-brand-button: var(--palette-red-600); /* a coral button: the brightest coral white text can be read on */
+  --color-brand-text: var(--palette-red-625); /* small coral text on cream or white (the brand coral is too light there) */
+  --color-brand-strong: var(--palette-red-650); /* small coral text on pale coral, the muted surface or the grey sign-up panel */
+  --color-brand-surface: var(--palette-red-100); /* pale coral behind coral marks: avatars, icons, the step number */
+  --color-brand-tint: var(--palette-red-200); /* soft coral shapes: the hero backdrop, the savings bars */
+  --color-dark: var(--palette-navy); /* dark sections and the primary button */
+  --color-surface-muted: var(--palette-gray-100); /* sections and cards set off from the page */
+  --color-success-surface: var(--palette-green-100); /* behind green marks */
+  --color-divider: rgba(9, 23, 35, 0.08); /* hairlines between rows */
   --color-backdrop: rgba(9, 23, 35, 0.72); /* behind the screenshot modal */
 
   /* Can it wait? */
@@ -98,10 +112,13 @@
   --color-chart-annotation: var(--palette-gray-700); /* knee, capacity line, campaign marker */
 
   /* Shadows */
-  --shadow-popover: 0 8px 24px rgba(9, 23, 35, 0.08);
-  --shadow-card-hover: 0 6px 16px rgba(9, 23, 35, 0.1); /* short finding card, lifted on hover */
-  --shadow-floating: 0 8px 20px rgba(9, 23, 35, 0.25); /* the components page's back button */
-  --shadow-wait-now: 0 4px 12px rgba(255, 79, 64, 0.2);
+  /* Bigger the higher something sits. sm: buttons at rest. md: buttons and cards lifted on hover, and boxes on the page. lg: only a box on top of another shadowed box. The coral ones go on coral things, or things with a coral border. */
+  --shadow-sm: 0 2px 6px rgba(17, 34, 49, 0.16);
+  --shadow-md: 0 6px 12px rgba(17, 34, 49, 0.18);
+  --shadow-lg: 0 14px 16px rgba(17, 34, 49, 0.24);
+  --shadow-coral-sm: 0 2px 6px rgba(255, 79, 64, 0.16);
+  --shadow-coral-md: 0 6px 12px rgba(255, 79, 64, 0.18);
+  --shadow-coral-lg: 0 14px 16px rgba(255, 79, 64, 0.24);
 
   /* Focus */
   --focus-ring: 2px solid var(--color-border-active); /* the outline on whatever has keyboard focus */

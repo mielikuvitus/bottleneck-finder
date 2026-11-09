@@ -1,32 +1,13 @@
-/* Colors from the Figma design */
-:root {
-  --coral: #ff4f40;
-  --coral-text: #d13a2c; /* small coral text on cream or white (bright coral is too light to read there) */
-  --coral-button: #d93c2e; /* the coral button: the brightest coral white text can be read on */
-  --coral-strong: #c9362a; /* small coral text on pale coral, sand or the grey sign-up panel */
-  --coral-soft: #fff0ed;
-  --coral-pale: #ffd8d2;
-  --ink: #091723;
-  --navy: #112231;
-  --cream: #fbfaf7;
-  --sand: #f1efe9;
-  --mint: #f1f5f2;
-  --green: #218157;
-  --green-soft: #e6f6ee;
-  --grey-text: #52606a;
-  --grey-muted: #65717a;
-  --grey-label: #65717a;
-  --grey-faint: #a4abb0;
-  --line: rgba(9, 23, 35, 0.08);
-}
+/* The tomorrow site. Its colours, shadows and page sizes come from tokens.css,
+   which the dashboard shares. */
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background: var(--cream);
-  color: var(--ink);
-  font-family: 'Manrope', system-ui, sans-serif;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -36,15 +17,15 @@ a { color: inherit; text-decoration: none; }
 img { display: block; }
 
 .container {
-  max-width: 1240px;
+  max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 var(--page-gutter);
 }
 
 /* ---------- Shared pieces ---------- */
 
 .eyebrow {
-  color: var(--coral-text);
+  color: var(--color-brand-text);
   font-size: 12px;
   font-weight: 800;
   line-height: 16px;
@@ -65,33 +46,44 @@ img { display: block; }
 }
 .display-tight { line-height: 0.96; }
 
-.btn {
+.btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  background: var(--navy);
-  color: #fff;
-  font-weight: 700;
+  border: 0;
   border-radius: 999px;
+  background: var(--color-dark);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
   white-space: nowrap;
+  cursor: pointer;
+  /* Navy shadows for the navy button; .btn-coral swaps in the coral ones */
+  --button-shadow: var(--shadow-sm);
+  --button-shadow-hover: var(--shadow-md);
+  box-shadow: var(--button-shadow);
+  transition: box-shadow 150ms ease, transform 150ms ease;
+}
+/* Hover: lifts 2px, to the medium shadow (not while it can't be used) */
+.btn-primary:not(:disabled, [aria-disabled="true"]):hover {
+  box-shadow: var(--button-shadow-hover);
+  transform: translateY(-2px);
 }
 .btn-small {
   padding: 10px 20px;
   font-size: 14px;
   line-height: 20px;
-  box-shadow: 0 8px 10px rgba(17, 34, 49, 0.18);
 }
 .btn-large {
   height: 56px;
   padding: 16px 28px;
   font-size: 16px;
   line-height: 24px;
-  box-shadow: 0 14px 16px rgba(17, 34, 49, 0.24);
 }
-.btn-soft-shadow { box-shadow: 0 14px 16px rgba(17, 34, 49, 0.2); }
 .btn-coral {
-  background: var(--coral-button);
-  box-shadow: 0 14px 16px rgba(255, 79, 64, 0.2);
+  --button-shadow: var(--shadow-coral-sm);
+  --button-shadow-hover: var(--shadow-coral-md);
+  background: var(--color-brand-button);
 }
 
 .logo {
@@ -105,7 +97,7 @@ img { display: block; }
   width: 36px;
   height: 36px;
   border-radius: 11px;
-  background: var(--coral);
+  background: var(--color-brand);
   color: #fff;
   font-size: 20px;
   font-weight: 800;
@@ -124,12 +116,12 @@ img { display: block; }
   place-items: center;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--coral-soft);
-  color: var(--coral);
+  background: var(--color-brand-surface);
+  color: var(--color-brand);
 }
 .avatar-40 { width: 40px; height: 40px; font-size: 16px; font-weight: 700; }
 .avatar-36 { width: 36px; height: 36px; font-size: 12px; font-weight: 800; }
-.avatar-green { background: var(--green-soft); color: var(--green); }
+.avatar-green { background: var(--color-success-surface); color: var(--color-success); }
 
 /* ---------- Hero ---------- */
 
@@ -140,7 +132,7 @@ img { display: block; }
 body:has(.hero) {
   background:
     radial-gradient(circle 424px at 75% 58px, rgba(255, 79, 64, 0.16), rgba(255, 79, 64, 0)) 0 0 / 100% 580px no-repeat,
-    var(--cream);
+    var(--color-background);
 }
 
 .nav {
@@ -175,14 +167,14 @@ body:has(.hero) {
   letter-spacing: -0.075em;
   word-spacing: 0.12em;
 }
-.accent { color: var(--coral); }
+.accent { color: var(--color-brand); }
 /* The panel's background is darker than the page's */
-.signup-panel .accent { color: var(--coral-text); }
+.signup-panel .accent { color: var(--color-brand-text); }
 
 .hero-text {
   max-width: 510px;
   padding-top: 32px;
-  color: var(--grey-text);
+  color: var(--color-text-muted);
   font-size: 20px;
   line-height: 32px;
 }
@@ -192,7 +184,7 @@ body:has(.hero) {
   display: flex;
   gap: 24px;
   padding-top: 28px;
-  color: var(--grey-text);
+  color: var(--color-text-muted);
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
@@ -217,7 +209,7 @@ body:has(.hero) {
   width: 466px;
   height: 640px;
   border-radius: 48px;
-  background: var(--coral-pale);
+  background: var(--color-brand-tint);
   transform: rotate(3deg);
 }
 
@@ -231,10 +223,10 @@ body:has(.hero) {
   height: 660px;
   padding: 20px;
   overflow: hidden;
-  border: 9px solid var(--ink);
+  border: 9px solid var(--color-text);
   border-radius: 42px;
   background: #fff;
-  box-shadow: 0 35px 35px rgba(9, 23, 35, 0.24);
+  box-shadow: var(--shadow-md); /* on the page */
   transform: rotate(-5deg);
 }
 .phone-notch {
@@ -242,7 +234,7 @@ body:has(.hero) {
   width: 64px;
   height: 8px;
   border-radius: 999px;
-  background: var(--ink);
+  background: var(--color-text);
 }
 .phone-balance {
   display: flex;
@@ -251,7 +243,7 @@ body:has(.hero) {
   padding-top: 28px;
 }
 .phone-label {
-  color: var(--grey-label);
+  color: var(--color-text-faint);
   font-size: 12px;
   font-weight: 600;
   line-height: 16px;
@@ -269,7 +261,7 @@ body:has(.hero) {
   margin-top: 28px;
   padding: 20px;
   border-radius: 22px;
-  background: var(--ink);
+  background: var(--color-text);
   color: #fff;
 }
 .bank-card-top {
@@ -282,7 +274,7 @@ body:has(.hero) {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--coral);
+  background: var(--color-brand);
 }
 .bank-card-dots i + i {
   margin-left: -4px;
@@ -310,7 +302,7 @@ body:has(.hero) {
 }
 .activity-head p { font-size: 14px; font-weight: 800; line-height: 20px; }
 .activity-head span {
-  color: var(--coral);
+  color: var(--color-brand);
   font-size: 12px;
   font-weight: 700;
   line-height: 16px;
@@ -320,11 +312,11 @@ body:has(.hero) {
   align-items: center;
   gap: 12px;
   padding: 12px 0;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--color-divider);
 }
 .activity-name { flex: 1; }
 .activity-name p:first-child { font-size: 12px; font-weight: 700; line-height: 16px; }
-.activity-name p:last-child { color: var(--grey-label); font-size: 10px; line-height: 15px; }
+.activity-name p:last-child { color: var(--color-text-faint); font-size: 10px; line-height: 15px; }
 .activity-amount { font-size: 12px; font-weight: 800; line-height: 16px; }
 
 .float-card {
@@ -337,11 +329,11 @@ body:has(.hero) {
   top: 44px;
   width: 144px;
   background: #fff;
-  box-shadow: 0 15px 20px rgba(9, 23, 35, 0.15);
+  box-shadow: var(--shadow-lg); /* on top of a shadowed card */
   transform: rotate(6deg);
 }
 .float-label {
-  color: var(--grey-label);
+  color: var(--color-text-faint);
   font-size: 10px;
   font-weight: 700;
   line-height: 15px;
@@ -360,9 +352,9 @@ body:has(.hero) {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--coral);
+  background: var(--color-brand);
   color: #fff;
-  box-shadow: 0 15px 20px rgba(255, 79, 64, 0.3);
+  box-shadow: var(--shadow-coral-lg); /* coral, on top of a shadowed card */
 }
 .float-icon {
   display: grid;
@@ -385,8 +377,8 @@ body:has(.hero) {
 .ratings {
   padding: 64px 0;
   background: #fff;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  border-top: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--color-divider);
 }
 .ratings-head {
   display: flex;
@@ -402,7 +394,7 @@ body:has(.hero) {
   letter-spacing: -1.2px;
 }
 .ratings-note {
-  color: var(--grey-muted);
+  color: var(--color-text-faint);
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
@@ -419,7 +411,7 @@ body:has(.hero) {
   gap: 28px;
   padding: 24px 32px;
   border-radius: 28px;
-  background: var(--mint);
+  background: var(--color-surface-muted);
 }
 .rating-score {
   font-size: 60px;
@@ -442,7 +434,7 @@ body:has(.hero) {
   width: 28px;
   height: 28px;
   border-radius: 7px;
-  background: var(--coral);
+  background: var(--color-brand);
 }
 
 /* ---------- Features ---------- */
@@ -485,10 +477,10 @@ body:has(.hero) {
   width: 48px;
   height: 48px;
   border-radius: 16px;
-  background: var(--coral-soft);
+  background: var(--color-brand-surface);
 }
 .feature-num {
-  color: var(--grey-label);
+  color: var(--color-text-faint);
   font-size: 12px;
   font-weight: 800;
   line-height: 16px;
@@ -502,7 +494,7 @@ body:has(.hero) {
 }
 .feature-card p {
   padding-top: 16px;
-  color: var(--grey-muted);
+  color: var(--color-text-faint);
   font-size: 16px;
   line-height: 28px;
 }
@@ -516,7 +508,7 @@ body:has(.hero) {
 
 .roundups {
   padding: 128px 0;
-  background: var(--sand);
+  background: var(--color-surface-muted);
 }
 .roundups-grid {
   display: grid;
@@ -530,11 +522,11 @@ body:has(.hero) {
   padding: 48px;
   overflow: hidden;
   border-radius: 36px;
-  background: var(--coral);
+  background: var(--color-brand);
   color: #fff;
 }
 .roundup-eyebrow {
-  color: var(--ink);
+  color: var(--color-text);
   font-size: 14px;
   font-weight: 700;
   line-height: 20px;
@@ -569,11 +561,11 @@ body:has(.hero) {
   padding: 20px;
   border-radius: 24px;
   background: #fff;
-  color: var(--ink);
-  box-shadow: 0 20px 12.5px rgba(0, 0, 0, 0.1), 0 8px 5px rgba(0, 0, 0, 0.1);
+  color: var(--color-text);
+  box-shadow: var(--shadow-md); /* on the page */
 }
 .roundup-widget-label {
-  color: var(--grey-label);
+  color: var(--color-text-faint);
   font-size: 12px;
   font-weight: 700;
   line-height: 16px;
@@ -593,9 +585,9 @@ body:has(.hero) {
 .bars i {
   width: 8px;
   border-radius: 999px;
-  background: var(--coral-pale);
+  background: var(--color-brand-tint);
 }
-.bars .bar-today { background: var(--coral); }
+.bars .bar-today { background: var(--color-brand); }
 
 .roundups-copy { padding-left: 40px; }
 .roundups-copy .display { padding-top: 24px; }
@@ -623,7 +615,7 @@ body:has(.hero) {
 }
 .stat-label {
   padding-top: 4px;
-  color: var(--grey-text);
+  color: var(--color-text-muted);
   font-size: 14px;
   line-height: 20px;
 }
@@ -647,10 +639,10 @@ body:has(.hero) {
   min-height: 112px;
   padding: 24px 32px;
   border-radius: 28px;
-  background: var(--mint);
+  background: var(--color-surface-muted);
 }
 .rate-card.is-loading {
-  color: var(--grey-label);
+  color: var(--color-text-faint);
   font-size: 14px;
   font-weight: 600;
 }
@@ -666,13 +658,13 @@ body:has(.hero) {
   line-height: 22px;
 }
 .rate-unit {
-  color: var(--grey-muted);
+  color: var(--color-text-faint);
   font-size: 14px;
   line-height: 20px;
 }
 .rates-error {
   grid-column: 1 / -1;
-  color: var(--grey-muted);
+  color: var(--color-text-faint);
   font-size: 14px;
   font-weight: 600;
 }
@@ -681,7 +673,7 @@ body:has(.hero) {
 
 .footer {
   padding: 112px 0 32px;
-  background: var(--navy);
+  background: var(--color-dark);
   color: #fff;
 }
 .footer-top {
@@ -693,8 +685,8 @@ body:has(.hero) {
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 /* The footer is navy, where the brighter coral is the readable one */
-.roundups .eyebrow { color: var(--coral-strong); } /* sand is darker than the page */
-.footer .eyebrow { color: var(--coral); }
+.roundups .eyebrow { color: var(--color-brand-strong); } /* sand is darker than the page */
+.footer .eyebrow { color: var(--color-brand); }
 .footer-title {
   padding-top: 24px;
   font-size: clamp(56px, 7vw, 98.42px);
@@ -711,7 +703,7 @@ body:has(.hero) {
   font-size: 18px;
   line-height: 32px;
 }
-.footer-cta .btn { margin-top: 28px; }
+.footer-cta .btn-primary { margin-top: 28px; }
 
 .footer-bottom {
   display: flex;
@@ -808,7 +800,7 @@ body:has(.hero) {
   background: #f1f3ef;
 }
 .signup-eyebrow {
-  color: var(--coral-strong);
+  color: var(--color-brand-strong);
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
@@ -820,7 +812,7 @@ body:has(.hero) {
 }
 .signup-panel-text,
 .signup-intro-text {
-  color: var(--grey-text);
+  color: var(--color-text-muted);
   font-size: 16px;
   line-height: 27px;
 }
@@ -851,9 +843,9 @@ body:has(.hero) {
   height: 184px;
   padding: 24px;
   border-radius: 18px;
-  background: var(--navy);
+  background: var(--color-dark);
   color: #fff;
-  box-shadow: 0 20px 40px rgba(9, 23, 35, 0.13);
+  box-shadow: var(--shadow-md); /* on the page */
   transform: rotate(-6deg);
 }
 .debit-card-top,
@@ -887,7 +879,7 @@ body:has(.hero) {
   padding: 14px;
   border-radius: 14px;
   background: #fff;
-  box-shadow: 0 20px 40px rgba(9, 23, 35, 0.13);
+  box-shadow: var(--shadow-lg); /* on top of a shadowed card */
   font-size: 12px;
   font-weight: 700;
 }
@@ -897,13 +889,13 @@ body:has(.hero) {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--coral-soft);
+  background: var(--color-brand-surface);
 }
 .signup-benefits {
   display: flex;
   flex-wrap: wrap;
   gap: 12px 24px;
-  color: var(--grey-text);
+  color: var(--color-text-muted);
   font-size: 13px;
   font-weight: 600;
 }
@@ -919,7 +911,7 @@ body:has(.hero) {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--grey-label);
+  color: var(--color-text-faint);
   font-size: 12px;
 }
 .signup-steps li { display: flex; align-items: center; gap: 10px; }
@@ -929,15 +921,15 @@ body:has(.hero) {
   height: 1px;
   background: rgba(9, 23, 35, 0.1);
 }
-.signup-steps .is-current { color: var(--ink); font-weight: 700; }
+.signup-steps .is-current { color: var(--color-text); font-weight: 700; }
 .signup-step-num {
   display: grid;
   place-items: center;
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--coral-soft);
-  color: var(--coral-strong);
+  background: var(--color-brand-surface);
+  color: var(--color-brand-strong);
   font-weight: 800;
 }
 .signup-intro { display: flex; flex-direction: column; gap: 16px; }
@@ -960,7 +952,7 @@ body:has(.hero) {
   border-radius: 12px;
   background: #fff;
 }
-.signup-input:focus-within { border-color: var(--ink); }
+.signup-input:focus-within { border-color: var(--color-text); }
 .signup-input input {
   flex: 1;
   min-width: 0;
@@ -968,43 +960,36 @@ body:has(.hero) {
   border: 0;
   outline: 0;
   background: transparent;
-  color: var(--ink);
+  color: var(--color-text);
   font: inherit;
   font-size: 16px;
 }
-.signup-input input::placeholder { color: var(--grey-label); }
+.signup-input input::placeholder { color: var(--color-text-faint); }
 .signup-message { font-size: 13px; font-weight: 600; line-height: 20px; }
 /* Stays rendered while empty, so screen readers announce it when text appears.
    The negative margin cancels .signup-field's 10px gap. */
 .signup-message:empty { margin-top: -10px; }
-.signup-message.is-success { color: var(--green); }
-.signup-message.is-error { color: var(--coral-text); }
+.signup-message.is-success { color: var(--color-success); }
+.signup-message.is-error { color: var(--color-brand-text); }
 
 .signup-terms {
-  color: var(--grey-text);
+  color: var(--color-text-muted);
   font-size: 13px;
   line-height: 22px;
 }
 .signup-terms a,
 .signup-support a {
-  color: var(--ink);
+  color: var(--color-text);
   font-weight: 700;
   text-decoration: underline;
 }
+/* A primary button (.btn-primary) that fills the form's width */
 .signup-submit {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   height: 56px;
   padding: 0 24px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--navy);
-  color: #fff;
-  font: inherit;
   font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
 }
 .signup-submit:disabled { opacity: 0.6; cursor: wait; }
 .signup-privacy {
@@ -1012,13 +997,13 @@ body:has(.hero) {
   justify-content: center;
   align-items: center;
   gap: 8px;
-  color: var(--grey-text);
+  color: var(--color-text-muted);
   font-size: 12px;
 }
 .signup-support {
   padding-top: 24px;
   border-top: 1px solid rgba(9, 23, 35, 0.1);
-  color: var(--grey-text);
+  color: var(--color-text-muted);
   font-size: 13px;
 }
 
@@ -1061,7 +1046,7 @@ body:has(.hero) {
   z-index: 100;
   overflow: hidden;
   padding: 11px 0;
-  background: var(--navy);
+  background: var(--color-dark);
   color: #fff;
   font-size: 12px;
   font-weight: 700;
@@ -1083,7 +1068,7 @@ body:has(.hero) {
   height: 6px;
   margin: 0 24px;
   border-radius: 50%;
-  background: var(--coral);
+  background: var(--color-brand);
 }
 @keyframes demo-ribbon-scroll {
   to { transform: translateX(-50%); }
@@ -1094,6 +1079,8 @@ html { scroll-padding-top: 56px; }
 
 /* Visitors who turn off animations get the whole message, standing still */
 @media (prefers-reduced-motion: reduce) {
+  .btn-primary { transition: none; }
+  .btn-primary:not(:disabled, [aria-disabled="true"]):hover { transform: none; }
   .demo-ribbon { padding: 11px 16px; text-align: center; }
   .demo-ribbon-track { width: auto; animation: none; }
   .demo-ribbon-copy { flex: 1; flex-wrap: wrap; justify-content: center; row-gap: 4px; }

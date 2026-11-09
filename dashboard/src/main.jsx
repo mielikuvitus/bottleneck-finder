@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import './styles/tokens.css';
+// The design tokens, shared with the bank site
+import '../../public/tokens.css';
 import './styles/base.css';
 // Smallest pieces first, so a larger piece's rules can build on them
 import './styles/atoms.css';

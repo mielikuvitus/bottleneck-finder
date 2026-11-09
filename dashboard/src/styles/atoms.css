@@ -107,4 +107,5 @@
   text-underline-offset: 3px;
   cursor: pointer;
 }
+.text-link:hover { text-decoration-thickness: 2px; }
 .text-link:focus-visible { outline: var(--focus-ring); outline-offset: 4px; }

@@ -18,6 +18,8 @@ export default function SiteScreenshots({ shots }) {
             key={shot.src}
             src={shot.src}
             caption={shot.caption}
+            width={shot.width}
+            height={shot.height}
             className="site-screenshot"
             captionClassName="site-screenshot-caption"
             loading="lazy"

@@ -159,14 +159,16 @@
   transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
 }
 
-/* Hover: a darker border, and the card lifts a little with a shadow under it */
+/* Hover: a darker border, and the card lifts 2px to the medium shadow (coral
+   for the cards with a coral border) */
 .finding-card:hover {
   border-color: color-mix(in srgb, var(--color-border), var(--color-hover-shade) 18%);
-  box-shadow: var(--shadow-card-hover);
+  box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
 .finding-card:is([data-severity='critical'], [data-severity='high']):hover {
   border-color: color-mix(in srgb, var(--color-severity-critical-border), var(--color-hover-shade) 18%);
+  box-shadow: var(--shadow-coral-md);
 }
 
 /* Critical and high: a red ring grows out of the border and fades, 3 times

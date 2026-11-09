@@ -254,6 +254,11 @@ function DashboardComponents() {
       <Specimen name="RunPicker">
         <div style={{ width: '100%', maxWidth: 520 }}>{picker}</div>
       </Specimen>
+      <Specimen name="RunPicker (no runs yet: open it)">
+        <div style={{ width: '100%', maxWidth: 520 }}>
+          <RunPicker runs={[]} value={null} onChange={() => {}} showSuperseded={false} onShowSupersededChange={() => {}} />
+        </div>
+      </Specimen>
       <RunSpecimen name="KeyNumbers (main run, first finding)" status={status} ready={firstFinding} empty={NO_FINDINGS}>
         {() => (
           <div style={{ width: '100%' }}>
@@ -291,7 +296,15 @@ function DashboardComponents() {
         </div>
       </Specimen>
       <Specimen name="ScreenshotButton (caption under the image, or as its alt text)">
-        <ScreenshotButton src={modalShot.src} caption={modalShot.caption} className="site-screenshot" captionClassName="site-screenshot-caption" />
+        <ScreenshotButton src={modalShot.src} caption={modalShot.caption} width={modalShot.width} height={modalShot.height} className="site-screenshot" captionClassName="site-screenshot-caption" />
+      </Specimen>
+      <Specimen name="ScreenshotButton (image not found)">
+        <ScreenshotButton src={`${modalShot.src}-missing`} caption={modalShot.caption} width={modalShot.width} height={modalShot.height} className="site-screenshot" captionClassName="site-screenshot-caption" />
+      </Specimen>
+      <Specimen name="ChartCard (no data)">
+        <div style={{ width: '100%', maxWidth: 560 }}>
+          <ChartCard title="Response time (p95)" unit="ms" legend={[{ kind: 'main', label: 'GET /signup p95' }]} empty />
+        </div>
       </Specimen>
       <Specimen name="Disclosure">
         <div style={{ width: '100%' }}>
@@ -304,7 +317,7 @@ function DashboardComponents() {
         <button type="button" className="text-link" onClick={() => setModalOpen(true)}>
           Open the modal
         </button>
-        {modalOpen ? <ScreenshotModal src={modalShot.src} caption={modalShot.caption} onClose={() => setModalOpen(false)} /> : null}
+        {modalOpen ? <ScreenshotModal src={modalShot.src} caption={modalShot.caption} width={modalShot.width} height={modalShot.height} onClose={() => setModalOpen(false)} /> : null}
       </Specimen>
       <RunSpecimen name="AssumptionsList" status={status} ready={anyRun} empty={NO_RUNS}>
         {() => (

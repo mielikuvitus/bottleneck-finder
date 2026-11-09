@@ -51,7 +51,7 @@ export default function CustomerView({ states = [], initialState, address, capti
           ))}
         </div>
         <div className="browser-page" role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-tab-${shown.key}`}>
-          <ScreenshotButton src={shown.src} caption={shown.caption} className="browser-page-enlarge" />
+          <ScreenshotButton src={shown.src} caption={shown.caption} width={shown.width} height={shown.height} className="browser-page-enlarge" />
         </div>
       </div>
       <figcaption className="customer-view-label">

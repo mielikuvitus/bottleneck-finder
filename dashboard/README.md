@@ -2,8 +2,8 @@
 
 An unstyled React (Vite) dashboard for recorded load-test runs. The design is
 still to come: see [COMPONENTS.md](COMPONENTS.md) for every component and the
-data it shows, and [src/styles/tokens.css](src/styles/tokens.css) for the
-colour, spacing and type variables.
+data it shows, and [public/tokens.css](../public/tokens.css) (shared with the
+bank site) for the colour, shadow, spacing and type variables.
 
 ```sh
 npm install     # first time only

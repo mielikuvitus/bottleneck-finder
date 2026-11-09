@@ -71,6 +71,8 @@
  * @typedef {object} Screenshot
  * @property {string} src  the image's address
  * @property {string} caption
+ * @property {number} [width]  the file's pixel size, so the page keeps its space while it loads
+ * @property {number} [height]
  */
 
 /**

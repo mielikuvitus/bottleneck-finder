@@ -5,4 +5,4 @@
 }
 .signup-input input[aria-disabled="true"] { cursor: not-allowed; }
 .signup-submit[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
-.signup-message.is-demo { color: var(--ink); }
+.signup-message.is-demo { color: var(--color-text); }

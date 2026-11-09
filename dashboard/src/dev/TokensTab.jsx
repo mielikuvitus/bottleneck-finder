@@ -1,9 +1,27 @@
-// The components page's Tokens tab: every design token of the dashboard and the
-// bank site, read from their real stylesheets so it can't go out of date.
-import { useEffect, useState } from 'react';
-import dashboardCss from '../styles/tokens.css?raw';
+// The components page's Tokens tab: every design token, read from
+// public/tokens.css (shared by the bank site and the dashboard), and which of
+// the two uses it, worked out from their real styles so it can't go out of date.
+import { useEffect, useMemo, useState } from 'react';
+import tokensCss from '../../../public/tokens.css?raw';
 
+// The dashboard's styles and components, as text
+const DASHBOARD_SOURCES = Object.values(import.meta.glob(['../styles/*.css', '../components/**/*.jsx'], { query: '?raw', import: 'default', eager: true }));
 const SITE_CSS = `${import.meta.env.BASE_URL}data/site/styles.css`;
+
+const tokensIn = (text) => [...text.matchAll(/var\((--[\w-]+)/g)].map((match) => match[1]);
+
+// The tokens some styles use: directly, or through a token that refers to
+// another (--color-brand uses --palette-red-500)
+function usedBy(sources, values) {
+  const used = new Set();
+  const visit = (name) => {
+    if (used.has(name)) return;
+    used.add(name);
+    tokensIn(values.get(name) ?? '').forEach(visit);
+  };
+  sources.forEach((text) => tokensIn(text).forEach(visit));
+  return used;
+}
 
 // The first :root block's tokens, in groups. A comment on its own line starts a
 // group, and a second one straight after it is the group's description; a
@@ -44,7 +62,7 @@ function Preview({ name, value }) {
 }
 
 // resolve: the final value of a token that points at another one
-function TokenGroup({ group, resolve }) {
+function TokenGroup({ group, usedLabel }) {
   return (
     <>
       <h3 className="dev-token-group">{group.name}</h3>
@@ -56,12 +74,13 @@ function TokenGroup({ group, resolve }) {
               <th scope="col">Preview</th>
               <th scope="col">Token</th>
               <th scope="col">Value</th>
+              <th scope="col">Used by</th>
               <th scope="col">Note</th>
             </tr>
           </thead>
           <tbody>
             {group.tokens.map(({ name, value, note }) => {
-              const final = resolve(name, value);
+              const final = value.includes('var(') ? getComputedStyle(document.documentElement).getPropertyValue(name).trim() : value;
               return (
                 <tr key={name}>
                   <td className="dev-token-preview">
@@ -74,6 +93,7 @@ function TokenGroup({ group, resolve }) {
                     <code>{value}</code>
                     {final !== value ? <code className="dev-token-final">{final}</code> : null}
                   </td>
+                  <td className="dev-token-used">{usedLabel(name)}</td>
                   <td className="muted">{note}</td>
                 </tr>
               );
@@ -84,9 +104,6 @@ function TokenGroup({ group, resolve }) {
     </>
   );
 }
-
-const fromPage = (name, value) => (value.includes('var(') ? getComputedStyle(document.documentElement).getPropertyValue(name).trim() : value);
-const asWritten = (name, value) => value;
 
 export default function TokensTab() {
   const [siteCss, setSiteCss] = useState(null);
@@ -102,18 +119,27 @@ export default function TokensTab() {
       .catch(setError);
   }, []);
 
+  const groups = useMemo(() => parseTokens(tokensCss, 'Tokens'), []);
+  const values = useMemo(() => new Map(groups.flatMap((group) => group.tokens.map((token) => [token.name, token.value]))), [groups]);
+  const dashboard = useMemo(() => usedBy(DASHBOARD_SOURCES, values), [values]);
+  const site = useMemo(() => (siteCss ? usedBy([siteCss], values) : null), [siteCss, values]);
+
+  function usedLabel(name) {
+    if (!site) return '…';
+    const users = [dashboard.has(name) && 'Dashboard', site.has(name) && 'Tomorrow'].filter(Boolean);
+    return users.length === 2 ? 'Both' : (users[0] ?? '–');
+  }
+
   return (
     <>
-      <p className="muted">Read from each stylesheet, so these are always the values in use.</p>
-      <h2 className="dev-level">Dashboard</h2>
-      {parseTokens(dashboardCss, 'Tokens').map((group) => (
-        <TokenGroup key={group.name} group={group} resolve={fromPage} />
-      ))}
-      <h2 className="dev-level">Tomorrow site</h2>
+      <p className="muted">
+        One set of tokens for both, in <code>public/tokens.css</code>. "Used by" shows which of the two uses each one, directly or
+        through another token.
+      </p>
       {error ? <p role="alert">{error.message}</p> : null}
-      {siteCss
-        ? parseTokens(siteCss, 'Colours').map((group) => <TokenGroup key={group.name} group={group} resolve={asWritten} />)
-        : null}
+      {groups.map((group) => (
+        <TokenGroup key={group.name} group={group} usedLabel={usedLabel} />
+      ))}
     </>
   );
 }

@@ -65,7 +65,7 @@ export default function AiResponse({ response, modelName, typing = false }) {
 
       {checkTitle ? (
         <div className="ai-response-section">
-          <h5 className="subheading">{checkTitle}</h5>
+          <h4 className="subheading">{checkTitle}</h4>
           <ul className="ai-response-list">
             {checks.map((c, i) =>
               c.step ? (
@@ -81,7 +81,7 @@ export default function AiResponse({ response, modelName, typing = false }) {
 
       {fixesTitle ? (
         <div className="ai-response-section">
-          <h5 className="subheading">{fixesTitle}</h5>
+          <h4 className="subheading">{fixesTitle}</h4>
           <ol className="ai-response-list">
             {fixes.map((f, i) =>
               f.fix ? (

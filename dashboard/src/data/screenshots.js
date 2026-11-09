@@ -1,26 +1,27 @@
 // What a visitor sees for each route, by state. File paths are relative to
 // public/data/images (copied from docs/images by npm run data). The sign-up
 // form ones are cropped (fallbacks/cropped/) to the email field and the
-// message under it. A state with
-// no screenshot yet is simply left out, and its tab isn't shown.
+// message under it. A state with no screenshot yet is simply left out, and its
+// tab isn't shown. width and height are the files' pixel sizes, so the page
+// keeps their space while they load.
 import { imageUrl } from './api.js';
 
 export const SCREENSHOTS = {
   'GET /': {
-    normal: { file: 'tomorrow1.png', caption: 'The homepage' },
+    normal: { file: 'tomorrow1.png', width: 2278, height: 1584, caption: 'The homepage' },
   },
   'GET /api/rates': {
-    normal: { file: 'fallbacks/0-rates-normal.png', caption: 'Rate cards loaded' },
-    slow: { file: 'fallbacks/1-rates-loading.png', caption: 'Rate cards while rates is slow: "Loading…"' },
-    fallback: { file: 'fallbacks/2-rates-fallback.png', caption: 'After 3s: "Couldn\'t load rates right now."' },
+    normal: { file: 'fallbacks/0-rates-normal.png', width: 2560, height: 656, caption: 'Rate cards loaded' },
+    slow: { file: 'fallbacks/1-rates-loading.png', width: 2560, height: 656, caption: 'Rate cards while rates is slow: "Loading…"' },
+    fallback: { file: 'fallbacks/2-rates-fallback.png', width: 2560, height: 470, caption: 'After 3s: "Couldn\'t load rates right now."' },
   },
   'GET /signup': {
-    normal: { file: 'tomorrow2.png', caption: 'The sign-up page' },
-    fallback: { file: 'fallbacks/6-signup-page-unreachable.png', caption: 'The sign-up page refused: the browser\'s own error page' },
+    normal: { file: 'tomorrow2.png', width: 2278, height: 1584, caption: 'The sign-up page' },
+    fallback: { file: 'fallbacks/6-signup-page-unreachable.png', width: 2560, height: 1400, caption: 'The sign-up page refused: the browser\'s own error page' },
   },
   'POST /api/signup': {
-    slow: { file: 'fallbacks/cropped/3-signup-waiting.png', caption: 'The form submitted, button greyed out while waiting' },
-    fallback: { file: 'fallbacks/cropped/4-signup-timed-out.png', caption: 'After 3s: "We couldn\'t confirm your sign-up…"' },
+    slow: { file: 'fallbacks/cropped/3-signup-waiting.png', width: 1096, height: 510, caption: 'The form submitted, button greyed out while waiting' },
+    fallback: { file: 'fallbacks/cropped/4-signup-timed-out.png', width: 1096, height: 310, caption: 'After 3s: "We couldn\'t confirm your sign-up…"' },
   },
 };
 

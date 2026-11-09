@@ -38,7 +38,7 @@ fs.rmSync(OUT, { recursive: true, force: true });
 // Styles and icons, as they are
 fs.mkdirSync(OUT, { recursive: true });
 fs.cpSync(path.join(PUBLIC, 'icons'), path.join(OUT, 'icons'), { recursive: true });
-for (const file of ['styles.css', 'favicon.svg']) fs.copyFileSync(path.join(PUBLIC, file), path.join(OUT, file));
+for (const file of ['tokens.css', 'styles.css', 'favicon.svg']) fs.copyFileSync(path.join(PUBLIC, file), path.join(OUT, file));
 
 // The form's stand-in behaviour and styles
 for (const file of ['demo-signup.js', 'demo.css']) fs.copyFileSync(path.join(__dirname, file), path.join(OUT, file));

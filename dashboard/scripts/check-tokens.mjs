@@ -1,4 +1,5 @@
-// Fails if a raw colour is used outside tokens.css, or a component reaches past
+// Fails if a raw colour is used in the dashboard (the tokens are in
+// public/tokens.css, shared with the bank site), or a component reaches past
 // the named tokens to the palette. Run with npm run check:tokens (also in CI).
 // siteSpecimens.js is skipped: its styles belong to the bank site.
 import { readdirSync, readFileSync } from 'node:fs';
@@ -7,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FOLDERS = ['src/styles', 'src/components', 'src/dev'];
-const SKIP = new Set(['src/styles/tokens.css', 'src/dev/siteSpecimens.js']);
+const SKIP = new Set(['src/dev/siteSpecimens.js']);
 const EXTENSIONS = /\.(css|jsx|js)$/;
 
 const RAW_COLOUR = /#[0-9a-fA-F]{3,8}\b|\b(?:rgb|hsl)a?\(/;
@@ -41,7 +42,7 @@ for (const file of files) {
 if (problems.length) {
   console.error(`Tokens: ${problems.length} problem(s), in ${relative(process.cwd(), ROOT) || '.'}:`);
   for (const problem of problems) console.error(`  ${problem}`);
-  console.error('Add or reuse a token in src/styles/tokens.css.');
+  console.error('Add or reuse a token in public/tokens.css.');
   process.exit(1);
 }
 console.log(`Tokens: OK (${files.length} files checked).`);
