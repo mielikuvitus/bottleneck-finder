@@ -156,7 +156,7 @@
   padding: 3px;
   border: 0;
   border-radius: var(--radius-pill);
-  background: var(--color-border);
+  background: var(--color-switch-off);
   cursor: pointer;
   transition: background-color var(--duration-switch) var(--ease-switch);
 }

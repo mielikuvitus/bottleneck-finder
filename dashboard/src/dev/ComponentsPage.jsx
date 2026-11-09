@@ -1,10 +1,12 @@
-// Every component on one page, in atoms, molecules, organisms order, under two
-// tabs: the bank site (SiteComponents.jsx) and the dashboard, with all its
-// variants and real data from the newest main and sign-up runs with findings.
+// Every component on one page, in atoms, molecules, organisms order, under
+// tabs: the bank site (SiteComponents.jsx), the dashboard, with all its variants
+// and real data from the newest main and sign-up runs with findings, and the
+// design tokens of both (TokensTab.jsx).
 // Lives at /monzo/dashboard/components, loaded only when that address is opened.
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { Line, LineChart } from 'recharts';
 import SiteComponents from './SiteComponents.jsx';
+import TokensTab from './TokensTab.jsx';
 import { INTERACTIVE, JumpContext, JumpHint, UsedInLink, useJumps } from './jumps.jsx';
 import { chartRows } from '../data/series.js';
 import { SCREENSHOTS } from '../data/screenshots.js';
@@ -384,6 +386,7 @@ function DashboardComponents() {
 const TABS = [
   { key: 'tomorrow', label: 'Tomorrow site', Content: SiteComponents },
   { key: 'dashboard', label: 'Dashboard', Content: DashboardComponents },
+  { key: 'tokens', label: 'Tokens', Content: TokensTab },
 ];
 
 export default function ComponentsPage() {

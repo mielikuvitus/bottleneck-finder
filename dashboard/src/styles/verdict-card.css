@@ -96,7 +96,7 @@
   margin: 0;
   color: var(--color-text-muted);
   font-size: var(--font-size-lead);
-  line-height: 1.6;
+  line-height: var(--line-height-note);
 }
 /* Several fixes: bullet points */
 .verdict-fix-list {
@@ -168,15 +168,15 @@
   border-top: 1px solid var(--color-border);
 }
 .customer-view-title { color: var(--color-text); font-size: var(--font-size-small); font-weight: var(--font-weight-extrabold); }
-.customer-view-caption { color: var(--color-text-muted); font-size: var(--font-size-caption); line-height: 1.5; }
+.customer-view-caption { color: var(--color-text-muted); font-size: var(--font-size-caption); line-height: var(--line-height); }
 
 /* Evidence (the box and toggle are .disclosure, in atoms.css) */
 .evidence-disclosure { margin: 0 var(--verdict-gutter); }
 .evidence-content { display: flex; flex-direction: column; gap: var(--space-3); padding-top: var(--space-3); }
 /* Why the finding has its confidence (confidence_reason) */
-.evidence-confidence { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-label); line-height: 1.6; }
+.evidence-confidence { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-label); line-height: var(--line-height-note); }
 .evidence-confidence strong { display: block; color: var(--color-text); font-weight: var(--font-weight-extrabold); }
-.evidence-summary { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-lead); line-height: 1.6; }
+.evidence-summary { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-lead); line-height: var(--line-height-note); }
 .evidence-cards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -206,13 +206,13 @@
 .chart-legend-item { display: inline-flex; align-items: center; gap: 6px; }
 .chart-legend-item svg { flex: none; }
 /* The unit above the y axis */
-.evidence-card-unit { margin: 0; color: var(--color-text-muted); font-family: var(--font-family-mono); font-size: 11px; }
+.evidence-card-unit { margin: 0; color: var(--color-text-muted); font-family: var(--font-family-mono); font-size: var(--font-size-caption); }
 .evidence-list {
   margin: 0;
   padding-left: var(--space-4);
   color: var(--color-text-muted);
   font-size: var(--font-size-label);
-  line-height: 1.6;
+  line-height: var(--line-height-note);
 }
 .evidence-cause { color: var(--color-text); font-weight: var(--font-weight-bold); }
 
@@ -256,7 +256,7 @@
   margin: 0;
   color: var(--color-text);
   font-size: var(--font-size-body);
-  line-height: 1.5;
+  line-height: var(--line-height);
 }
 .all-clear-note {
   margin: 0 var(--verdict-gutter);
@@ -288,12 +288,12 @@
 }
 /* Hover: a darker border, and the card lifts a little with a shadow under it */
 .finding-card:hover {
-  border-color: color-mix(in srgb, var(--color-border), #000 18%);
+  border-color: color-mix(in srgb, var(--color-border), var(--color-hover-shade) 18%);
   box-shadow: var(--shadow-card-hover);
   transform: translateY(-2px);
 }
 .finding-card:is([data-severity='critical'], [data-severity='high']):hover {
-  border-color: color-mix(in srgb, var(--color-severity-critical-border), #000 18%);
+  border-color: color-mix(in srgb, var(--color-severity-critical-border), var(--color-hover-shade) 18%);
 }
 /* Critical and high: a red ring grows out of the border and fades, 3 times
    when the card first appears. Critical's ring is stronger. */
@@ -330,7 +330,7 @@
   margin: 0;
   color: var(--color-text-muted);
   font-size: var(--font-size-label);
-  line-height: 1.6;
+  line-height: var(--line-height-note);
 }
 /* The can-it-wait line: opens the full card */
 .finding-card-expand {
@@ -480,7 +480,7 @@ tr[data-empty] .funnel-bar { display: none; }
 /* The sentences under the table: notes, so quieter than the table (small,
    grey, italic; the peak label only slightly heavier) */
 .funnel-notes { display: flex; flex-direction: column; gap: var(--space-1); }
-.funnel-notes p { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-small); font-style: italic; line-height: 1.6; }
+.funnel-notes p { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-small); font-style: italic; line-height: var(--line-height-note); }
 .funnel-notes strong { color: inherit; font-weight: var(--font-weight-bold); }
 
 /* Phones: the bar and why go, so the numbers fit */

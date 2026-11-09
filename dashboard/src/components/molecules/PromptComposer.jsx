@@ -4,7 +4,7 @@
 // model picker and the send button. The box keeps its size: everything above
 // the bar scrolls, and follows the reply to the bottom while it types (unless
 // the reader has scrolled up).
-import { useEffect, useId, useRef } from 'react';
+import { Children, useEffect, useId, useRef } from 'react';
 import Icon from '../atoms/Icon.jsx';
 
 // models: [{ id, name }], in picker order
@@ -13,7 +13,8 @@ export default function PromptComposer({ prompt, attachment, models, model, onMo
   const scrollRef = useRef(null);
   const replyRef = useRef(null);
   const followRef = useRef(true); // at the bottom: keep following
-  const hasReply = Boolean(children);
+  // toArray leaves out empty children, so empty slots don't count as a reply
+  const hasReply = Children.toArray(children).length > 0;
 
   // Once sent, jump to the bottom, then stay there as the reply grows
   useEffect(() => {

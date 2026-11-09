@@ -11,7 +11,7 @@
 .dev-specimen-head .dev-specimen-name { margin: 0; }
 .dev-jump-hint { display: flex; align-items: center; gap: var(--space-3); margin: var(--space-4) 0 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-card); background: var(--color-text); color: var(--color-surface); font-size: 16px; }
 .dev-jump-hint strong { font-weight: var(--font-weight-extrabold); }
-.dev-jump-hint-mark { display: grid; flex: none; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--color-brand); color: #fff; font-weight: var(--font-weight-extrabold); }
+.dev-jump-hint-mark { display: grid; flex: none; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--color-brand); color: var(--color-on-brand); font-weight: var(--font-weight-extrabold); }
 .dev-used-in, .dev-used-in-note { margin: 0; padding: var(--space-1) var(--space-3); border-radius: 999px; font: inherit; font-size: var(--font-size-small); font-weight: var(--font-weight-extrabold); }
 .dev-used-in { border: 1px solid var(--color-text); background: var(--color-surface); color: var(--color-text); cursor: pointer; }
 .dev-used-in:hover, .dev-specimen.is-linked:hover .dev-used-in { background: var(--color-text); color: var(--color-surface); }
@@ -25,7 +25,7 @@
   0%, 60% { box-shadow: 0 0 0 3px var(--color-brand); }
   100% { box-shadow: 0 0 0 3px transparent; }
 }
-.dev-back { position: fixed; left: var(--space-4); bottom: var(--space-4); z-index: 50; padding: var(--space-2) var(--space-4); border: 0; border-radius: 999px; background: var(--color-text); color: var(--color-surface); font: inherit; font-size: var(--font-size-small); font-weight: var(--font-weight-extrabold); cursor: pointer; box-shadow: 0 8px 20px rgba(9, 23, 35, 0.25); }
+.dev-back { position: fixed; left: var(--space-4); bottom: var(--space-4); z-index: 50; padding: var(--space-2) var(--space-4); border: 0; border-radius: 999px; background: var(--color-text); color: var(--color-surface); font: inherit; font-size: var(--font-size-small); font-weight: var(--font-weight-extrabold); cursor: pointer; box-shadow: var(--shadow-floating); }
 @media (prefers-reduced-motion: reduce) {
   .dev-specimen.is-jump-target { animation: none; outline: 3px solid var(--color-brand); }
 }
@@ -42,3 +42,17 @@
   .dev-components { padding: var(--space-5) var(--page-gutter-phone); }
   .dev-grid-4 { grid-template-columns: minmax(0, 1fr); }
 }
+/* The Tokens tab */
+.dev-token-group { margin: var(--space-5) 0 var(--space-2); color: var(--color-text); font-size: var(--font-size-lead); font-weight: var(--font-weight-extrabold); }
+.dev-token-description { max-width: 70ch; margin: 0 0 var(--space-2); }
+.dev-token-scroll { overflow-x: auto; }
+.dev-tokens { width: 100%; margin: 0; background: var(--color-surface); font-size: var(--font-size-small); }
+.dev-tokens th, .dev-tokens td { padding: var(--space-2) var(--space-3); border: 0; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.dev-tokens th { color: var(--color-text-muted); font-weight: var(--font-weight-bold); white-space: nowrap; }
+.dev-tokens code { display: block; font-family: var(--font-family-mono); white-space: nowrap; }
+.dev-tokens .dev-token-final { color: var(--color-text-muted); }
+.dev-token-preview { width: 96px; }
+.dev-token-swatch, .dev-token-box { display: block; width: 40px; height: 28px; border: 1px solid var(--color-border); border-radius: var(--radius-option); }
+.dev-token-box { background: var(--color-surface); }
+.dev-token-bar { display: block; max-width: 80px; height: 12px; background: var(--color-text-muted); }
+.dev-token-lines { display: block; }

@@ -2,9 +2,10 @@
 
 To see them all at once, open [pixelation.io/monzo/dashboard/components](https://pixelation.io/monzo/dashboard/components),
 or run `npm run dev` and open http://localhost:5173/monzo/dashboard/components.
-The page has two tabs: **Tomorrow site** shows the bank site's pieces, taken from
-its real pages (list in `src/dev/siteSpecimens.js`), and **Dashboard**
-(`?tab=dashboard`) shows the components below. The Tomorrow tab needs
+The page has three tabs: **Tomorrow site** shows the bank site's pieces, taken from
+its real pages (list in `src/dev/siteSpecimens.js`), **Dashboard**
+(`?tab=dashboard`) shows the components below, and **Tokens** (`?tab=tokens`) shows
+both sets of design tokens, read from their stylesheets. The Tomorrow and Tokens tabs need
 `npm run build` in the project root, then `npm run dashboard:data`. Clicking an
 atom or molecule goes to the first organism using it, or the first page part if
 no organism does (Tomorrow: worked out from the pages; Dashboard: `USED_IN` in
@@ -13,8 +14,9 @@ no organism does (Tomorrow: worked out from the pages; Dashboard: `USED_IN` in
 Every component, its props, the real data fields it uses, and one example
 value from the current runs: `2026-10-19_000132-main` and
 `2026-10-19_001114-signup`. The components are unstyled stubs in
-`src/components/`. All colours, spacing and type come from the CSS variables in
-[src/styles/tokens.css](src/styles/tokens.css). I'm not maintaining a Figma file
+`src/components/`. Colours and shadows always come from the CSS variables in
+[src/styles/tokens.css](src/styles/tokens.css) (`npm run check:tokens` checks this);
+spacing, type and corner radius use one when it has the same value. I'm not maintaining a Figma file
 for this project.
 
 **Where the data comes from** (copied into `public/data/` by `npm run data`):

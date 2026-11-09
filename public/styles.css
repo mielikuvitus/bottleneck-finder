@@ -1,6 +1,9 @@
 /* Colors from the Figma design */
 :root {
   --coral: #ff4f40;
+  --coral-text: #d13a2c; /* small coral text on cream or white (bright coral is too light to read there) */
+  --coral-button: #d93c2e; /* the coral button: the brightest coral white text can be read on */
+  --coral-strong: #c9362a; /* small coral text on pale coral, sand or the grey sign-up panel */
   --coral-soft: #fff0ed;
   --coral-pale: #ffd8d2;
   --ink: #091723;
@@ -12,7 +15,7 @@
   --green-soft: #e6f6ee;
   --grey-text: #52606a;
   --grey-muted: #65717a;
-  --grey-label: #7b858d;
+  --grey-label: #65717a;
   --grey-faint: #a4abb0;
   --line: rgba(9, 23, 35, 0.08);
 }
@@ -41,7 +44,7 @@ img { display: block; }
 /* ---------- Shared pieces ---------- */
 
 .eyebrow {
-  color: var(--coral);
+  color: var(--coral-text);
   font-size: 12px;
   font-weight: 800;
   line-height: 16px;
@@ -87,7 +90,7 @@ img { display: block; }
 }
 .btn-soft-shadow { box-shadow: 0 14px 16px rgba(17, 34, 49, 0.2); }
 .btn-coral {
-  background: var(--coral);
+  background: var(--coral-button);
   box-shadow: 0 14px 16px rgba(255, 79, 64, 0.2);
 }
 
@@ -173,6 +176,8 @@ body:has(.hero) {
   word-spacing: 0.12em;
 }
 .accent { color: var(--coral); }
+/* The panel's background is darker than the page's */
+.signup-panel .accent { color: var(--coral-text); }
 
 .hero-text {
   max-width: 510px;
@@ -483,7 +488,7 @@ body:has(.hero) {
   background: var(--coral-soft);
 }
 .feature-num {
-  color: var(--grey-faint);
+  color: var(--grey-label);
   font-size: 12px;
   font-weight: 800;
   line-height: 16px;
@@ -529,7 +534,7 @@ body:has(.hero) {
   color: #fff;
 }
 .roundup-eyebrow {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--ink);
   font-size: 14px;
   font-weight: 700;
   line-height: 20px;
@@ -618,7 +623,7 @@ body:has(.hero) {
 }
 .stat-label {
   padding-top: 4px;
-  color: var(--grey-muted);
+  color: var(--grey-text);
   font-size: 14px;
   line-height: 20px;
 }
@@ -687,6 +692,9 @@ body:has(.hero) {
   padding-bottom: 80px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
+/* The footer is navy, where the brighter coral is the readable one */
+.roundups .eyebrow { color: var(--coral-strong); } /* sand is darker than the page */
+.footer .eyebrow { color: var(--coral); }
 .footer-title {
   padding-top: 24px;
   font-size: clamp(56px, 7vw, 98.42px);
@@ -800,7 +808,7 @@ body:has(.hero) {
   background: #f1f3ef;
 }
 .signup-eyebrow {
-  color: var(--coral);
+  color: var(--coral-strong);
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
@@ -929,7 +937,7 @@ body:has(.hero) {
   height: 28px;
   border-radius: 50%;
   background: var(--coral-soft);
-  color: var(--coral);
+  color: var(--coral-strong);
   font-weight: 800;
 }
 .signup-intro { display: flex; flex-direction: column; gap: 16px; }
@@ -970,7 +978,7 @@ body:has(.hero) {
    The negative margin cancels .signup-field's 10px gap. */
 .signup-message:empty { margin-top: -10px; }
 .signup-message.is-success { color: var(--green); }
-.signup-message.is-error { color: var(--coral); }
+.signup-message.is-error { color: var(--coral-text); }
 
 .signup-terms {
   color: var(--grey-text);

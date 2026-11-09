@@ -35,4 +35,5 @@ jobs:
           cache-dependency-path: dashboard/package-lock.json
       - run: npm ci
       - run: npm run lint
+      - run: npm run check:tokens
       - run: npm run build

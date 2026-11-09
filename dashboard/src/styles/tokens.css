@@ -1,68 +1,111 @@
-/* Design tokens. Values from the Figma designs; components only use these
-   variables, never raw colours or sizes. */
+/* Design tokens, in two layers. The palette holds the raw values; the tokens
+   below it name what each one is for. Components only use the named tokens for
+   colours and shadows (npm run check:tokens checks this). Spacing, type and
+   corner radius use a token when one has the same value; a few one-off sizes
+   are written directly in the component's styles. The components page's Tokens
+   tab shows them all. */
 :root {
+  /* Palette */
+  --palette-white: #ffffff;
+  --palette-black: #000000;
+  --palette-cream: #fbfaf7;
+  --palette-ink: #091723;
+  --palette-navy: #112231;
+  --palette-gray-900: #111827;
+  --palette-gray-700: #52606a;
+  --palette-gray-600: #65717a;
+  --palette-gray-400: #8a959c;
+  --palette-gray-300: #dde1dd;
+  --palette-gray-200: #e4e7e2;
+  --palette-gray-150: #eceef1;
+  --palette-gray-100: #f1f3ef;
+  --palette-gray-75: #f3f4f6;
+  --palette-gray-50: #f6f7f8;
+  --palette-red-700: #b82d23;
+  --palette-red-500: #ff4f40;
+  --palette-red-300: #ffbdb6;
+  --palette-red-200: #fde2de;
+  --palette-red-100: #fff0ed;
+  --palette-red-50: #fff8f5;
+  --palette-green-700: #246754;
+  --palette-green-200: #d9ebe0;
+  --palette-green-100: #edf5f0;
+  --palette-amber-700: #8b5e17;
+  --palette-amber-300: #e6cf9c;
+  --palette-amber-100: #faf2df;
+  --palette-blue-700: #3b6b8b;
+  --palette-blue-100: #edf2f6;
+
   /* Colours */
-  --color-text: #091723;
-  --color-text-muted: #52606a;
-  --color-background: #fbfaf7;
-  --color-surface: #ffffff;
-  --color-border: #dde1dd;
-  --color-placeholder: #e4e7e2; /* loading placeholders */
-  --color-text-faint: #7b858d; /* empty values and small print */
-  --color-symbol-surface: #f1f3ef; /* tile behind the empty-report symbol */
-  --color-border-active: #091723; /* the run picker while open */
-  --color-option-selected: #f3f4f6;
-  --color-option-hover: #f6f7f8; /* not in Figma: a light grey hover */
-  --color-option-hover-strong: #eceef1;
-  --color-danger: #b82d23; /* "Superseded" */
-  --color-success: #246754; /* "Fixes applied" (the green used for safe and success) */
-  --color-check: #111827;
-  --color-switch-on: #112231;
-  --color-switch-thumb: #ffffff;
+  --color-text: var(--palette-ink);
+  --color-text-muted: var(--palette-gray-700);
+  --color-text-faint: var(--palette-gray-600); /* empty values and small print */
+  --color-background: var(--palette-cream);
+  --color-surface: var(--palette-white);
+  --color-border: var(--palette-gray-300);
+  --color-border-active: var(--palette-ink); /* the run picker while open, and focus rings */
+  --color-placeholder: var(--palette-gray-200); /* loading placeholders */
+  --color-symbol-surface: var(--palette-gray-100); /* tile behind the empty-report symbol */
+  --color-option-selected: var(--palette-gray-75);
+  --color-option-hover: var(--palette-gray-50);
+  --color-option-hover-strong: var(--palette-gray-150);
+  --color-hover-shade: var(--palette-black); /* mixed into a border to darken it on hover */
+  --color-danger: var(--palette-red-700); /* "Superseded" */
+  --color-success: var(--palette-green-700); /* "Fixes applied" */
+  --color-check: var(--palette-gray-900);
+  --color-switch-off: var(--palette-gray-400);
+  --color-switch-on: var(--palette-navy);
+  --color-switch-thumb: var(--palette-white);
+  --color-confidence-filled: var(--palette-gray-700);
+  --color-confidence-empty: var(--palette-gray-300);
+  --color-brand: var(--palette-red-500); /* the tomorrow logo */
+  --color-on-brand: var(--palette-white);
+  --color-backdrop: rgba(9, 23, 35, 0.72); /* behind the screenshot modal */
+
+  /* Can it wait? */
+  /* The callout on each finding that says how soon it needs fixing. It has four looks, picked from the finding's severity: safe (green), caution (amber), soon (pale red) and now (coral). */
+  --color-wait-safe: var(--palette-green-700);
+  --color-wait-safe-surface: var(--palette-green-100);
+  --color-wait-caution: var(--palette-amber-700);
+  --color-wait-caution-border: var(--palette-amber-300);
+  --color-wait-caution-surface: var(--palette-amber-100);
+  --color-wait-soon-border: var(--palette-red-300);
+  --color-wait-soon-surface: var(--palette-red-50);
+  --color-wait-now-border: var(--palette-red-500);
+  --color-wait-now-surface: var(--palette-red-100);
+
+  /* Severity badges */
+  --color-severity-critical: var(--palette-red-700);
+  --color-severity-critical-surface: var(--palette-red-100);
+  --color-severity-critical-border: var(--palette-red-500);
+  --color-severity-high: var(--palette-red-700);
+  --color-severity-high-surface: var(--palette-red-50);
+  --color-severity-high-border: var(--palette-red-300);
+  --color-severity-medium: var(--palette-amber-700);
+  --color-severity-medium-surface: var(--palette-amber-100);
+  --color-severity-low: var(--palette-blue-700);
+  --color-severity-low-surface: var(--palette-blue-100);
+  --color-severity-info: var(--palette-green-700);
+  --color-severity-info-surface: var(--palette-green-100);
+
+  /* Charts */
+  --color-chart-arrivals: var(--palette-navy); /* solid line */
+  --color-chart-success: var(--palette-green-700); /* shaded area's edge */
+  --color-chart-success-fill: var(--palette-green-200); /* the shaded area under success */
+  --color-chart-left: var(--palette-navy); /* solid block */
+  --color-chart-fallback: var(--palette-red-700); /* hatched block, dotted outline */
+  --color-chart-fallback-fill: var(--palette-red-200);
+  --color-chart-annotation: var(--palette-gray-700); /* knee, capacity line, campaign marker */
+
+  /* Shadows */
   --shadow-popover: 0 8px 24px rgba(9, 23, 35, 0.08);
   --shadow-card-hover: 0 6px 16px rgba(9, 23, 35, 0.1); /* short finding card, lifted on hover */
-  --color-backdrop: rgba(9, 23, 35, 0.72); /* not in Figma: behind the screenshot modal */
+  --shadow-floating: 0 8px 20px rgba(9, 23, 35, 0.25); /* the components page's back button */
+  --shadow-wait-now: 0 4px 12px rgba(255, 79, 64, 0.2);
+
+  /* Motion */
   --duration-switch: 240ms; /* keep in step with SWITCH_MS in RunPicker.jsx */
   --ease-switch: cubic-bezier(0.4, 0, 0.2, 1); /* gentle start and stop */
-  --color-confidence-filled: #52606a;
-  --color-confidence-empty: #dde1dd;
-  /* Can it wait? */
-  --color-wait-safe: #246754;
-  --color-wait-safe-surface: #edf5f0;
-  --color-wait-caution: #8b5e17; /* the design's yellow (severity badges) */
-  --color-wait-caution-border: #e6cf9c; /* not in Figma: a border between the two */
-  --color-wait-caution-surface: #faf2df;
-  --color-wait-soon-border: #ffbdb6;
-  --color-wait-soon-surface: #fff8f5;
-  --color-wait-now-border: #ff4f40;
-  --color-wait-now-surface: #fff0ed;
-  --shadow-wait-now: 0 4px 12px rgba(255, 79, 64, 0.2);
-  --color-brand: #ff4f40; /* the tomorrow logo */
-  --color-on-brand: #ffffff;
-
-  /* Severity badges (Figma: Severity badges). Critical uses the "Fix now"
-     coral, high the "Fix before campaign" pale red */
-  --color-severity-critical: #b82d23;
-  --color-severity-critical-surface: #fff0ed;
-  --color-severity-critical-border: #ff4f40;
-  --color-severity-high: #b82d23;
-  --color-severity-high-surface: #fff8f5;
-  --color-severity-high-border: #ffbdb6;
-  --color-severity-medium: #8b5e17;
-  --color-severity-medium-surface: #faf2df;
-  --color-severity-low: #3b6b8b;
-  --color-severity-low-surface: #edf2f6;
-  --color-severity-info: #246754;
-  --color-severity-info-surface: #edf5f0;
-
-  /* Chart vocabulary (Figma: Legend & chart annotation vocabulary) */
-  --color-chart-arrivals: #112231; /* solid line */
-  --color-chart-success: #246754; /* shaded area's edge (green, like the safe can-it-wait) */
-  --color-chart-success-fill: #d9ebe0; /* not in Figma: the shaded area under success */
-  --color-chart-left: #112231; /* solid block */
-  --color-chart-fallback: #b82d23; /* hatched block, dotted outline */
-  --color-chart-fallback-fill: #fde2de; /* not in Figma: from the reference image */
-  --color-chart-annotation: #52606a; /* knee, capacity line, campaign marker */
 
   /* Spacing */
   --space-1: 4px;
@@ -93,7 +136,6 @@
   /* Type */
   --font-family: 'Manrope', system-ui, sans-serif;
   --font-family-mono: 'IBM Plex Mono', ui-monospace, monospace;
-  --font-weight-regular: 400;
   --font-weight-bold: 700;
   --font-weight-extrabold: 800;
   --font-size-caption: 11px;
@@ -105,13 +147,12 @@
   --font-size-heading-2: 16px;
   --font-size-heading-1: 25px;
   --font-size-display: 26px; /* empty-report heading */
-  --font-size-stat: 24px;
   --font-size-symbol: 28px;
   --line-height: 1.5;
   --line-height-note: 1.6;
   --line-height-lead: 1.7;
 
-  /* Layout: same approach as the test site */
+  /* Layout */
   --page-max-width: 1240px;
   --page-gutter: 40px;
   --page-gutter-phone: 24px;
