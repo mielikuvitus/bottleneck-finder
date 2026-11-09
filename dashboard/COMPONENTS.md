@@ -162,6 +162,7 @@ also closes it.
 | `selected` | the selected run's `name`, or `null` | `"2026-10-19_000132-main"` |
 | `onSelect` | – | function(name) |
 | `showSuperseded`, `onToggleSuperseded` | – | `false`, function(on) |
+| `autoFocus` | – | `true` to focus the button when it appears; the page sets it after a run is chosen, as the skeleton removes the picker while the run loads |
 
 Each option and the button show:
 
@@ -211,7 +212,7 @@ is placeholder, to be revisited.
 | ---- | ------- |
 | `title` | `"Response time (p95)"` |
 | `unit` | `"ms"` (shown above the y axis, in mono) |
-| `legend` | `ChartLegend` items: `[{ kind: "line", label: "GET /signup p95" }]` |
+| `legend` | `ChartLegend` items: `[{ kind: "line", label: "GET /signup p95" }]`. Left out, there's no legend |
 | `children` | a Recharts chart |
 
 One chart card. Also exports the shared `xAxis(rows)`, `yAxis`, `tooltip` and
@@ -292,7 +293,7 @@ it types, unless the reader scrolls up. To change the prompt or the models, edit
 | `model`, `onModelChange` | the picked model's `id`, and called with a new one |
 | `onSend` | called by the send button |
 | `children` | shown under the prompt once sent: the thinking state or `AiResponse` |
-| `sendDisabled` | `true` once sent, or when there's no reply for the finding |
+| `sendDisabled` | `true` once sent, or when there's no reply for the finding. The button stays focusable (`aria-disabled`) so keyboard focus isn't lost |
 
 ### AiResponse
 

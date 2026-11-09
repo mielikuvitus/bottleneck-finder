@@ -966,7 +966,9 @@ body:has(.hero) {
 }
 .signup-input input::placeholder { color: var(--grey-label); }
 .signup-message { font-size: 13px; font-weight: 600; line-height: 20px; }
-.signup-message:empty { display: none; }
+/* Stays rendered while empty, so screen readers announce it when text appears.
+   The negative margin cancels .signup-field's 10px gap. */
+.signup-message:empty { margin-top: -10px; }
 .signup-message.is-success { color: var(--green); }
 .signup-message.is-error { color: var(--coral); }
 

@@ -21,6 +21,7 @@ form.addEventListener('submit', async (event) => {
   event.preventDefault();
   button.disabled = true;
   show('', 'empty');
+  form.email.removeAttribute('aria-invalid');
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), SIGNUP_TIMEOUT_MS);
@@ -39,6 +40,7 @@ form.addEventListener('submit', async (event) => {
     } else if (response.status === 400 || response.status === 409) {
       // The server explains what's wrong with the email
       show((await response.json()).error, 'error');
+      form.email.setAttribute('aria-invalid', 'true');
     } else {
       show(NOT_SAVED, 'error');
     }

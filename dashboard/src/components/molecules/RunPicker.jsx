@@ -1,18 +1,16 @@
 // Picks the run to show (Figma: Run picker / open). A button that opens a list
 // of runs, following the ARIA listbox pattern: Enter, Space or the arrow keys
 // open it; arrows move; Enter or Space selects; Esc or a click outside closes.
+// autoFocus: focus the button when it appears (the page sets it after a run is
+// chosen, as the skeleton removes the picker while that run loads).
 import { useEffect, useId, useRef, useState } from 'react';
 import { DESCRIPTIONS, titleOf } from '../../data/runLabels.js';
-
-// Choosing a run shows the skeleton while it loads, which removes the picker
-// for a moment; this puts keyboard focus back on it afterwards
-let refocusAfterLoad = false;
 
 // How long the switch and the superseded runs animate: keep in step with
 // --duration-switch in tokens.css
 const SWITCH_MS = 240;
 
-export default function RunPicker({ runs, selected, onSelect, showSuperseded, onToggleSuperseded }) {
+export default function RunPicker({ runs, selected, onSelect, showSuperseded, onToggleSuperseded, autoFocus = false }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const [usingKeyboard, setUsingKeyboard] = useState(false);
@@ -30,11 +28,9 @@ export default function RunPicker({ runs, selected, onSelect, showSuperseded, on
   const options = runs.filter((r) => showSuperseded || motion === 'out' || !r.superseded || r.name === selected);
   const current = runs.find((r) => r.name === selected);
 
+  // Only when it first appears, so it doesn't take focus from elsewhere later
   useEffect(() => {
-    if (refocusAfterLoad) {
-      refocusAfterLoad = false;
-      buttonRef.current?.focus();
-    }
+    if (autoFocus) buttonRef.current?.focus();
   }, []);
 
   // Close on a click outside
@@ -60,7 +56,6 @@ export default function RunPicker({ runs, selected, onSelect, showSuperseded, on
   }
 
   function choose(run) {
-    if (run.name !== selected) refocusAfterLoad = true;
     onSelect(run.name);
     close();
   }
@@ -80,9 +75,16 @@ export default function RunPicker({ runs, selected, onSelect, showSuperseded, on
     else if (e.key === 'Home') setActive(0);
     else if (e.key === 'End') setActive(options.length - 1);
     else if (e.key === 'Enter' || e.key === ' ') options[active] && choose(options[active]);
-    else if (e.key === 'Escape') close();
     else return;
     e.preventDefault();
+  }
+
+  // Esc closes from anywhere in the picker, including the switch
+  function onRootKey(e) {
+    if (open && e.key === 'Escape') {
+      e.preventDefault();
+      close();
+    }
   }
 
   // Close when focus leaves the whole picker (e.g. tabbing past the switch)
@@ -91,7 +93,7 @@ export default function RunPicker({ runs, selected, onSelect, showSuperseded, on
   }
 
   return (
-    <div className="run-picker" ref={rootRef} onBlur={onBlur}>
+    <div className="run-picker" ref={rootRef} onBlur={onBlur} onKeyDown={onRootKey}>
       <button
         ref={buttonRef}
         type="button"

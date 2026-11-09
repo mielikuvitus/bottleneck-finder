@@ -3,8 +3,6 @@ const form = document.getElementById('signup-form');
 const message = form.querySelector('.signup-message');
 const CONTROLS = '.signup-input, .signup-submit';
 
-message.setAttribute('role', 'status');
-
 // Keeps the input and button from taking focus when clicked
 form.addEventListener('mousedown', (event) => {
   if (event.target.closest(CONTROLS)) event.preventDefault();

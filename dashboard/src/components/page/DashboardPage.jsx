@@ -1,7 +1,7 @@
 // The whole page: header with the run picker and the summary strip, then
 // verdict cards and funnel
 // (the assumptions are in the summary strip; each finding's evidence and charts are in its verdict card)
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRun } from '../../data/RunContext.jsx';
 import { pageTitle } from '../../data/runLabels.js';
 import RunPicker from '../molecules/RunPicker.jsx';
@@ -28,8 +28,23 @@ export default function DashboardPage() {
     document.title = pageTitle(selectedRun, isLoading);
   }, [selectedRun, isLoading]);
 
+  // Choosing another run shows the skeleton, which removes the picker while the
+  // run loads; this puts keyboard focus back on the picker afterwards
+  const [refocusPicker, setRefocusPicker] = useState(false);
+  function onSelectRun(name) {
+    if (name !== selected) setRefocusPicker(true);
+    selectRun(name);
+  }
+
   const picker = (
-    <RunPicker runs={runs} selected={selected} onSelect={selectRun} showSuperseded={showSuperseded} onToggleSuperseded={setShowSuperseded} />
+    <RunPicker
+      runs={runs}
+      selected={selected}
+      onSelect={onSelectRun}
+      showSuperseded={showSuperseded}
+      onToggleSuperseded={setShowSuperseded}
+      autoFocus={refocusPicker}
+    />
   );
 
   // Nothing selected yet: the empty report

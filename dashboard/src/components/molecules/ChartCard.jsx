@@ -24,11 +24,11 @@ const realValue = (value, name, item) => [item.dataKey.endsWith(SMOOTHED) ? item
 export const tooltip = <Tooltip formatter={realValue} labelFormatter={(s) => `${s}s`} />;
 export const grid = <CartesianGrid stroke="var(--color-border)" vertical={false} />;
 
-export default function ChartCard({ title, unit, legend, children }) {
+export default function ChartCard({ title, unit, legend = [], children }) {
   return (
     <div className="evidence-card">
       <p className="evidence-card-title">{title}</p>
-      <ChartLegend items={legend} />
+      {legend.length ? <ChartLegend items={legend} /> : null}
       {unit ? <p className="evidence-card-unit">{unit}</p> : null}
       <div className="evidence-card-chart">
         <ResponsiveContainer>{children}</ResponsiveContainer>

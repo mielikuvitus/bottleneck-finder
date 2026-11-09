@@ -21,12 +21,12 @@ function Weighted({ children }) {
 }
 
 // Small design-system-style building blocks
-function Stack({ as: Tag = 'div', className, children }) {
-  return <Weighted><Tag className={className}>{children}</Tag></Weighted>;
+function Stack({ as: Tag = 'div', className, children, ...rest }) {
+  return <Weighted><Tag className={className} {...rest}>{children}</Tag></Weighted>;
 }
 
-function Text({ as: Tag = 'p', className, children }) {
-  return <Weighted><Tag className={className}>{children}</Tag></Weighted>;
+function Text({ as: Tag = 'p', className, children, ...rest }) {
+  return <Weighted><Tag className={className} {...rest}>{children}</Tag></Weighted>;
 }
 
 function Icon({ name, width, height }) {
@@ -119,9 +119,9 @@ function SignupForm({ demo }) {
           <label htmlFor="email">Email address</label>
           <Stack className="signup-input">
             <Icon name="mail" width={20} height={20} />
-            <input id="email" type="email" {...inputProps} placeholder="you@example.com" required={!demo} />
+            <input id="email" type="email" aria-describedby="signup-message" {...inputProps} placeholder="you@example.com" required={!demo} />
           </Stack>
-          <Text className="signup-message" />
+          <Text className="signup-message" id="signup-message" role="status" />
         </Stack>
         <Text className="signup-terms">
           By continuing, you agree to our <a href="#">Terms &amp; Conditions</a> and acknowledge

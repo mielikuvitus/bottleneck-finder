@@ -8,9 +8,7 @@ import CanWaitCallout from '../molecules/CanWaitCallout.jsx';
 import CustomerView from '../molecules/CustomerView.jsx';
 import AiAnalysisDisclosure from './AiAnalysisDisclosure.jsx';
 import EvidenceDisclosure from './EvidenceDisclosure.jsx';
-
-// Which can-it-wait look each severity gets
-export const WAIT_VARIANT = { critical: 'now', high: 'soon', medium: 'caution', low: 'safe', info: 'safe' };
+import { waitVariant } from '../../data/severity.js';
 
 // onCollapse (from FindingCard) adds Read less at the bottom, back to the short card
 export default function VerdictCard({ finding, timeline, routeContext, peaks, onCollapse }) {
@@ -38,7 +36,7 @@ export default function VerdictCard({ finding, timeline, routeContext, peaks, on
 
       <div className="verdict-body">
         <div className="verdict-decision">
-          <CanWaitCallout variant={WAIT_VARIANT[finding.severity] ?? 'safe'} title={finding.can_wait_title} text={finding.can_wait} size="large" />
+          <CanWaitCallout variant={waitVariant(finding.severity)} title={finding.can_wait_title} text={finding.can_wait} size="large" />
           <div className="verdict-fix">
             <h4 className="verdict-fix-title">Suggested fix</h4>
             {/* Several causes: a list per cause, under its name and share. Else

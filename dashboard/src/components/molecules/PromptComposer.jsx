@@ -36,7 +36,8 @@ export default function PromptComposer({ prompt, attachment, models, model, onMo
 
   return (
     <div className="prompt-composer">
-      <div className="prompt-composer-scroll" ref={scrollRef} onScroll={onScroll}>
+      {/* Focusable so the arrow keys can scroll the reply */}
+      <div className="prompt-composer-scroll" ref={scrollRef} onScroll={onScroll} role="group" aria-label="Prompt and reply" tabIndex={0}>
         {attachment ? (
           <div className="prompt-composer-attachment">
             <Icon name="description" size={16} />
@@ -68,7 +69,8 @@ export default function PromptComposer({ prompt, attachment, models, model, onMo
             </option>
           ))}
         </select>
-        <button type="button" className="prompt-composer-send" onClick={onSend} disabled={sendDisabled}>
+        {/* aria-disabled keeps keyboard focus on the button once sent; disabled can lose it */}
+        <button type="button" className="prompt-composer-send" onClick={sendDisabled ? undefined : onSend} aria-disabled={sendDisabled ? true : undefined}>
           <Icon name="arrowUpward" size={18} />
           <span className="visually-hidden">Send</span>
         </button>

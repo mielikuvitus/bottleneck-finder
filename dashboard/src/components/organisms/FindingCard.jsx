@@ -7,7 +7,8 @@ import { useRef, useState } from 'react';
 import SeverityBadge from '../atoms/SeverityBadge.jsx';
 import ConfidenceIndicator from '../atoms/ConfidenceIndicator.jsx';
 import CanWaitCallout from '../molecules/CanWaitCallout.jsx';
-import VerdictCard, { WAIT_VARIANT } from './VerdictCard.jsx';
+import VerdictCard from './VerdictCard.jsx';
+import { waitVariant } from '../../data/severity.js';
 
 // defaultExpanded: true to start full
 export default function FindingCard({ finding, timeline, routeContext, peaks, defaultExpanded }) {
@@ -57,7 +58,7 @@ export default function FindingCard({ finding, timeline, routeContext, peaks, de
           requestAnimationFrame(() => fullRef.current?.focus());
         }}
       >
-        <CanWaitCallout variant={WAIT_VARIANT[finding.severity] ?? 'safe'} title={finding.can_wait_title} size="inline">
+        <CanWaitCallout variant={waitVariant(finding.severity)} title={finding.can_wait_title} size="inline">
           <span className="finding-card-more">
             <span aria-hidden="true">→ </span>
             Read more

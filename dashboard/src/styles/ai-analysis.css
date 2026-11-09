@@ -95,8 +95,8 @@
   cursor: pointer;
 }
 /* Used once (or no reply for the finding): grey */
-.prompt-composer-send:disabled { background: var(--color-border); color: var(--color-text-faint); cursor: default; }
-:is(.prompt-composer-model, .prompt-composer-send):focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 2px; }
+.prompt-composer-send[aria-disabled='true'] { background: var(--color-border); color: var(--color-text-faint); cursor: default; }
+:is(.prompt-composer-model, .prompt-composer-send, .prompt-composer-scroll):focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 2px; }
 
 /* Thinking… then the reply */
 .ai-thinking { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-label); }
