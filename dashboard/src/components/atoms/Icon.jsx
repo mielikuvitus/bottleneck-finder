@@ -45,8 +45,16 @@ const ICONS = {
   bolt: <path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z" />,
 };
 
-// name: a key of ICONS; size in px. Decorative: hidden from screen readers,
-// so the text next to it carries the meaning.
+/** @typedef {keyof typeof ICONS} IconName  the icons this file has */
+
+// Decorative: hidden from screen readers, so the text next to it carries the
+// meaning. It takes the text colour (currentColor).
+/**
+ * @param {object} props
+ * @param {IconName} props.name
+ * @param {number} [props.size]  in px (default 14)
+ * @param {string} [props.className]  added to its own; other attributes go to the <svg> too
+ */
 export default function Icon({ name, size = 14, className = '', ...rest }) {
   return (
     <svg

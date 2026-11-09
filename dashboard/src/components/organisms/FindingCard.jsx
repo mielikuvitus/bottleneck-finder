@@ -45,7 +45,7 @@ export default function FindingCard({ finding, timeline, routeContext, peaks, de
         <SeverityBadge severity={finding.severity} />
         <ConfidenceIndicator level={finding.confidence} />
       </div>
-      <h3 className="finding-card-headline">{finding.headline ?? finding.title}</h3>
+      <h3 className="finding-card-headline">{finding.headline}</h3>
       <p className="finding-card-subline">{subline}</p>
       <button
         type="button"

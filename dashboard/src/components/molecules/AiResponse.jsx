@@ -20,6 +20,12 @@ const pieces = (r) => [
 ];
 const wordCount = (text) => text.split(' ').length;
 
+/**
+ * @param {object} props
+ * @param {import('../../data/types.js').AiReply} props.response  one entry of cannedAiResponses.json
+ * @param {string} props.modelName  e.g. "Claude Sonnet 5.5"
+ * @param {boolean} [props.typing]  true to type it out a word at a time (all at once with reduced motion)
+ */
 export default function AiResponse({ response, modelName, typing = false }) {
   const total = pieces(response).reduce((n, text) => n + wordCount(text), 0);
   const reduceMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;

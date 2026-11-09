@@ -1,11 +1,6 @@
 // Chart legend (Figma: Legend & chart annotation vocabulary). Symbols are
-// drawn as small SVGs so they look the same everywhere.
-// legend: [{ kind, label }]. kind is what the mark means in the chart:
-// "main" (the chart's main series: a solid navy line), "success" (a shaded
-// green area), "second" (the second series in what filled up, e.g. requests
-// waiting: a shaded red area), "other-cause" (any further cause filling the
-// server: a dashed red line), "left" (a solid block), "fallback" (a hatched
-// block), "knee", "capacity" and "campaign".
+// drawn as small SVGs so they look the same everywhere. Each mark's kind says
+// what it means in the chart (LegendKind in src/data/types.js).
 import { useId } from 'react';
 
 // A shaded area with a solid top edge
@@ -41,7 +36,11 @@ function Symbol({ kind, patternId }) {
   }
 }
 
-// The fallback hatching, shared by the legend and the bar chart
+/**
+ * The fallback hatching, shared by the legend and the bar chart: an SVG
+ * <pattern> for a <defs>.
+ * @param {{ id: string }} props  the pattern's id, for fill="url(#id)"
+ */
 export function HatchPattern({ id }) {
   return (
     <pattern id={id} width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -51,6 +50,11 @@ export function HatchPattern({ id }) {
   );
 }
 
+/**
+ * @param {object} props
+ * @param {import('../../data/types.js').LegendItem[]} props.legend  one mark and label each
+ * @param {string} [props.className]  added to its own; other attributes go to the list too
+ */
 export default function ChartLegend({ legend, className = '', ...rest }) {
   const patternId = useId().replace(/:/g, '');
   return (

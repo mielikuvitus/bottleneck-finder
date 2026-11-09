@@ -7,7 +7,17 @@
 import { Children, useEffect, useId, useRef } from 'react';
 import Icon from '../atoms/Icon.jsx';
 
-// models: [{ id, name }], in picker order
+/**
+ * @param {object} props
+ * @param {string} props.prompt  shown read-only (PROMPT_TEMPLATE in src/data/aiContract.js)
+ * @param {{ name: string, size?: string }} [props.attachment]  the file chip, e.g. { name: "findings.json", size: "4 KB" }
+ * @param {import('../../data/types.js').Model[]} props.models  in picker order (MODELS)
+ * @param {string} props.model  the picked model's id
+ * @param {(id: string) => void} props.onModelChange
+ * @param {() => void} props.onSend
+ * @param {boolean} [props.sendDisabled]  true once sent, or when there's no reply; the button stays focusable
+ * @param {import('react').ReactNode} [props.children]  the conversation under the prompt (the thinking state, then AiResponse)
+ */
 export default function PromptComposer({ prompt, attachment, models, model, onModelChange, onSend, sendDisabled, children }) {
   const id = useId();
   const scrollRef = useRef(null);

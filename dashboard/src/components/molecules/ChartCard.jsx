@@ -1,10 +1,16 @@
-// One chart card: title, legend, the unit above the y axis, then the chart
-// (children: a Recharts chart starting with {chartBase(rows)}, from
-// chartBase.jsx). Used by the evidence and the healthy routes.
+// One chart card: title, legend, the unit above the y axis, then the chart.
+// Used by the evidence and the healthy routes.
 import { ResponsiveContainer } from 'recharts';
 import ChartLegend from '../atoms/ChartLegend.jsx';
 
-// legend: ChartLegend items; left out, there's no legend
+/**
+ * @param {object} props
+ * @param {string} props.title  e.g. "Response time (p95)"
+ * @param {string} [props.unit]  shown above the y axis, e.g. "ms"
+ * @param {import('../../data/types.js').LegendItem[]} [props.legend]  left out, there's no legend
+ * @param {import('react').ReactNode} props.children  a Recharts chart, starting with {chartBase(rows)} (chartBase.jsx)
+ * @param {string} [props.className]  added to its own; other attributes go to the card too
+ */
 export default function ChartCard({ title, unit, legend = [], className = '', children, ...rest }) {
   return (
     <div {...rest} className={`evidence-card ${className}`.trim()}>

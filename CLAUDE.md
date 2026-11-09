@@ -24,7 +24,8 @@ and data).
   (findings), `describe.mjs` (wording), `timeline.mjs` (builds timeline.json),
   `route-context.json`, `names.json`
 - **Dashboard:** `dashboard/src/` — `components/{atoms,molecules,organisms,page}`,
-  `data/` (useRun, `series.js` chart rows), `styles/` (`tokens.css`, `base.css`,
+  `data/` (useRun, `series.js` chart rows, `findings.js` converts older
+  findings.json shapes, `types.js` JSDoc shapes), `styles/` (`tokens.css`, `base.css`,
   then one file per layer: `atoms.css`, `molecules.css`, `organisms.css`,
   `page.css`);
   `dashboard/scripts/copy-data.mjs` (npm run dashboard:data)

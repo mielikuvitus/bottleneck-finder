@@ -1,8 +1,11 @@
 // Screenshots of the test site in the test details, each opening large
-// (ScreenshotButton). shots: [{ src, caption }], from siteShots() in
-// src/data/screenshots.js. None, and nothing shows.
+// (ScreenshotButton). None, and nothing shows.
 import ScreenshotButton from './ScreenshotButton.jsx';
 
+/**
+ * @param {object} props
+ * @param {import('../../data/types.js').Screenshot[]} props.shots  siteShots(findings.test) in src/data/screenshots.js
+ */
 export default function SiteScreenshots({ shots }) {
   if (!shots?.length) return null;
 

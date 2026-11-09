@@ -338,7 +338,10 @@ const allClear =
       }
     : null;
 
+// schema_version: raise it when a field the dashboard reads changes shape, and
+// convert the older shape in dashboard/src/data/findings.js
 const output = {
+  schema_version: 1,
   run: basename(runDir),
   test: runInfo.test,
   variant: variantOf(runInfo),

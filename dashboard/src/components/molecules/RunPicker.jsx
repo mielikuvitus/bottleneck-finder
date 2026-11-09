@@ -1,10 +1,6 @@
 // Picks the run to show (Figma: Run picker / open). A button that opens a list
 // of runs, following the ARIA listbox pattern: Enter, Space or the arrow keys
 // open it; arrows move; Enter or Space selects; Esc or a click outside closes.
-// runs: runs.json. value: the selected run's name, or null; onChange(name).
-// showSuperseded and onShowSupersededChange(on): the switch.
-// autoFocus: focus the button when it appears (the page sets it after a run is
-// chosen, as the skeleton removes the picker while that run loads).
 import { useEffect, useId, useRef, useState } from 'react';
 import { DESCRIPTIONS, titleOf } from '../../data/runLabels.js';
 
@@ -12,6 +8,15 @@ import { DESCRIPTIONS, titleOf } from '../../data/runLabels.js';
 // --duration-switch in tokens.css
 const SWITCH_MS = 240;
 
+/**
+ * @param {object} props
+ * @param {import('../../data/types.js').RunSummary[]} props.runs  runs.json (superseded ones are hidden unless the switch is on)
+ * @param {string | null} props.value  the selected run's name
+ * @param {(name: string) => void} props.onChange
+ * @param {boolean} props.showSuperseded  the "Show superseded runs" switch
+ * @param {(on: boolean) => void} props.onShowSupersededChange
+ * @param {boolean} [props.autoFocus]  focus the button when it appears; the page sets it after a run is chosen, as the skeleton removes the picker while that run loads
+ */
 export default function RunPicker({ runs, value, onChange, showSuperseded, onShowSupersededChange, autoFocus = false }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);

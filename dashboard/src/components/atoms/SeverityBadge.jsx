@@ -1,7 +1,7 @@
 // A finding's severity (Figma: Severity badges).
-// severity: finding.severity ("critical" | "high" | "medium" | "low" | "info").
 import Icon from './Icon.jsx';
 
+/** @type {Record<string, { label: string, icon: import('./Icon.jsx').IconName }>} */
 const BADGES = {
   critical: { label: 'Critical', icon: 'error' },
   high: { label: 'High', icon: 'priorityHigh' },
@@ -10,6 +10,11 @@ const BADGES = {
   info: { label: 'Healthy', icon: 'check' },
 };
 
+/**
+ * @param {object} props
+ * @param {import('../../data/types.js').Severity} props.severity  finding.severity; "info" reads "Healthy"
+ * @param {string} [props.className]  added to its own; other attributes go to the badge too
+ */
 export default function SeverityBadge({ severity, className = '', ...rest }) {
   const badge = BADGES[severity] ?? { label: severity, icon: null };
   return (

@@ -56,10 +56,16 @@ function RouteRow({ healthy, powers, rows }) {
       <button type="button" className="healthy-route-toggle" aria-expanded={open} aria-controls={`${id}-charts`} onClick={() => setOpen(!open)}>
         <span className="healthy-route-name">{healthy.route}</span>
         {powers ? <span className="healthy-route-powers">{powers}</span> : null}
-        {/* older findings.json files have only the whole sentence */}
+        {/* p95 is null in files from before it was added: the whole note instead */}
         <span className="healthy-route-p95">
-          {healthy.p95 ? <span className="healthy-route-p95-prefix">p95 </span> : null}
-          {healthy.p95 ?? healthy.note}
+          {healthy.p95 ? (
+            <>
+              <span className="healthy-route-p95-prefix">p95 </span>
+              {healthy.p95}
+            </>
+          ) : (
+            healthy.note
+          )}
         </span>
         <span className={`run-selector-chevron${open ? ' is-up' : ''}`} aria-hidden="true" />
       </button>

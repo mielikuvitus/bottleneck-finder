@@ -118,8 +118,11 @@ npm run analyze -- load-tests/results/<sign-up run>  # then
 
 **The sign-up test is a campaign scenario** (`scenario: "campaign"` in `test-config.json`). Every visitor goes straight to `/signup`, which only happens during a sign-up ad, so comparing it with a normal day would overstate the risk: normally about 30% of visitors reach sign-up. Its findings are judged at the campaign peak, and their normal-day impact and headroom come from the latest main run that isn't superseded. So analyse the main run first. If the two runs were made on different code (a different git commit, or uncommitted changes), the findings warn that the normal-day numbers may be out of date, and set `normal_day_confidence` to low.
 
-It writes `findings.json` into the run folder and prints a summary. The code
-is in `analyzer/`:
+It writes `findings.json` into the run folder and prints a summary.
+`schema_version` (now 1) says which shape it has: when a field the dashboard
+reads changes shape, raise it and convert the older shape in
+[dashboard/src/data/findings.js](dashboard/src/data/findings.js), which reads
+files without it as version 0. The code is in `analyzer/`:
 
 - [analyze.mjs](analyzer/analyze.mjs): the numbers, knees and visit model
 - [rules.mjs](analyzer/rules.mjs): the findings

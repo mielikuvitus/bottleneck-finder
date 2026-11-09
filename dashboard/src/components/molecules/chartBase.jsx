@@ -1,6 +1,6 @@
 // What every chart card's chart starts with: the grid, the time axis, the value
 // axis and the tooltip, in that order. Put {chartBase(rows)} first inside the
-// Recharts chart. rows: the chart's data (the time axis spans its seconds).
+// Recharts chart.
 // Kept apart from ChartCard.jsx, as a file that exports a component should
 // export only components.
 import { CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
@@ -8,6 +8,10 @@ import { tooltipValue } from '../../data/series.js';
 
 const axisTick = { fontSize: 11, fontFamily: 'var(--font-family-mono)', fill: 'var(--color-text-muted)' };
 
+/**
+ * @param {{ second: number }[]} rows  the chart's data; the time axis spans its seconds
+ * @returns {import('react').ReactElement[]}
+ */
 export const chartBase = (rows) => [
   <CartesianGrid key="grid" stroke="var(--color-border)" vertical={false} />,
   <XAxis

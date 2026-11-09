@@ -2,6 +2,11 @@
 // (finding.load_levels). Room is only shown when a level fits.
 import { handlesNote } from '../../data/loadLevels.js';
 
+/**
+ * @param {object} props
+ * @param {import('../../data/types.js').LoadLevels} [props.loadLevels]  finding.load_levels; missing (no break point), and nothing shows
+ * @param {string} [props.className]  added to its own; other attributes go to the grid too
+ */
 export default function KeyNumbers({ loadLevels, className = '', ...rest }) {
   if (!loadLevels) return null;
   return (

@@ -15,7 +15,10 @@ Every component, its props, the real data fields it uses, and one example
 value from the current runs: `2026-10-19_000132-main` and
 `2026-10-19_001114-signup`. The components are in `src/components/`. Atoms, and
 molecules with a single outer element, also take `className` (added to their
-own) and any other attribute, such as `aria-*`, for that outer element. Colours and shadows always come from the CSS variables in
+own) and any other attribute, such as `aria-*`, for that outer element. Each
+atom and molecule lists its props in a JSDoc comment, so the editor shows them
+on hover; the data shapes they use are in [src/data/types.js](src/data/types.js).
+Colours and shadows always come from the CSS variables in
 [src/styles/tokens.css](src/styles/tokens.css) (`npm run check:tokens` checks this);
 spacing, type and corner radius use one when it has the same value. I'm not maintaining a Figma file
 for this project.
@@ -29,6 +32,9 @@ for this project.
 - `images/`: screenshots, listed in [src/data/screenshots.js](src/data/screenshots.js)
 
 Components get the selected run from `useRun()` ([src/data/RunContext.jsx](src/data/RunContext.jsx)).
+`findings.json` goes through `normalizeFindings` ([src/data/findings.js](src/data/findings.js))
+as it loads, which converts runs from older analyser versions (by `schema_version`),
+so components can rely on the current fields.
 
 ---
 

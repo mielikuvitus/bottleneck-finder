@@ -1,9 +1,15 @@
 // A screenshot as a button that opens it large (ScreenshotModal).
-// src: the image's address. With captionClassName the caption shows under the
-// image; without it, the caption is the image's alt text.
 import { useState } from 'react';
 import ScreenshotModal from './ScreenshotModal.jsx';
 
+/**
+ * @param {object} props
+ * @param {string} props.src  the image's address
+ * @param {string} props.caption
+ * @param {string} [props.className]  the button's look comes from its user
+ * @param {string} [props.captionClassName]  shows the caption under the image; left out, the caption is the image's alt text
+ * @param {'lazy' | 'eager'} [props.loading]
+ */
 export default function ScreenshotButton({ src, caption, className, captionClassName, loading }) {
   const [open, setOpen] = useState(false);
   return (

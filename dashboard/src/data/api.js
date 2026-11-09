@@ -1,4 +1,5 @@
 // Loads recorded runs from public/data (written by npm run data).
+import { normalizeFindings } from './findings.js';
 const base = `${import.meta.env.BASE_URL}data`;
 
 async function getJson(path) {
@@ -12,7 +13,7 @@ export const loadRunIndex = () => getJson('runs.json');
 // Everything the dashboard needs for one run
 export async function loadRun(name) {
   const [findings, timeline, runInfo, config, routeContext] = await Promise.all([
-    getJson(`runs/${name}/findings.json`),
+    getJson(`runs/${name}/findings.json`).then(normalizeFindings),
     getJson(`runs/${name}/timeline.json`),
     getJson(`runs/${name}/run.json`).catch(() => null),
     getJson(`runs/${name}/test-config.json`).catch(() => null),

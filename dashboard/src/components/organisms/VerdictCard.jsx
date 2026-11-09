@@ -22,7 +22,7 @@ export default function VerdictCard({ finding, timeline, routeContext, peaks, on
           <SeverityBadge severity={finding.severity} />
           <ConfidenceIndicator level={finding.confidence} />
         </div>
-        <h3 className="verdict-headline">{finding.headline ?? finding.title}</h3>
+        <h3 className="verdict-headline">{finding.headline}</h3>
         <p className="verdict-subline">
           {powers}
           {shownOn ? ` · ${shownOn}` : ''}
@@ -41,7 +41,7 @@ export default function VerdictCard({ finding, timeline, routeContext, peaks, on
           <div className="verdict-fix">
             <h4 className="subheading">Suggested fix</h4>
             {/* Several causes: a list per cause, under its name and share. Else
-                several fixes as bullet points; one (or an older run) as a sentence */}
+                several fixes as bullet points; one as a sentence */}
             {finding.suggested_fix_groups ? (
               finding.suggested_fix_groups.map((group) => (
                 <div key={group.cause} className="verdict-fix-group">
@@ -55,14 +55,14 @@ export default function VerdictCard({ finding, timeline, routeContext, peaks, on
                   </ul>
                 </div>
               ))
-            ) : finding.suggested_fixes?.length > 1 ? (
+            ) : finding.suggested_fixes.length > 1 ? (
               <ul className="verdict-fix-list">
                 {finding.suggested_fixes.map((fix) => (
                   <li key={fix}>{fix}</li>
                 ))}
               </ul>
             ) : (
-              <p className="verdict-fix-text">{finding.suggested_fixes?.[0] ?? finding.suggested_fix}</p>
+              <p className="verdict-fix-text">{finding.suggested_fixes[0]}</p>
             )}
           </div>
         </div>

@@ -1,12 +1,16 @@
 // What a visitor sees: a browser-style frame with the page address, a tab per
 // state that has a screenshot, and a caption. The screenshot opens large
-// (ScreenshotButton), like the test site's.
-// states: [{ key, label, src, caption }], from statesFor() in
-// src/data/screenshots.js. initialState: the tab it opens on. address: the page
-// address in the bar. caption: under the frame. No states, and nothing shows.
+// (ScreenshotButton), like the test site's. No states, and nothing shows.
 import { useId, useState } from 'react';
 import ScreenshotButton from './ScreenshotButton.jsx';
 
+/**
+ * @param {object} props
+ * @param {import('../../data/types.js').ScreenshotState[]} props.states  statesFor(customer_view.route) in src/data/screenshots.js, in tab order
+ * @param {'normal' | 'slow' | 'fallback'} [props.initialState]  customer_view.state: the tab it opens on
+ * @param {string} [props.address]  customer_view.shown_on, in the address bar
+ * @param {string} [props.caption]  customer_view.caption, under the frame
+ */
 export default function CustomerView({ states = [], initialState, address, caption }) {
   const initial = states.find((s) => s.key === initialState) ?? states[0];
   const [current, setCurrent] = useState(initial?.key);
