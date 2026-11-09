@@ -14,7 +14,8 @@ Every component, its props, the real data fields it uses, and one example
 value from the current runs: `2026-10-19_000132-main` and
 `2026-10-19_001114-signup`. The components are unstyled stubs in
 `src/components/`. All colours, spacing and type come from the CSS variables in
-[src/styles/tokens.css](src/styles/tokens.css).
+[src/styles/tokens.css](src/styles/tokens.css). I'm not maintaining a Figma file
+for this project.
 
 **Where the data comes from** (copied into `public/data/` by `npm run data`):
 
@@ -32,7 +33,7 @@ Components get the selected run from `useRun()` ([src/data/RunContext.jsx](src/d
 
 Shown whenever a run is loading (on first load and when switching runs): no
 values or verdicts appear until the whole run is ready. Add `?skeleton` to the
-address to keep it on screen. Figma: "Loading dashboard layout".
+address to keep it on screen.
 
 ### DashboardSkeleton
 
@@ -54,16 +55,14 @@ No props: the tilted coral "T", "tomorrow", and "Web Performance".
 | ---- | ------- |
 | `title` | `"Traffic readiness"` |
 | `label` | `"Campaign readiness · loading…"`: shown as a read-only selector box when there are no `children` |
-| `children` | the real `RunPicker`, once the loaded page is designed |
+| `children` | the real `RunPicker` |
 
 ### EmptyReport
 
-No props or data. Shown when no run is selected (Figma: "No run selected
-layout"): the header, "Traffic readiness", the "Select a run" box and the "Choose a run to see the story." card. The card's arrow points up at the box, and
+No props or data. Shown when no run is selected: the header, "Traffic readiness", the "Select a run" box and the "Choose a run to see the story." card. The card's arrow points up at the box, and
 hovering the card pulses the box once in the brand coral (with reduced motion,
 the border just turns coral). The dashboard
-opens on this. Until the dropdown is designed, open a run with `?run=<name>` in
-the address.
+opens on this. `?run=<name>` in the address opens a run directly.
 
 ### Placeholder
 
@@ -78,7 +77,7 @@ the address.
 
 ### SeverityBadge
 
-Figma: "Severity badges". An icon and a label, in the severity's colours.
+An icon and a label, in the severity's colours.
 
 | Prop | Field | Example |
 | ---- | ----- | ------- |
@@ -92,7 +91,7 @@ Figma: "Severity badges". An icon and a label, in the severity's colours.
 | `low` | Low | `arrowDownward` | blue `#edf2f6` / `#3b6b8b` |
 | `info` | Healthy | `check` | green `#edf5f0` / `#246754` |
 
-The labels are the design's (atom text the user chose to keep). The icon is
+The labels are set in the atom (atom text the user chose to keep). The icon is
 hidden from screen readers; the label is read out.
 
 ### Icon
@@ -114,7 +113,7 @@ an icon, copy its path data into `ICONS`. It uses the text colour
 | ---- | ----- | ------- |
 | `level` | `finding.confidence`, or `finding.normal_day_confidence` | `"high"`, `"medium"` or `"low"` |
 
-Figma: "Confidence / all three levels". Three bars of rising height, with 3,
+Three bars of rising height, with 3,
 2 or 1 filled, then "High confidence", "Medium confidence" or "Low
 confidence". Change `level` and it updates. Any other value shows no filled
 bars and "<value> confidence" (for example `normal_day_confidence` can be
@@ -129,7 +128,7 @@ of this atom: it's the first line of `EvidenceDisclosure`.
 | ---- | ------- |
 | `items` | `[{ kind: "line", label: "Arrivals" }, { kind: "hatched", label: "Fallback" }]` |
 
-Figma: "Legend & chart annotation vocabulary". A row of small SVG symbols
+A row of small SVG symbols
 with labels. Kinds and colours (tokens in `tokens.css`, `--color-chart-*`):
 
 | `kind` | Means | Looks like |
@@ -152,7 +151,7 @@ Also exports `HatchPattern` (`id`), the SVG `<pattern>` the fallback bars use.
 
 ### RunPicker
 
-Figma: "Run picker / open". A button showing the selected run; it opens a list
+A button showing the selected run; it opens a list
 of runs and a "Show superseded runs" switch. Keyboard: Enter, Space or the arrow
 keys open it, the arrows move, Enter or Space picks, Esc closes; a click outside
 also closes it.
@@ -179,7 +178,7 @@ no run selected. `?run=<name>` in the address opens a run directly.
 
 ### CanWaitCallout
 
-Figma: "Can it wait variants". A bold title and a sentence underneath. The
+A bold title and a sentence underneath. The
 look comes from `variant`; the words come from the analyser.
 
 | Prop | Field | Example |
@@ -192,11 +191,11 @@ look comes from `variant`; the words come from the analyser.
 | `variant` | Look | Icon | Severity |
 | --------- | ---- | ---- | -------- |
 | `safe` | green | `checkCircle` (tick in a circle) | `low`, `info` |
-| `caution` | yellow, the design's `#faf2df` / `#8b5e17` (from the severity badges) | `visibility` (an eye) | `medium` |
+| `caution` | yellow, `#faf2df` / `#8b5e17` (from the severity badges) | `visibility` (an eye) | `medium` |
 | `soon` | pale red | `schedule` (a clock) | `high` |
 | `now` | coral, with a shadow | `bolt` (a lightning bolt) | `critical` |
 
-The icon (not in the Figma design) says *when* to act, so it's different from
+The icon says *when* to act, so it's different from
 the severity badge's icons, which say how bad it is. It sits before the title
 in the title's colour: 16px, 18px in `large`, 15px in `inline`.
 
@@ -316,8 +315,7 @@ numbered list: `fix`, `reason` under it, and an "Added by AI" pill when
 
 ### FindingCard
 
-One finding, short or full. Every finding starts as the short card (Figma:
-"Supporting finding"), `critical` and `high` ones with a red border (the full
+One finding, short or full. Every finding starts as the short card, `critical` and `high` ones with a red border (the full
 `VerdictCard` keeps it),
 and "→ READ MORE" opens the full card in place (keyboard focus moves to it).
 A click anywhere on the short card does the same: the button's click area is
@@ -345,7 +343,7 @@ two to a row (one below 760px).
 
 ### VerdictCard
 
-Figma: "Expanded verdict". One finding, important things first:
+One finding, important things first:
 
 1. **Heading:** `SeverityBadge` (`severity`) and `ConfidenceIndicator` (`confidence`); the headline (`headline`, what visitors experienced, e.g. `"At campaign peak, every visit showed “Couldn't load rates right now.”"`); a subline from `route-context.json` `powers` plus `customer_view.shown_on` (`"Savings rate cards on the homepage · /"`).
 2. **`KeyNumbers`** (`load_levels`), with a divider under them. Left out when there's no break point.

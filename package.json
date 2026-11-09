@@ -12,6 +12,8 @@
     "load:smoke": "k6 run load-tests/smoke.js",
     "load": "load-tests/run.sh main",
     "load:signup": "load-tests/run.sh signup",
+    "guard": "npm run build && node load-tests/guard.mjs",
+    "guard:update": "npm run build && node load-tests/guard.mjs --update",
     "analyze": "node analyzer/analyze.mjs",
     "dashboard:data": "npm --prefix dashboard run data",
     "dashboard": "npm --prefix dashboard run dev"

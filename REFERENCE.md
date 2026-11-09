@@ -53,6 +53,14 @@ npm run load:signup  # sign-up test, about 11 minutes
 Both full tests reseed the database first. Run `npm run seed` afterwards to
 remove the users they created. For a quick dry run: `RAMP=5s HOLD=5s npm run load`.
 
+`npm run guard` (also run by CI) fails if something changed that can shift the
+results: the server files, the root `package-lock.json`, the load-test scripts and
+config, or a built page's size by more than 10%. k6 doesn't load CSS, icons or the
+browser scripts, so those aren't checked. If a change is intended, rerun both full
+tests, compare them with the last runs, then run `npm run guard:update` and commit
+`load-tests/target-lock.json`. Even a comment-only edit to a checked file fails
+the guard. CI doesn't run the load tests themselves.
+
 Both tests are _open_: k6 starts a set number of visits per second however
 slow the site gets, like real public traffic.
 

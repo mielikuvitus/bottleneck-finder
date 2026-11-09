@@ -1,0 +1,21 @@
+{
+  "files": {
+    "server.js": "5307033171fcd73b113d602ffb0d2e7d0038b871340adeed5b51631d7566fa3d",
+    "db.js": "3b96f6ab7629ad4602b0d53ad59e64eb4d87626c0d9f533b02ddb0ac98cb6e8a",
+    "cms.js": "16f4e169acab1564cc77ff5cdd37b2a3e16e81f9d3195ac2fb7e455d7e8384f4",
+    "emailValidation.js": "425a786039e9188673ceb6f408ef6def737a027a302bdef2d31d8251cf58984e",
+    "metrics.js": "ab7c688125278a56f6c6d4c81605aa3de9dc2eb4a7593c40b3c22a259f23933a",
+    "seed.js": "f83e4bba31c245ba844601b6a3496ca30efae612e11b8a86698d8490d477b6a0",
+    "package-lock.json": "534b6be2b58910519971ec0a08ed5f040e96a9ed790e1d0bff403fc88269b748",
+    "load-tests/lib.js": "60e835d976d474b7164757d91f78fcf05ccd4fb72fba40da0a14e70604c58aff",
+    "load-tests/main.js": "6791b2a3ed1b49f2530ee51157b36c2c2d62446120b38796f6828886820aa5f5",
+    "load-tests/signup.js": "2fde8502213f3f118a9175d9eb9c853527e46e9252cd8166f3291ac4b73f329f",
+    "load-tests/run.sh": "073f88a3d66c657195f91aa414b24a8fa438557c17bc53c8effcc74d5116521c",
+    "load-tests/poll-metrics.mjs": "032a43f5a26762928b7d053ea7b5d519f4c685ed3462db28fcf5f84c9029c5c6",
+    "load-tests/test-config.json": "e5e1085e4e65193809b627ad819d1e594b9602a276afd6f71b752ac7cae4a916"
+  },
+  "pageBytes": {
+    "build/index.html": 13047,
+    "build/signup.html": 6167
+  }
+}

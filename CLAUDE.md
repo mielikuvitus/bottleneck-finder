@@ -18,7 +18,8 @@ and data).
   of the test site for /monzo/tomorrow-bank/), `demo-signup.js`, `demo.css`
 - **Load tests:** `load-tests/` — `main.js`, `signup.js`, `smoke.js`, `lib.js`
   (shared), `run.sh` (runs k6 and saves results), `poll-metrics.mjs`,
-  `test-config.json` (assumptions)
+  `test-config.json` (assumptions), `guard.mjs` + `target-lock.json` (npm run
+  guard: fails if something that can shift the results changed)
 - **Analyser:** `analyzer/` — `analyze.mjs` (numbers, knees), `rules.mjs`
   (findings), `describe.mjs` (wording), `timeline.mjs` (builds timeline.json),
   `route-context.json`, `names.json`
