@@ -29,8 +29,9 @@ const SERVER_CHARTS = [
 ];
 const showsServerCharts = (cause) => ['render', 'db', 'loop', 'unexplained'].includes(cause.kind);
 
-export default function EvidenceDisclosure({ finding, timeline, peaks }) {
-  const [open, setOpen] = useState(false);
+// defaultOpen: true to start open (the components page)
+export default function EvidenceDisclosure({ finding, timeline, peaks, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen);
   const id = useId();
   const hatchId = `${id.replace(/:/g, '')}-hatch`;
 

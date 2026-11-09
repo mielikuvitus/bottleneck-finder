@@ -20,8 +20,9 @@ function SummaryNumber({ label, value, note }) {
 
 const round = (n) => (n === null || n === undefined ? '–' : Math.round(n));
 
-export default function SummaryStrip({ run }) {
-  const [open, setOpen] = useState(false);
+// defaultOpen: true to start open (the components page)
+export default function SummaryStrip({ run, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen);
   const id = useId();
   const { findings } = run;
   const counts = SEVERITIES.map((s) => [s, findings.findings.filter((f) => f.severity === s).length]).filter(([, n]) => n);

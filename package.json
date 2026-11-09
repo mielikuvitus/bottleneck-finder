@@ -8,6 +8,7 @@
     "seed": "node seed.js",
     "build": "esbuild views/SignupPage.jsx --bundle --packages=external --outdir=build/views --format=cjs --platform=node --jsx=automatic --log-level=warning && NODE_ENV=production node prerender.js",
     "prestart": "npm run build",
+    "build:demo": "npm run build && node demo-site/build.js",
     "load:smoke": "k6 run load-tests/smoke.js",
     "load": "load-tests/run.sh main",
     "load:signup": "load-tests/run.sh signup",

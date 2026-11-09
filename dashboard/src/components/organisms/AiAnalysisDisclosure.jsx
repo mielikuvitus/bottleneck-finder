@@ -12,8 +12,9 @@ import CANNED from '../../data/cannedAiResponses.json';
 
 const THINKING_MS = 900; // "Thinking…" before the reply starts
 
-export default function AiAnalysisDisclosure({ finding, peaks }) {
-  const [open, setOpen] = useState(false);
+// defaultOpen: true to start open (the components page)
+export default function AiAnalysisDisclosure({ finding, peaks, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen);
   const [model, setModel] = useState(MODELS[0].id);
   // idle → thinking → answered
   const [status, setStatus] = useState('idle');

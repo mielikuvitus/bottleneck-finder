@@ -42,7 +42,8 @@ The JS files and the data between them.
   │                                                      │
   │  GET /hello      → "hello"                           │
   │                                                      │
-  │  GET /           → reads public/index.html           │
+  │  GET /           → reads build/index.html            │
+  │                    (public/index.html + ribbon)      │
   │                    Cache-Control: public, 1 hour     │
   │                                                      │
   │  GET /styles.css → express.static reads public/      │

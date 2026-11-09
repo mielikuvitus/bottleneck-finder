@@ -59,4 +59,4 @@ async function getRates(signal) {
   }
 }
 
-module.exports = { getRates, getStats };
+module.exports = { getRates, getStats, RATES };

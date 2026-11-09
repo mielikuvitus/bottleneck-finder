@@ -1,0 +1,8 @@
+/* The published sign-up form: looks unavailable, and explains itself on click */
+.signup-input:has(input[aria-disabled="true"]) {
+  background: rgba(9, 23, 35, 0.04);
+  cursor: not-allowed;
+}
+.signup-input input[aria-disabled="true"] { cursor: not-allowed; }
+.signup-submit[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+.signup-message.is-demo { color: var(--ink); }

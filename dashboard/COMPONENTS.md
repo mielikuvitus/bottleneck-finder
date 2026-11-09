@@ -1,7 +1,14 @@
 # Dashboard components
 
-To see them all at once, run `npm run dev` and open http://localhost:5173/monzo/dashboard/components
-(development only).
+To see them all at once, open [pixelation.io/monzo/dashboard/components](https://pixelation.io/monzo/dashboard/components),
+or run `npm run dev` and open http://localhost:5173/monzo/dashboard/components.
+The page has two tabs: **Tomorrow site** shows the bank site's pieces, taken from
+its real pages (list in `src/dev/siteSpecimens.js`), and **Dashboard**
+(`?tab=dashboard`) shows the components below. The Tomorrow tab needs
+`npm run build` in the project root, then `npm run dashboard:data`. Clicking an
+atom or molecule goes to the first organism using it, or the first page part if
+no organism does (Tomorrow: worked out from the pages; Dashboard: `USED_IN` in
+`src/dev/ComponentsPage.jsx`, so update it when a component's use changes).
 
 Every component, its props, the real data fields it uses, and one example
 value from the current runs: `2026-10-19_000132-main` and
@@ -53,8 +60,8 @@ No props: the tilted coral "T", "tomorrow", and "Web Performance".
 
 No props or data. Shown when no run is selected (Figma: "No run selected
 layout"): the header, "Traffic readiness", the "Select a run" box and the "Choose a run to see the story." card. The card's arrow points up at the box, and
-hovering the card pulses the box once in the info green (with reduced motion,
-the border just turns green). The dashboard
+hovering the card pulses the box once in the brand coral (with reduced motion,
+the border just turns coral). The dashboard
 opens on this. Until the dropdown is designed, open a run with `?run=<name>` in
 the address.
 
@@ -100,18 +107,6 @@ Google's Material Icons, copied as SVG paths into
 Apache License 2.0 (notice in the file), so no MUI packages are needed. To add
 an icon, copy its path data into `ICONS`. It uses the text colour
 (`currentColor`).
-
-### HeadroomComponent
-
-| Prop | Field | Example |
-| ---- | ----- | ------- |
-| `headroom.break_point_visitors` | `finding.headroom.break_point_visitors` | `163` |
-| `headroom.expected_pct` | `finding.headroom.expected_pct` | `48` (48% to spare) |
-| `headroom.campaign_pct` | `finding.headroom.campaign_pct` | `-37` (37% over the limit) |
-| `headroom.summary` | `finding.headroom.summary` | `"breaks at about 163 visitors at once: 48% to spare at expected peak (110), 37% over the limit at campaign peak (260)"` |
-
-`headroom` is `null` when nothing broke yet (for example the slow-lookup
-finding). Percentages below 0 mean over the limit.
 
 ### ConfidenceIndicator
 
@@ -182,28 +177,6 @@ Each option and the button show:
 The button shows "Select a run" until a run is chosen; the dashboard opens with
 no run selected. `?run=<name>` in the address opens a run directly.
 
-### ImpactRow
-
-One row per level; a verdict card has three: `finding.user_impact_now`
-(expected peak), `user_impact_at_campaign` and `user_impact_at_limit`.
-
-| Prop | Field | Example (`user_impact_at_campaign`, main run) |
-| ---- | ----- | ------- |
-| `label` | – | `"Campaign peak"` |
-| `impact.level` | `.level` | `"campaign peak (just after an ad goes live)"` |
-| `impact.visitors` | `.visitors` | `260` |
-| `impact.stage_used` | `.stage_used` | `"57 visits/s (planned about 265 visitors at once, measured 420)"` |
-| `impact.left` | `.left` | `0` |
-| `impact.degraded` | `.degraded` | `3419` |
-| `impact.lost_signups` | `.lost_signups.lost`, `.attempts` | `0` of `593` |
-| `impact.summary` | `.summary` | `"At about 260 visitors at once (…): 3,419 of 3,419 visits (100%) were degraded: the cards show "Couldn't load rates right now." …"` |
-
-Also available: `.measured_visitors_at_once`, `.failures`,
-`.slow_visit_share` (`0.12`), and `.routes[route]` with `p50_ms`, `p95_ms`,
-`requests`, `failed`, `fallback_shown`. For a campaign scenario,
-`user_impact_now` comes from the main run and also has `.source` (the main
-run's name) and `.warning`.
-
 ### CanWaitCallout
 
 Figma: "Can it wait variants". A bold title and a sentence underneath. The
@@ -232,33 +205,6 @@ severity, so it only mentions a campaign when the campaign peak is the reason:
 "Fix now", "Fix before campaign", "Fix before next release", "Fix before
 traffic grows", "Watch closely", "Safe for now" or "Safe to wait". All wording
 is placeholder, to be revisited.
-
-### ScreenshotFrame
-
-| Prop | Field | Example |
-| ---- | ----- | ------- |
-| `file` | `screenshots.js` | `"fallbacks/2-rates-fallback.png"` |
-| `route` | `screenshots.js` | `"GET /api/rates"` |
-| `state` | `screenshots.js` | `"fallback"` (or `normal`, `loading`, `waiting`, `timed out`, `connection failed`, `unreachable`) |
-| `caption` | `screenshots.js` | `"After 3s: \"Couldn't load rates right now.\""` |
-
-Screenshots are 2560px wide (2x). The verdict card shows the fallback states
-for its `affected_routes`.
-
-### PredictionVsMeasured
-
-| Prop | Field | Example (main run, rates) |
-| ---- | ----- | ------- |
-| `fallbackPoint.timeout_seconds` | `finding.fallback_point.timeout_seconds` | `3` |
-| `.predicted.starts_above` | | `"about 35/s GET /api/rates requests: any load above that leads to fallbacks if it lasts long enough"` |
-| `.predicted.expected.summary` / `.campaign.summary` | also `.arrivals_rps`, `.overload_pct`, `.seconds_until_fallback` | campaign: `seconds_until_fallback: 5` |
-| `.measured.summary` | | `"The arriving load first went over capacity at second 362 … timeouts became sustained … from second 401 (39s after going over) … The prediction assumes the load jumps straight to that level…"` |
-| `.measured.seconds_after_load_went_over_capacity` | | `39` |
-| `.measured.sustained_timeouts_from_second` | | `401` |
-| `.measured.predicted_for_that_load.seconds_until_fallback` | | `10.4` (predicted for 45 visits/s) |
-| `.measured.note` | | the ramp-vs-sudden-jump explanation |
-
-`fallback_point` is `null` when there's no knee.
 
 ### ChartCard
 

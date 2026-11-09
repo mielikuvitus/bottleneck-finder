@@ -91,7 +91,14 @@ function WelcomePanel() {
   );
 }
 
-function SignupForm() {
+// demo: the published copy (demo-site/build.js). The input has no name, so
+// there is nothing to submit even if demo-signup.js fails to load
+function SignupForm({ demo }) {
+  const inputProps = demo
+    ? { readOnly: true, 'aria-disabled': true, tabIndex: -1, autoComplete: 'off' }
+    : { name: 'email', autoComplete: 'email' };
+  const buttonProps = demo ? { type: 'button', 'aria-disabled': true } : { type: 'submit' };
+
   return (
     <Stack as="section" className="signup-form-col">
       <Stack as="ol" className="signup-steps" aria-label="Application progress">
@@ -112,7 +119,7 @@ function SignupForm() {
           <label htmlFor="email">Email address</label>
           <Stack className="signup-input">
             <Icon name="mail" width={20} height={20} />
-            <input id="email" name="email" type="email" autoComplete="email" placeholder="you@example.com" required />
+            <input id="email" type="email" {...inputProps} placeholder="you@example.com" required={!demo} />
           </Stack>
           <Text className="signup-message" />
         </Stack>
@@ -120,7 +127,7 @@ function SignupForm() {
           By continuing, you agree to our <a href="#">Terms &amp; Conditions</a> and acknowledge
           our <a href="#">Privacy Policy</a>.
         </Text>
-        <button className="signup-submit" type="submit">
+        <button className="signup-submit" {...buttonProps}>
           Continue with email
           <Icon name="arrow-right" width={20} height={20} />
         </button>
@@ -164,7 +171,7 @@ function Footer() {
   );
 }
 
-export default function SignupPage() {
+export default function SignupPage({ demo = false }) {
   return (
     <html lang="en">
       <head>
@@ -182,11 +189,11 @@ export default function SignupPage() {
           <Logo />
         </header>
         <main className="signup-main container">
-          <SignupForm />
+          <SignupForm demo={demo} />
           <WelcomePanel />
         </main>
         <Footer />
-        <script src="/signup.js" />
+        <script src={demo ? '/demo-signup.js' : '/signup.js'} />
       </body>
     </html>
   );

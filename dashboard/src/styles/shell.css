@@ -128,25 +128,25 @@
   line-height: var(--line-height-lead);
 }
 
-/* Hovering the empty card points at the run selector: one green pulse of its
+/* Hovering the empty card points at the run selector: one coral pulse of its
    border and a fading ring (not while the picker is open) */
 .app-frame:has(.empty-report:hover) .run-selector:not(.is-open) {
   animation: run-selector-pulse 1.2s ease-out 1;
 }
 @keyframes run-selector-pulse {
   0% {
-    border-color: var(--color-severity-info);
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-severity-info) 45%, transparent);
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 45%, transparent);
   }
   100% {
     border-color: var(--color-border);
-    box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-severity-info) 0%, transparent);
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-brand) 0%, transparent);
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .app-frame:has(.empty-report:hover) .run-selector:not(.is-open) {
     animation: none;
-    border-color: var(--color-severity-info);
+    border-color: var(--color-brand);
   }
 }
 

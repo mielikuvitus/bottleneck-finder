@@ -3,6 +3,7 @@
 //
 // Usage (from dashboard/): npm run data
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { join } from 'node:path';
 
 const ROOT = new URL('../..', import.meta.url).pathname;
@@ -82,3 +83,21 @@ writeFileSync(join(OUT, 'runs.json'), JSON.stringify(index, null, 2));
 cpSync(IMAGES, join(OUT, 'images'), { recursive: true, filter: (src) => !src.endsWith('.DS_Store') });
 console.log(`copied  docs/images -> public/data/images`);
 console.log(`wrote   public/data/runs.json (${index.length} runs)`);
+
+// The bank site's real pages and styles, for the components page's Tomorrow tab.
+const SITE = join(OUT, 'site');
+const BUILD = join(ROOT, 'build');
+const PUBLIC = join(ROOT, 'public');
+if (existsSync(join(BUILD, 'index.html')) && existsSync(join(BUILD, 'signup.html'))) {
+  mkdirSync(SITE);
+  cpSync(join(BUILD, 'index.html'), join(SITE, 'home.html'));
+  cpSync(join(BUILD, 'signup.html'), join(SITE, 'signup.html'));
+  cpSync(join(PUBLIC, 'styles.css'), join(SITE, 'styles.css'));
+  cpSync(join(PUBLIC, 'icons'), join(SITE, 'icons'), { recursive: true, filter: (src) => !src.endsWith('.DS_Store') });
+  const icons = readdirSync(join(PUBLIC, 'icons')).filter((file) => file.endsWith('.svg')).sort();
+  const { RATES } = createRequire(import.meta.url)(join(ROOT, 'cms.js'));
+  writeFileSync(join(SITE, 'manifest.json'), JSON.stringify({ icons, rates: RATES }, null, 2));
+  console.log(`copied  bank site -> public/data/site`);
+} else {
+  console.log(`skipped bank site: run npm run build in the project root first`);
+}

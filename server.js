@@ -30,7 +30,7 @@ app.get('/metrics', (req, res) => {
 
 app.get('/', (req, res) => {
   res.set('Cache-Control', 'public, max-age=3600');
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'build', 'index.html')); // public/index.html plus the ribbon (prerender.js)
 });
 
 // CSS and icons. index: false so "/" is only served by the route above.

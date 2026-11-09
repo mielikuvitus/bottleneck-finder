@@ -12,7 +12,10 @@ and data).
 
 - **Test site:** `server.js` (routes), `db.js`, `cms.js` (fake CMS, trap 2),
   `emailValidation.js` (trap 4), `metrics.js` (GET /metrics), `seed.js`,
-  `views/SignupPage.jsx` (trap 3), `public/` (homepage, `home.js`, `signup.js`)
+  `views/SignupPage.jsx` (trap 3), `views/ribbon.js` (fictional-bank ribbon, added
+  by `prerender.js`), `public/` (homepage, `home.js`, `signup.js`)
+- **Published demo:** `demo-site/` — `build.js` (npm run build:demo, static copy
+  of the test site for /monzo/tomorrow-bank/), `demo-signup.js`, `demo.css`
 - **Load tests:** `load-tests/` — `main.js`, `signup.js`, `smoke.js`, `lib.js`
   (shared), `run.sh` (runs k6 and saves results), `poll-metrics.mjs`,
   `test-config.json` (assumptions)

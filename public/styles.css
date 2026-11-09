@@ -130,10 +130,14 @@ img { display: block; }
 
 /* ---------- Hero ---------- */
 
-.hero {
+/* A sticky element stops at the end of its parent, and the nav and ribbon sit
+   inside .hero. display: contents makes the page their parent, so the ribbon
+   stays pinned for the whole page. The hero's glow goes on the page instead. */
+.hero { display: contents; }
+body:has(.hero) {
   background:
-    radial-gradient(circle 424px at 75% 58px, rgba(255, 79, 64, 0.16), rgba(255, 79, 64, 0)) no-repeat;
-  background-size: 100% 580px;
+    radial-gradient(circle 424px at 75% 58px, rgba(255, 79, 64, 0.16), rgba(255, 79, 64, 0)) 0 0 / 100% 580px no-repeat,
+    var(--cream);
 }
 
 .nav {
@@ -760,7 +764,7 @@ img { display: block; }
   .hero-visual { zoom: 0.66; }
 }
 @media (max-width: 389px) {
-  .hero { overflow-x: clip; }
+  .hero-grid { overflow-x: clip; }
   .hero-visual { zoom: 0.6; }
 }
 
@@ -1036,4 +1040,55 @@ img { display: block; }
   .signup-steps { gap: 8px; }
   .signup-steps li { gap: 8px; }
   .signup-steps li + li::before { width: 14px; }
+}
+
+/* ---------- Ribbon (views/ribbon.js) ---------- */
+
+/* Under the nav bar at first, then pinned to the top of the screen */
+.demo-ribbon {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  overflow: hidden;
+  padding: 11px 0;
+  background: var(--navy);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.demo-ribbon-track {
+  display: flex;
+  width: max-content;
+  animation: demo-ribbon-scroll 60s linear infinite;
+}
+.demo-ribbon:hover .demo-ribbon-track { animation-play-state: paused; }
+.demo-ribbon-copy { display: flex; align-items: center; flex: none; }
+.demo-ribbon-copy > span { white-space: nowrap; }
+.demo-ribbon-dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin: 0 24px;
+  border-radius: 50%;
+  background: var(--coral);
+}
+@keyframes demo-ribbon-scroll {
+  to { transform: translateX(-50%); }
+}
+
+/* Links to #features land below the pinned ribbon */
+html { scroll-padding-top: 56px; }
+
+/* Visitors who turn off animations get the whole message, standing still */
+@media (prefers-reduced-motion: reduce) {
+  .demo-ribbon { padding: 11px 16px; text-align: center; }
+  .demo-ribbon-track { width: auto; animation: none; }
+  .demo-ribbon-copy { flex: 1; flex-wrap: wrap; justify-content: center; row-gap: 4px; }
+  .demo-ribbon-copy[aria-hidden="true"] { display: none; }
+  .demo-ribbon-copy > span { white-space: normal; }
+  .demo-ribbon-dot { margin: 0 12px; }
+  .demo-ribbon-dot:last-child { display: none; }
 }

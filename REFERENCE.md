@@ -8,8 +8,9 @@ lists every dashboard component.
 ## Setup notes
 
 - **`npm run seed`** clears the table first, so it's safe to re-run, and you always get exactly 100,000 users: user1@example.com to user100000@example.com (ids 1 to 100,000). Users added since the last seed are deleted.
-- **`npm start`** first runs `npm run build`: esbuild compiles the React sign-up page (`views/*.jsx` → `build/`) and `prerender.js` renders it once to `build/signup.html`. Then it runs the server with `NODE_ENV=production`. This matters for load tests: React's development build renders about 10 times slower.
+- **`npm start`** first runs `npm run build`: esbuild compiles the React sign-up page (`views/*.jsx` → `build/`) and `prerender.js` renders it once to `build/signup.html`, and adds the ribbon (`views/ribbon.js`) to it and to `build/index.html`. Then it runs the server with `NODE_ENV=production`. This matters for load tests: React's development build renders about 10 times slower.
 - `curl localhost:3000/hello` should print `hello` once the server is up.
+- **`npm run build:demo`** builds the published copy of the site into `build/tomorrow-bank/`, for `/monzo/tomorrow-bank/`. It's static: no server, database or traps. The rates come from `rates.json`, and the sign-up input and button only show a "demo site" message. Load tests still use the local site.
 
 ## Routes
 
