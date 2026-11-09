@@ -1,0 +1,62 @@
+/* The components page (/components) */
+.c-lib-components { max-width: var(--page-max-width); margin: 0 auto; padding: var(--space-5) var(--page-gutter); }
+.c-lib-tabs { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-4) 0; border-bottom: 1px solid var(--color-border); }
+.c-lib-tab { margin-bottom: -1px; padding: var(--space-2) var(--space-3); border: 0; border-bottom: 2px solid transparent; background: none; color: var(--color-text-muted); font: inherit; font-weight: var(--font-weight-extrabold); cursor: pointer; }
+.c-lib-tab:hover { color: var(--color-text); }
+.c-lib-tab.is-active { border-bottom-color: var(--color-text); color: var(--color-text); }
+.c-lib-site-piece { width: 100%; min-width: 0; overflow: hidden; }
+.c-lib-specimen { scroll-margin-top: var(--space-4); }
+.c-lib-specimen:focus { outline: none; }
+.c-lib-specimen-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: var(--space-2) var(--space-3); margin-bottom: var(--space-3); }
+.c-lib-specimen-head .c-lib-specimen-name { margin: 0; }
+.c-lib-jump-hint { display: flex; align-items: center; gap: var(--space-3); margin: var(--space-4) 0 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-card); background: var(--color-text); color: var(--color-surface); font-size: 16px; }
+.c-lib-jump-hint strong { font-weight: var(--font-weight-extrabold); }
+.c-lib-jump-hint-mark { display: grid; flex: none; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--color-brand); color: var(--color-on-brand); font-weight: var(--font-weight-extrabold); }
+.c-lib-used-in, .c-lib-used-in-note { margin: 0; padding: var(--space-1) var(--space-3); border-radius: 999px; font: inherit; font-size: var(--font-size-small); font-weight: var(--font-weight-extrabold); }
+.c-lib-used-in { border: 1px solid var(--color-text); background: var(--color-surface); color: var(--color-text); cursor: pointer; }
+.c-lib-used-in:hover, .c-lib-specimen.is-linked:hover .c-lib-used-in { background: var(--color-text); color: var(--color-surface); }
+.c-lib-used-in-note { border: 1px solid var(--color-border); color: var(--color-text); }
+.c-lib-specimen.is-linked { transition: border-color 120ms ease, box-shadow 120ms ease; }
+.c-lib-specimen.is-linked:hover { border: 1px solid var(--color-text-muted); box-shadow: 0 0 0 1px var(--color-text-muted); }
+.c-lib-specimen.is-linked > .c-lib-specimen-body { cursor: pointer; }
+/* Holds long enough to still be there when a long scroll arrives */
+.c-lib-specimen.is-jump-target { animation: c-lib-jump-highlight 3s ease-out; }
+@keyframes c-lib-jump-highlight {
+  0%, 60% { box-shadow: 0 0 0 3px var(--color-brand); }
+  100% { box-shadow: 0 0 0 3px transparent; }
+}
+.c-lib-back { position: fixed; left: var(--space-4); bottom: var(--space-4); z-index: 50; padding: var(--space-2) var(--space-4); border: 0; border-radius: 999px; background: var(--color-text); color: var(--color-surface); font: inherit; font-size: var(--font-size-small); font-weight: var(--font-weight-extrabold); cursor: pointer; box-shadow: var(--shadow-sm); transition: box-shadow 150ms ease, transform 150ms ease; }
+.c-lib-back:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+@media (prefers-reduced-motion: reduce) {
+  .c-lib-back { transition: none; }
+  .c-lib-back:hover { transform: none; }
+  .c-lib-specimen.is-jump-target { animation: none; outline: 3px solid var(--color-brand); }
+}
+.c-lib-toggle { display: inline-flex; margin-bottom: var(--space-3); border: 1px solid var(--color-border); border-radius: 999px; }
+.c-lib-toggle-option { padding: var(--space-1) var(--space-3); border: 0; border-radius: 999px; background: none; color: var(--color-text-muted); font: inherit; font-size: var(--font-size-small); font-weight: var(--font-weight-extrabold); cursor: pointer; }
+.c-lib-toggle-option[aria-pressed="true"] { background: var(--color-text); color: var(--color-surface); }
+.c-lib-level { margin: var(--space-7) 0 var(--space-3); padding-top: var(--space-4); border-top: 2px solid var(--color-text); color: var(--color-text); font-size: var(--font-size-label); font-weight: var(--font-weight-extrabold); letter-spacing: 0.08em; text-transform: uppercase; }
+.c-lib-specimen { margin: var(--space-4) 0; padding: var(--space-4); border: 1px dashed var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); }
+.c-lib-specimen-name { margin: 0 0 var(--space-3); color: var(--color-text-muted); font-family: var(--font-family-mono); font-size: var(--font-size-small); }
+.c-lib-specimen-body { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-3); }
+.c-lib-grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); width: 100%; }
+.c-lib-icon { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-text); }
+@media (max-width: 600px) {
+  .c-lib-components { padding: var(--space-5) var(--page-gutter-phone); }
+  .c-lib-grid-4 { grid-template-columns: minmax(0, 1fr); }
+}
+/* The Tokens tab */
+.c-lib-token-group { margin: var(--space-5) 0 var(--space-2); color: var(--color-text); font-size: var(--font-size-lead); font-weight: var(--font-weight-extrabold); }
+.c-lib-token-description { max-width: 70ch; margin: 0 0 var(--space-2); }
+.c-lib-token-scroll { overflow-x: auto; }
+.c-lib-tokens { width: 100%; margin: 0; border-collapse: collapse; background: var(--color-surface); font-size: var(--font-size-small); }
+.c-lib-tokens th, .c-lib-tokens td { padding: var(--space-2) var(--space-3); border: 0; border-bottom: 1px solid var(--color-border); text-align: left; vertical-align: middle; }
+.c-lib-tokens th { color: var(--color-text-muted); font-weight: var(--font-weight-bold); white-space: nowrap; }
+.c-lib-tokens code { display: block; font-family: var(--font-family-mono); white-space: nowrap; }
+.c-lib-tokens .c-lib-token-final { color: var(--color-text-muted); }
+.c-lib-token-used { white-space: nowrap; }
+.c-lib-token-preview { width: 96px; }
+.c-lib-token-swatch, .c-lib-token-box { display: block; width: 40px; height: 28px; border: 1px solid var(--color-border); border-radius: var(--radius-option); }
+.c-lib-token-box { background: var(--color-surface); }
+.c-lib-token-bar { display: block; max-width: 80px; height: 12px; background: var(--color-text-muted); }
+.c-lib-token-lines { display: block; }

@@ -143,7 +143,7 @@
 .finding-card:is([data-severity='critical'], [data-severity='high']),
 .verdict-card:is([data-severity='critical'], [data-severity='high']) { border-color: var(--color-severity-critical-border); }
 
-/* The short finding card (Figma: Supporting finding) */
+/* The short finding card */
 .finding-card {
   --finding-gutter: 22px;
   display: flex;

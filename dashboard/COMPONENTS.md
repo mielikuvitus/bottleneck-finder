@@ -3,17 +3,20 @@
 To see them all at once, open [pixelation.io/monzo/dashboard/components](https://pixelation.io/monzo/dashboard/components),
 or run `npm run dev` and open http://localhost:5173/monzo/dashboard/components.
 The page has three tabs: **Tomorrow site** shows the bank site's pieces, taken from
-its real pages (list in `src/dev/siteSpecimens.js`), **Dashboard**
+its real pages (list in `src/components-library/siteSpecimens.js`), **Dashboard**
 (`?tab=dashboard`) shows the components below, and **Tokens** (`?tab=tokens`) shows
-both sets of design tokens, read from their stylesheets. The Tomorrow and Tokens tabs need
+the design tokens both share, read from `public/tokens.css` (the comment after a
+token is its note), grouped by name in `TokensTab.jsx`, and which of the two
+uses each one. The Tomorrow and Tokens tabs need
 `npm run build` in the project root, then `npm run dashboard:data`. Clicking an
 atom or molecule goes to the first organism using it, or the first page part if
-no organism does (Tomorrow: worked out from the pages; Dashboard: `USED_IN` in
-`src/dev/ComponentsPage.jsx`, so update it when a component's use changes).
+no organism does. Both are worked out, so they can't go out of date: Tomorrow from
+the pages, Dashboard from the components' imports (`src/components-library/usedIn.js`).
 
 Every component, its props, the real data fields it uses, and one example
-value from the current runs: `2026-10-19_000132-main` and
-`2026-10-19_001114-signup`. The components are in `src/components/`. Atoms, and
+value from a run. The specimens use the newest main and sign-up runs with
+findings (now `2026-10-20_023636-main` and `2026-10-20_024618-signup`); some
+examples here come from earlier runs of the same tests. The components are in `src/components/`. Atoms, and
 molecules with a single outer element, also take `className` (added to their
 own) and any other attribute, such as `aria-*`, for that outer element. Each
 atom and molecule lists its props in a JSDoc comment, so the editor shows them
@@ -77,16 +80,17 @@ hovering the card pulses the box once in the brand coral (with reduced motion,
 the border just turns coral). The dashboard
 opens on this. `?run=<name>` in the address opens a run directly.
 
+
+---
+
+## Atoms
+
 ### Placeholder
 
 | Prop | Example |
 | ---- | ------- |
 | `width` | `320` (px) or any CSS length; default `"100%"`. Never wider than its container |
 | `height` | `22` |
-
----
-
-## Atoms
 
 ### SeverityBadge
 
@@ -98,11 +102,13 @@ An icon and a label, in the severity's colours.
 
 | `severity` | Label | Icon (Material Icons) | Look |
 | ---------- | ----- | --------------------- | ---- |
-| `critical` | Critical | `error` (filled circle with "!") | coral, `#ff4f40` border (the "Fix now" callout) |
-| `high` | High | `priorityHigh` ("!") | pale red, `#ffbdb6` border (the "Fix before campaign" callout) |
-| `medium` | Medium | `warningAmber` (triangle) | yellow `#faf2df` / `#8b5e17` |
-| `low` | Low | `arrowDownward` | blue `#edf2f6` / `#3b6b8b` |
-| `info` | Healthy | `check` | green `#edf5f0` / `#246754` |
+| `critical` | Critical | `error` (filled circle with "!") | coral border (as the "Fix now" callout) |
+| `high` | High | `priorityHigh` ("!") | pale red border (as the "Fix before campaign" callout) |
+| `medium` | Medium | `warningAmber` (triangle) | yellow |
+| `low` | Low | `arrowDownward` | blue |
+| `info` | Healthy | `check` | green |
+
+The colours are the `--color-severity-*` tokens (the Tokens tab shows them).
 
 The labels are set in the atom (atom text the user chose to keep). The icon is
 hidden from screen readers; the label is read out.
@@ -111,14 +117,14 @@ hidden from screen readers; the label is read out.
 
 | Prop | Example |
 | ---- | ------- |
-| `name` | `"priorityHigh"`: one of `error`, `priorityHigh`, `warningAmber`, `arrowDownward`, `check` (severity badges), `checkCircle`, `visibility`, `schedule`, `bolt` (can it wait), `description`, `arrowUpward`, `autoAwesome` (AI analysis) |
+| `name` | `"priorityHigh"`: any key of `ICON_PATHS`: `error`, `priorityHigh`, `warningAmber`, `arrowDownward`, `check` (severity badges), `checkCircle`, `visibility`, `schedule`, `bolt` (can it wait), `close` (the screenshot modal), `description`, `arrowUpward`, `autoAwesome` (AI analysis) |
 | `size` | `14` (px, default) |
 
 Google's Material Icons, copied as SVG paths into
-[src/components/atoms/Icon.jsx](src/components/atoms/Icon.jsx) under the
+[src/components/atoms/iconPaths.jsx](src/components/atoms/iconPaths.jsx) under the
 Apache License 2.0 (notice in the file), so no MUI packages are needed. To add
-an icon, copy its path data into `ICONS`. It uses the text colour
-(`currentColor`).
+an icon, copy its path data into `ICON_PATHS`: the specimen lists every icon
+there. It uses the text colour (`currentColor`).
 
 ### ConfidenceIndicator
 
@@ -156,7 +162,10 @@ with labels. Kinds and colours (tokens in `public/tokens.css`, `--color-chart-*`
 | `capacity` | the most it served | dotted grey line |
 | `campaign` | campaign peak | vertical grey line |
 
-Also exports `HatchPattern` (`id`), the SVG `<pattern>` the fallback bars use.
+Each kind's mark and sample label are in
+[src/components/atoms/legendSymbols.jsx](src/components/atoms/legendSymbols.jsx):
+adding a kind there adds it to the specimen too. Also exports `HatchPattern`
+(`id`), the SVG `<pattern>` the fallback bars use.
 
 ---
 
@@ -207,7 +216,7 @@ look comes from `variant`; the words come from the analyser.
 | `variant` | Look | Icon | Severity |
 | --------- | ---- | ---- | -------- |
 | `safe` | green | `checkCircle` (tick in a circle) | `low`, `info` |
-| `caution` | yellow, `#faf2df` / `#8b5e17` (from the severity badges) | `visibility` (an eye) | `medium` |
+| `caution` | yellow (as the medium severity badge) | `visibility` (an eye) | `medium` |
 | `soon` | pale red | `schedule` (a clock) | `high` |
 | `now` | coral, with a coral shadow (`--shadow-coral-md`) | `bolt` (a lightning bolt) | `critical` |
 
@@ -231,6 +240,30 @@ title in the variant's colour, no box. Made of spans, so it can sit in a button.
 | ---- | ------- |
 | `variant`, `title` | as for `CanWaitCallout` |
 | `children` | follow the title in the same colour (the finding card's "→ Read more") |
+
+### KeyNumbers
+
+How much traffic the route carries, against both peaks. Room is only shown
+when a level fits; over the limit just says so.
+
+| Field (`finding.load_levels`) | Example |
+| ----------------------------- | ------- |
+| `handles_visitors`, `handles_what`, `handles_requests_per_second` | `160`, `"visitors at once"`, `35` |
+| `levels[]`: `name`, `visitors`, `fits`, `note` | `{ name: "Normal busy hour", visitors: 110, fits: true, note: "room for about 50 more" }`, `{ name: "Ad campaign", visitors: 260, fits: false, note: null }` |
+
+### CustomerView
+
+A browser-style frame: "tomorrow" + the page address, a tab per state that has
+a screenshot (Normal, Slow / Loading, Fallback; tabs without a screenshot are
+left out), and a caption. Tabs work with the arrow keys. Clicking the
+screenshot (a `ScreenshotButton`) opens the current tab's image large.
+
+| Prop | Field | Example |
+| ---- | ----- | ------- |
+| `states` | `statesFor(finding.customer_view.route)` in `src/data/screenshots.js`: `[{ key, label, src, caption }]`. Empty, and nothing shows | the `GET /api/rates` screenshots |
+| `initialState` | `customer_view.state`: the tab it opens on (what most visitors saw) | `"fallback"` |
+| `address` | `customer_view.shown_on` | `"/"` |
+| `caption` | `customer_view.caption` | `"Savings rate cards on the homepage at campaign peak"` |
 
 ### ChartCard
 
@@ -394,30 +427,6 @@ One finding, important things first:
 
 Spacing: one 28px inner gutter for every section (20px on phones), 24px between
 sections, 12px within a group.
-
-### KeyNumbers
-
-How much traffic the route carries, against both peaks. Room is only shown
-when a level fits; over the limit just says so.
-
-| Field (`finding.load_levels`) | Example |
-| ----------------------------- | ------- |
-| `handles_visitors`, `handles_what`, `handles_requests_per_second` | `160`, `"visitors at once"`, `35` |
-| `levels[]`: `name`, `visitors`, `fits`, `note` | `{ name: "Normal busy hour", visitors: 110, fits: true, note: "room for about 50 more" }`, `{ name: "Ad campaign", visitors: 260, fits: false, note: null }` |
-
-### CustomerView
-
-A browser-style frame: "tomorrow" + the page address, a tab per state that has
-a screenshot (Normal, Slow / Loading, Fallback; tabs without a screenshot are
-left out), and a caption. Tabs work with the arrow keys. Clicking the
-screenshot (a `ScreenshotButton`) opens the current tab's image large.
-
-| Prop | Field | Example |
-| ---- | ----- | ------- |
-| `states` | `statesFor(finding.customer_view.route)` in `src/data/screenshots.js`: `[{ key, label, src, caption }]`. Empty, and nothing shows | the `GET /api/rates` screenshots |
-| `initialState` | `customer_view.state`: the tab it opens on (what most visitors saw) | `"fallback"` |
-| `address` | `customer_view.shown_on` | `"/"` |
-| `caption` | `customer_view.caption` | `"Savings rate cards on the homepage at campaign peak"` |
 
 ### AiAnalysisDisclosure
 

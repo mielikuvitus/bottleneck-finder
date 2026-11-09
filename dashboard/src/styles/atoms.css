@@ -7,7 +7,7 @@
   background: var(--color-placeholder);
 }
 
-/* Confidence indicator (Figma: Confidence / all three levels) */
+/* Confidence indicator */
 .confidence-indicator {
   display: inline-flex;
   align-items: center;
@@ -34,7 +34,7 @@
   white-space: nowrap;
 }
 
-/* Severity badges (Figma: Severity badges) */
+/* Severity badges */
 .severity-badge {
   display: inline-flex;
   align-items: center;
@@ -78,7 +78,7 @@
   font-weight: var(--font-weight-extrabold);
 }
 
-/* Chart legend (Figma: Legend & chart annotation vocabulary) */
+/* Chart legend */
 .chart-legend {
   display: flex;
   flex-wrap: wrap;

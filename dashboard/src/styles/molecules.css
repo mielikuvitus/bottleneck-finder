@@ -223,7 +223,7 @@
   outline-offset: 2px;
 }
 
-/* Can it wait? (Figma: Can it wait variants) */
+/* Can it wait? */
 .can-wait {
   display: flex;
   flex-direction: column;
@@ -280,8 +280,8 @@
   font-size: inherit;
 }
 
-/* A bordered box with an uppercase toggle and a chevron (Figma: Evidence
-   disclosure). Used by the evidence and the test details. */
+/* A bordered box with an uppercase toggle and a chevron (Disclosure). Used by
+   the test details, the AI analysis and the evidence. */
 .disclosure {
   padding: 15px;
   border: 1px solid var(--color-border);

@@ -2,7 +2,7 @@
    test details and the report sections. */
 
 .app-frame {
-  line-height: normal; /* Figma: "leading normal" */
+  line-height: normal;
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
@@ -66,7 +66,7 @@
   font-weight: var(--font-weight-extrabold);
 }
 
-/* No run selected (Figma: No run selected layout) */
+/* No run selected */
 .empty-report {
   display: flex;
   flex-direction: column;

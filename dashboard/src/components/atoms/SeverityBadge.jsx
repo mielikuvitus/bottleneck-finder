@@ -1,4 +1,4 @@
-// A finding's severity (Figma: Severity badges).
+// A finding's severity: an icon and a label, in the severity's colours.
 import Icon from './Icon.jsx';
 
 /** @type {Record<string, { label: string, icon: import('./Icon.jsx').IconName }>} */

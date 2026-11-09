@@ -1,8 +1,7 @@
-// One finding, short or full (Figma: Supporting finding, Expanded verdict).
-// Every finding starts short (critical and high ones with a red border), and
-// clicking anywhere on the short card ("→ Read more" is the real button) opens
-// the full verdict card in place. Critical and high cards pulse 3 times when
-// they first appear (not again after Read less).
+// One finding, short or full. Every finding starts short (critical and high
+// ones with a red border), and clicking anywhere on the short card ("→ Read
+// more" is the real button) opens the full verdict card in place. Critical and
+// high cards pulse 3 times when they first appear (not again after Read less).
 import { useRef, useState } from 'react';
 import SeverityBadge from '../atoms/SeverityBadge.jsx';
 import ConfidenceIndicator from '../atoms/ConfidenceIndicator.jsx';

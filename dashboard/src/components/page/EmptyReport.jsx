@@ -1,4 +1,4 @@
-// No run selected yet (Figma: No run selected layout)
+// No run selected yet
 import AppHeader from './AppHeader.jsx';
 import Icon from '../atoms/Icon.jsx';
 import ProjectContext from './ProjectContext.jsx';

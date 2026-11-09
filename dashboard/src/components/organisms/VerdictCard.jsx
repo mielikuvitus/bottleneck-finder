@@ -1,6 +1,6 @@
-// One finding (Figma: Expanded verdict). Important things first: severity and
-// confidence, what visitors experienced, how much traffic it carries, the
-// decision and fix next to what visitors see, then the evidence.
+// One finding, in full. Important things first: severity and confidence, what
+// visitors experienced, how much traffic it carries, the decision and fix next
+// to what visitors see, then the evidence.
 import SeverityBadge from '../atoms/SeverityBadge.jsx';
 import ConfidenceIndicator from '../atoms/ConfidenceIndicator.jsx';
 import KeyNumbers from '../molecules/KeyNumbers.jsx';

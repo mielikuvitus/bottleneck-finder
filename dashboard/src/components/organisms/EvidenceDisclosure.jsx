@@ -1,10 +1,9 @@
-// The proof behind a finding (Figma: Evidence disclosure): why it has its
-// confidence, one summary sentence, four chart cards (plus server cards when
-// the cause is the server itself or unknown), then the full evidence. Closed
-// by default. Charts use the chart vocabulary (Figma: Legend & chart
-// annotation vocabulary): arrivals solid navy, success a shaded green area (so
-// the two differ by shape, not only colour, and the gap between them is the
-// traffic that wasn't served), left solid blocks, fallback hatched blocks, and
+// The proof behind a finding: why it has its confidence, one summary sentence,
+// four chart cards (plus server cards when the cause is the server itself or
+// unknown), then the full evidence. Closed by default. Charts use the chart
+// vocabulary: arrivals solid navy, success a shaded green area (so the two
+// differ by shape, not only colour, and the gap between them is the traffic
+// that wasn't served), left solid blocks, fallback hatched blocks, and
 // knee / capacity / campaign marks.
 import { useId } from 'react';
 import { Area, Bar, BarChart, ComposedChart, Line, LineChart, ReferenceDot, ReferenceLine } from 'recharts';

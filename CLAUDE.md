@@ -29,6 +29,8 @@ and data).
   findings.json shapes, `types.js` JSDoc shapes), `styles/` (`base.css`,
   then one file per layer: `atoms.css`, `molecules.css`, `organisms.css`,
   `page.css`);
+  `components-library/` (the page at /components: `ComponentsPage.jsx`,
+  `SiteComponents.jsx`, `TokensTab.jsx`, `usedIn.js`);
   `dashboard/scripts/copy-data.mjs` (npm run dashboard:data)
 - **Run results:** `load-tests/results/<run>/`. Read `findings.json` or
   `run.json`; `timeline.json` is large, so search it rather than reading it whole.

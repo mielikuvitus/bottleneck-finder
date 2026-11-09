@@ -1,12 +1,12 @@
-// Picks the run to show (Figma: Run picker / open). A button that opens a list
-// of runs, following the ARIA listbox pattern: Enter, Space or the arrow keys
-// open it; arrows move; Enter or Space selects; Esc or a click outside closes.
+// Picks the run to show. A button that opens a list of runs, following the
+// ARIA listbox pattern: Enter, Space or the arrow keys open it; arrows move;
+// Enter or Space selects; Esc or a click outside closes.
 import { useEffect, useId, useRef, useState } from 'react';
 import { DESCRIPTIONS, titleOf } from '../../data/runLabels.js';
 
-// How long the switch and the superseded runs animate: keep in step with
-// --duration-switch in public/tokens.css
-const SWITCH_MS = 240;
+// How long the switch and the superseded runs animate, read from
+// --duration-switch in public/tokens.css (240ms if it can't be read)
+const switchMs = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--duration-switch')) || 240;
 
 /**
  * @param {object} props
@@ -199,7 +199,7 @@ export default function RunPicker({ runs, value, onChange, showSuperseded, onSho
               onClick={() => {
                 clearTimeout(motionTimer.current);
                 setMotion(showSuperseded ? 'out' : 'in');
-                motionTimer.current = setTimeout(() => setMotion(null), SWITCH_MS + 50);
+                motionTimer.current = setTimeout(() => setMotion(null), switchMs() + 50);
                 onShowSupersededChange(!showSuperseded);
               }}
             >

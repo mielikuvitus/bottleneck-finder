@@ -7,8 +7,8 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const FOLDERS = ['src/styles', 'src/components', 'src/dev'];
-const SKIP = new Set(['src/dev/siteSpecimens.js']);
+const FOLDERS = ['src/styles', 'src/components', 'src/components-library'];
+const SKIP = new Set(['src/components-library/siteSpecimens.js']);
 const EXTENSIONS = /\.(css|jsx|js)$/;
 
 const RAW_COLOUR = /#[0-9a-fA-F]{3,8}\b|\b(?:rgb|hsl)a?\(/;

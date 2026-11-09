@@ -26,7 +26,7 @@ if (window.location.pathname !== base && !isComponentsPage) {
 // when opened, so the dashboard doesn't load it.
 if (isComponentsPage) {
   document.title = 'Components · Bottleneck finder';
-  Promise.all([import('./dev/ComponentsPage.jsx'), import('./styles/dev.css')]).then(([{ default: ComponentsPage }]) =>
+  Promise.all([import('./components-library/ComponentsPage.jsx'), import('./styles/components-library.css')]).then(([{ default: ComponentsPage }]) =>
     root.render(
       <StrictMode>
         <ComponentsPage />

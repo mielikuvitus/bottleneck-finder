@@ -32,7 +32,7 @@ export function useJumps() {
   const backButton = back ? (
     <button
       type="button"
-      className="dev-back"
+      className="c-lib-back"
       onClick={() => {
         reveal(back.el);
         setBack(null);
@@ -48,8 +48,8 @@ export function useJumps() {
 // Says at the top of each tab that the pieces can be clicked
 export function JumpHint() {
   return (
-    <p className="dev-jump-hint">
-      <span className="dev-jump-hint-mark" aria-hidden="true">
+    <p className="c-lib-jump-hint">
+      <span className="c-lib-jump-hint-mark" aria-hidden="true">
         ↓
       </span>
       <span>
@@ -62,7 +62,7 @@ export function JumpHint() {
 // The visible, keyboard-friendly way to make the same jump as clicking the piece
 export function UsedInLink({ target, onClick }) {
   return (
-    <button type="button" className="dev-used-in" onClick={onClick}>
+    <button type="button" className="c-lib-used-in" onClick={onClick}>
       Used in {target} <span aria-hidden="true">→</span>
     </button>
   );

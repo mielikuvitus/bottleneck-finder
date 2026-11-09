@@ -110,7 +110,7 @@ function Piece({ specimen, site, onActivate }) {
   }, [html, site, specimen]);
 
   if (error) return <p role="alert">{error}</p>;
-  return <div ref={hostRef} className="dev-site-piece" />;
+  return <div ref={hostRef} className="c-lib-site-piece" />;
 }
 
 // One specimen. With variants, one version at a time and a toggle between them,
@@ -133,16 +133,16 @@ function SiteSpecimen({ specimen, site, jumpTo }) {
   }
 
   return (
-    <div ref={cardRef} className={`dev-specimen${target || hasIcons ? ' is-linked' : ''}`} data-component={specimen.name} tabIndex={-1}>
-      <div className="dev-specimen-head">
-        <p className="dev-specimen-name">{specimen.name}</p>
+    <div ref={cardRef} className={`c-lib-specimen${target || hasIcons ? ' is-linked' : ''}`} data-component={specimen.name} tabIndex={-1}>
+      <div className="c-lib-specimen-head">
+        <p className="c-lib-specimen-name">{specimen.name}</p>
         {target ? <UsedInLink target={target} onClick={() => jumpTo(cardRef.current, specimen.name, target)} /> : null}
-        {hasIcons ? <p className="dev-used-in-note">Click an icon to see it in use</p> : null}
+        {hasIcons ? <p className="c-lib-used-in-note">Click an icon to see it in use</p> : null}
       </div>
       {specimen.variants ? (
-        <div className="dev-toggle" role="group" aria-label={`${specimen.name} version`}>
+        <div className="c-lib-toggle" role="group" aria-label={`${specimen.name} version`}>
           {specimen.variants.map((v, i) => (
-            <button key={v.label} type="button" className="dev-toggle-option" aria-pressed={i === variant} onClick={() => setVariant(i)}>
+            <button key={v.label} type="button" className="c-lib-toggle-option" aria-pressed={i === variant} onClick={() => setVariant(i)}>
               {v.label}
             </button>
           ))}
@@ -172,7 +172,7 @@ export default function SiteComponents() {
       {site
         ? levels.map((level) => (
             <div key={level}>
-              <h2 className="dev-level">{level}</h2>
+              <h2 className="c-lib-level">{level}</h2>
               {SPECIMENS.filter((s) => s.level === level).map((specimen) => (
                 <SiteSpecimen key={specimen.name} specimen={specimen} site={site} jumpTo={jumpTo} />
               ))}

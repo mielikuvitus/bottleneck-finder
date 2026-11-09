@@ -1,5 +1,4 @@
-// How well a finding is supported (Figma: Confidence / all three levels).
-// Three bars of rising height, with 3, 2 or 1 of them filled, and a label.
+// How well a finding is supported: three bars of rising height, with 3, 2 or 1 of them filled, and a label.
 const LEVELS = {
   high: { filled: 3, label: 'High confidence' },
   medium: { filled: 2, label: 'Medium confidence' },

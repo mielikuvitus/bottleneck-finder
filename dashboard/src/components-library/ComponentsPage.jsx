@@ -8,6 +8,7 @@ import { Line, LineChart } from 'recharts';
 import SiteComponents from './SiteComponents.jsx';
 import TokensTab from './TokensTab.jsx';
 import { INTERACTIVE, JumpContext, JumpHint, UsedInLink, useJumps } from './jumps.jsx';
+import { usedIn } from './usedIn.js';
 import { chartRows } from '../data/series.js';
 import { siteShots, statesFor } from '../data/screenshots.js';
 import { assumptionsFor } from '../data/assumptions.js';
@@ -29,6 +30,8 @@ import ConfidenceIndicator from '../components/atoms/ConfidenceIndicator.jsx';
 import Placeholder from '../components/atoms/Placeholder.jsx';
 import Icon from '../components/atoms/Icon.jsx';
 import ChartLegend from '../components/atoms/ChartLegend.jsx';
+import { LEGEND_SYMBOLS } from '../components/atoms/legendSymbols.jsx';
+import { ICON_PATHS } from '../components/atoms/iconPaths.jsx';
 import CanWaitCallout from '../components/molecules/CanWaitCallout.jsx';
 import CanWaitTitle from '../components/molecules/CanWaitTitle.jsx';
 import KeyNumbers from '../components/molecules/KeyNumbers.jsx';
@@ -47,7 +50,6 @@ import CANNED_AI from '../data/cannedAiResponses.json';
 import FindingCard from '../components/organisms/FindingCard.jsx';
 
 const SEVERITIES = ['critical', 'high', 'medium', 'low', 'info'];
-const ICONS = ['error', 'priorityHigh', 'warningAmber', 'arrowDownward', 'check', 'checkCircle', 'visibility', 'schedule', 'bolt', 'close', 'description', 'arrowUpward', 'autoAwesome'];
 // The look of each variant, with a title the analyser writes for it
 const WAIT_VARIANTS = [
   ['safe', 'Safe to wait'],
@@ -55,60 +57,29 @@ const WAIT_VARIANTS = [
   ['soon', 'Fix before campaign'],
   ['now', 'Fix now'],
 ];
-const LEGEND_KINDS = [
-  { kind: 'main', label: 'Arrivals' },
-  { kind: 'success', label: 'Success' },
-  { kind: 'second', label: 'Waiting' },
-  { kind: 'other-cause', label: 'Second cause' },
-  { kind: 'left', label: 'Left' },
-  { kind: 'fallback', label: 'Fallback' },
-  { kind: 'knee', label: 'Knee' },
-  { kind: 'capacity', label: 'Capacity' },
-  { kind: 'campaign', label: 'Campaign' },
-];
+// Every legend kind, with its sample label
+const LEGEND_KINDS = Object.entries(LEGEND_SYMBOLS).map(([kind, { label }]) => ({ kind, label }));
 
-// The first specimen on this page that uses each atom and molecule (from the
-// components' imports). A few only appear in page parts, not in an organism.
-const USED_IN = {
-  SeverityBadge: 'VerdictCard',
-  ConfidenceIndicator: 'VerdictCard',
-  Icon: 'AiAnalysisDisclosure',
-  ChartLegend: 'EvidenceDisclosure',
-  Placeholder: 'DashboardSkeleton',
-  CanWaitCallout: 'VerdictCard',
-  CanWaitTitle: 'FindingCard',
-  PromptComposer: 'AiAnalysisDisclosure',
-  AiResponse: 'AiAnalysisDisclosure',
-  RunPicker: 'EmptyReport',
-  KeyNumbers: 'VerdictCard',
-  CustomerView: 'VerdictCard',
-  ChartCard: 'EvidenceDisclosure',
-  SiteScreenshots: 'SummaryStrip',
-  ScreenshotModal: 'VerdictCard',
-  ScreenshotButton: 'VerdictCard',
-  Disclosure: 'AiAnalysisDisclosure',
-  AssumptionsList: 'SummaryStrip',
-};
 
 function Specimen({ name, children }) {
   const jumps = useContext(JumpContext);
   const component = name.split(/[\s·(]/)[0];
-  const target = USED_IN[component];
+  const target = usedIn(component);
 
   // A click on the piece jumps, unless it's on something with its own job or
   // the end of selecting some text
   function onBodyClick(event) {
     if (event.target.closest(INTERACTIVE) || window.getSelection()?.toString()) return;
-    jumps.jumpTo(event.currentTarget.closest('.dev-specimen'), component, target);
+    jumps.jumpTo(event.currentTarget.closest('.c-lib-specimen'), component, target);
   }
 
   return (
-    <div className={`dev-specimen${target ? ' is-linked' : ''}`} data-component={component} tabIndex={-1}>
-      <div className="dev-specimen-head">
-        <p className="dev-specimen-name">{name}</p>
-        {target ? <UsedInLink target={target} onClick={(event) => jumps.jumpTo(event.currentTarget.closest('.dev-specimen'), component, target)} /> : null}
+    <div className={`c-lib-specimen${target ? ' is-linked' : ''}`} data-component={component} tabIndex={-1}>
+      <div className="c-lib-specimen-head">
+        <p className="c-lib-specimen-name">{name}</p>
+        {target ? <UsedInLink target={target} onClick={(event) => jumps.jumpTo(event.currentTarget.closest('.c-lib-specimen'), component, target)} /> : null}
       </div>
-      <div className="dev-specimen-body" onClick={target ? onBodyClick : undefined}>
+      <div className="c-lib-specimen-body" onClick={target ? onBodyClick : undefined}>
         {children}
       </div>
     </div>
@@ -186,7 +157,7 @@ function DashboardComponents() {
       <JumpHint />
       {error ? <p role="alert">{error.message}</p> : null}
 
-      <h2 className="dev-level">Atoms</h2>
+      <h2 className="c-lib-level">Atoms</h2>
       <Specimen name="SeverityBadge">
         {SEVERITIES.map((s) => (
           <SeverityBadge key={s} severity={s} />
@@ -198,8 +169,8 @@ function DashboardComponents() {
         ))}
       </Specimen>
       <Specimen name="Icon">
-        {ICONS.map((n) => (
-          <span key={n} className="dev-icon">
+        {Object.keys(ICON_PATHS).map((n) => (
+          <span key={n} className="c-lib-icon">
             <Icon name={n} size={20} /> <code>{n}</code>
           </span>
         ))}
@@ -214,16 +185,16 @@ function DashboardComponents() {
         </div>
       </Specimen>
 
-      <h2 className="dev-level">Molecules</h2>
+      <h2 className="c-lib-level">Molecules</h2>
       <Specimen name="CanWaitCallout (regular)">
-        <div className="dev-grid-4">
+        <div className="c-lib-grid-4">
           {WAIT_VARIANTS.map(([v, title]) => (
             <CanWaitCallout key={v} variant={v} title={title} text={`Sample sentence for the ${v} look.`} />
           ))}
         </div>
       </Specimen>
       <Specimen name='CanWaitCallout (size="large")'>
-        <div className="dev-grid-4">
+        <div className="c-lib-grid-4">
           {WAIT_VARIANTS.map(([v, title]) => (
             <CanWaitCallout key={v} variant={v} title={title} size="large" text={`Sample sentence for the ${v} look.`} />
           ))}
@@ -327,7 +298,7 @@ function DashboardComponents() {
         )}
       </RunSpecimen>
 
-      <h2 className="dev-level">Organisms</h2>
+      <h2 className="c-lib-level">Organisms</h2>
       <RunSpecimen name="AiAnalysisDisclosure (main run, first finding)" status={status} ready={firstFinding} empty={NO_FINDINGS}>
         {() => (
           <div className="verdict-card" style={{ width: '100%', paddingTop: 'var(--verdict-gutter)' }}>
@@ -393,7 +364,7 @@ function DashboardComponents() {
         )}
       </RunSpecimen>
 
-      <h2 className="dev-level">Page parts</h2>
+      <h2 className="c-lib-level">Page parts</h2>
       <RunSpecimen name="SummaryStrip (open)" status={status} ready={anyRun} empty={NO_RUNS}>
         {() => (
           <div className="app-frame" style={{ width: '100%', margin: 0 }}>
@@ -456,9 +427,9 @@ export default function ComponentsPage() {
   }
 
   return (
-    <div className="dev-components">
+    <div className="c-lib-components">
       <h1>Components</h1>
-      <div className="dev-tabs" role="tablist" aria-label="Which components to show" onKeyDown={onKey}>
+      <div className="c-lib-tabs" role="tablist" aria-label="Which components to show" onKeyDown={onKey}>
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -468,7 +439,7 @@ export default function ComponentsPage() {
             aria-selected={t.key === current}
             aria-controls={`components-panel-${t.key}`}
             tabIndex={t.key === current ? 0 : -1}
-            className={`dev-tab${t.key === current ? ' is-active' : ''}`}
+            className={`c-lib-tab${t.key === current ? ' is-active' : ''}`}
             onClick={() => select(t.key)}
           >
             {t.label}

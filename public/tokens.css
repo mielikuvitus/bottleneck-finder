@@ -2,10 +2,9 @@
    source. Each uses the tokens it needs. Two layers: the palette holds the raw
    values, and the tokens below it name what each one is for. Styles only use
    the named tokens for colours and shadows (npm run check:tokens checks the
-   dashboard). Spacing, type and corner radius use a token when one has the same
-   value. The site loads this file before styles.css; the dashboard imports it in
-   src/main.jsx. The components page's Tokens tab lists every token and which of
-   the two uses it. */
+   dashboard). The site loads this file before styles.css; the dashboard imports
+   it in src/main.jsx. The components page's Tokens tab lists them all, with the
+   comment after a token as its note; it groups them by name. */
 :root {
   /* Palette */
   --palette-white: #ffffff;
@@ -41,43 +40,42 @@
   --palette-blue-700: #3b6b8b;
   --palette-blue-100: #edf2f6;
 
-  /* Colours */
-  --color-text: var(--palette-ink);
-  --color-text-muted: var(--palette-gray-700);
-  --color-text-faint: var(--palette-gray-600); /* empty values and small print */
-  --color-background: var(--palette-cream);
-  --color-surface: var(--palette-white);
-  --color-border: var(--palette-gray-300);
-  --color-border-active: var(--palette-ink); /* the run picker while open, and focus rings */
-  --color-placeholder: var(--palette-gray-200); /* loading placeholders */
-  --color-symbol-surface: var(--palette-gray-100); /* tile behind the empty-report symbol */
-  --color-option-selected: var(--palette-gray-75);
-  --color-option-hover: var(--palette-gray-50);
-  --color-option-hover-strong: var(--palette-gray-150);
-  --color-hover-shade: var(--palette-black); /* mixed into a border to darken it on hover */
-  --color-danger: var(--palette-red-700); /* "Superseded" */
-  --color-success: var(--palette-green-700); /* "Fixes applied" */
-  --color-check: var(--palette-gray-900);
-  --color-switch-off: var(--palette-gray-400);
-  --color-switch-on: var(--palette-navy);
-  --color-switch-thumb: var(--palette-white);
-  --color-confidence-filled: var(--palette-gray-700);
-  --color-confidence-empty: var(--palette-gray-300);
-  --color-brand: var(--palette-red-500); /* the tomorrow logo */
-  --color-on-brand: var(--palette-white);
-  --color-brand-button: var(--palette-red-600); /* a coral button: the brightest coral white text can be read on */
-  --color-brand-text: var(--palette-red-625); /* small coral text on cream or white (the brand coral is too light there) */
+  /* Colour Variables */
+  --color-text: var(--palette-ink); /* body text and headings on both sites */
+  --color-text-muted: var(--palette-gray-700); /* secondary text: sublines, labels, table headers, chart axes */
+  --color-text-faint: var(--palette-gray-600); /* small print and empty values: dates, zero counts, card labels */
+  --color-background: var(--palette-cream); /* the page behind everything, on both sites */
+  --color-surface: var(--palette-white); /* white cards and panels: finding cards, picker, prompt box, specimens */
+  --color-border: var(--palette-gray-300); /* card outlines and table row lines on the dashboard */
+  --color-border-active: var(--palette-ink); /* the open run picker, and the focus ring */
+  --color-placeholder: var(--palette-gray-200); /* grey blocks in the loading skeleton */
+  --color-symbol-surface: var(--palette-gray-100); /* pale tiles: the empty-report symbol, browser bar, file chip */
+  --color-option-selected: var(--palette-gray-75); /* the selected run in the run picker */
+  --color-option-hover: var(--palette-gray-50); /* hovered run options and the model picker */
+  --color-option-hover-strong: var(--palette-gray-150); /* hovering an already-selected option, and the modal close button */
+  --color-hover-shade: var(--palette-black); /* mixed into borders and the switch to darken them on hover */
+  --color-danger: var(--palette-red-700); /* warnings in text: "Superseded", over the limit, lost visitors, the active tab */
+  --color-success: var(--palette-green-700); /* positive text: "Fixes applied", sign-up success, green avatars */
+  --color-check: var(--palette-gray-900); /* the tick next to the selected run */
+  --color-switch-off: var(--palette-gray-400); /* the switch track when off */
+  --color-switch-on: var(--palette-navy); /* the switch track when on, and the send button */
+  --color-switch-thumb: var(--palette-white); /* the switch knob, and the send button's arrow */
+  --color-confidence-filled: var(--palette-gray-700); /* filled bars of the confidence indicator */
+  --color-confidence-empty: var(--palette-gray-300); /* empty bars of the confidence indicator */
+  --color-brand: var(--palette-red-500); /* the tomorrow coral: logos, accents, decoration and brand marks */
+  --color-on-brand: var(--palette-white); /* text and marks on the coral: the logo letter */
+  --color-brand-button: var(--palette-red-600); /* the coral button: the brightest coral white text can be read on */
+  --color-brand-text: var(--palette-red-625); /* small coral text on cream or white: eyebrows, error messages */
   --color-brand-strong: var(--palette-red-650); /* small coral text on pale coral, the muted surface or the grey sign-up panel */
   --color-brand-surface: var(--palette-red-100); /* pale coral behind coral marks: avatars, icons, the step number */
   --color-brand-tint: var(--palette-red-200); /* soft coral shapes: the hero backdrop, the savings bars */
-  --color-dark: var(--palette-navy); /* dark sections and the primary button */
-  --color-surface-muted: var(--palette-gray-100); /* sections and cards set off from the page */
-  --color-success-surface: var(--palette-green-100); /* behind green marks */
-  --color-divider: rgba(9, 23, 35, 0.08); /* hairlines between rows */
-  --color-backdrop: rgba(9, 23, 35, 0.72); /* behind the screenshot modal */
+  --color-dark: var(--palette-navy); /* dark sections and the primary button: footer, ribbon, debit card */
+  --color-surface-muted: var(--palette-gray-100); /* sections and cards set off from the page: rating, rate and round-up areas */
+  --color-success-surface: var(--palette-green-100); /* pale green behind green marks: green avatars */
+  --color-divider: rgba(9, 23, 35, 0.08); /* hairlines between rows: activity list, ratings section */
+  --color-backdrop: rgba(9, 23, 35, 0.72); /* the dark layer behind the screenshot modal */
 
   /* Can it wait? */
-  /* The callout on each finding that says how soon it needs fixing. It has four looks, picked from the finding's severity: safe (green), caution (amber), soon (pale red) and now (coral). */
   --color-wait-safe: var(--palette-green-700);
   --color-wait-safe-surface: var(--palette-green-100);
   --color-wait-caution: var(--palette-amber-700);
@@ -112,7 +110,6 @@
   --color-chart-annotation: var(--palette-gray-700); /* knee, capacity line, campaign marker */
 
   /* Shadows */
-  /* Bigger the higher something sits. sm: buttons at rest. md: buttons and cards lifted on hover, and boxes on the page. lg: only a box on top of another shadowed box. The coral ones go on coral things, or things with a coral border. */
   --shadow-sm: 0 2px 6px rgba(17, 34, 49, 0.16);
   --shadow-md: 0 6px 12px rgba(17, 34, 49, 0.18);
   --shadow-lg: 0 14px 16px rgba(17, 34, 49, 0.24);
@@ -124,7 +121,7 @@
   --focus-ring: 2px solid var(--color-border-active); /* the outline on whatever has keyboard focus */
 
   /* Motion */
-  --duration-switch: 240ms; /* keep in step with SWITCH_MS in RunPicker.jsx */
+  --duration-switch: 240ms; /* the switch and the superseded runs in the run picker (RunPicker.jsx reads it) */
   --ease-switch: cubic-bezier(0.4, 0, 0.2, 1); /* gentle start and stop */
 
   /* Spacing */
