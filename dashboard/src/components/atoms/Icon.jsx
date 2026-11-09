@@ -47,9 +47,10 @@ const ICONS = {
 
 // name: a key of ICONS; size in px. Decorative: hidden from screen readers,
 // so the text next to it carries the meaning.
-export default function Icon({ name, size = 14, className = '' }) {
+export default function Icon({ name, size = 14, className = '', ...rest }) {
   return (
     <svg
+      {...rest}
       className={`icon ${className}`.trim()}
       width={size}
       height={size}

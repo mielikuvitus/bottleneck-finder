@@ -3,6 +3,8 @@
 // form ones are cropped (fallbacks/cropped/) to the email field and the
 // message under it. A state with
 // no screenshot yet is simply left out, and its tab isn't shown.
+import { imageUrl } from './api.js';
+
 export const SCREENSHOTS = {
   'GET /': {
     normal: { file: 'tomorrow1.png', caption: 'The homepage' },
@@ -28,5 +30,14 @@ export const STATES = [
   { key: 'fallback', label: 'Fallback' },
 ];
 
-// The states that have a screenshot for a route, in tab order
-export const statesFor = (route) => STATES.filter((s) => SCREENSHOTS[route]?.[s.key]).map((s) => ({ ...s, ...SCREENSHOTS[route][s.key] }));
+// A screenshot with its address, ready for an <img>
+const withSrc = (shot) => ({ ...shot, src: imageUrl(shot.file) });
+
+// The states that have a screenshot for a route, in tab order:
+// [{ key, label, file, src, caption }]
+export const statesFor = (route) => STATES.filter((s) => SCREENSHOTS[route]?.[s.key]).map((s) => withSrc({ ...s, ...SCREENSHOTS[route][s.key] }));
+
+// The test site's pages each test visits, in the test details: the main test
+// shows the homepage and the sign-up page, the sign-up test only the sign-up page
+const PAGES = { main: ['GET /', 'GET /signup'], signup: ['GET /signup'] };
+export const siteShots = (test) => (PAGES[test] ?? []).map((route) => SCREENSHOTS[route]?.normal).filter(Boolean).map(withSrc);

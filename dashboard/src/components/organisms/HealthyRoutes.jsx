@@ -3,7 +3,8 @@
 // highest load). A row opens that route's arrivals vs successful and p95 charts.
 import { useId, useMemo, useState } from 'react';
 import { Area, ComposedChart, Line, LineChart } from 'recharts';
-import ChartCard, { grid, tooltip, xAxis, yAxis } from '../molecules/ChartCard.jsx';
+import ChartCard from '../molecules/ChartCard.jsx';
+import { chartBase } from '../molecules/chartBase.jsx';
 import { SMOOTHED, chartRows, smoothRows } from '../../data/series.js';
 
 const SMOOTH_SECONDS = 5; // success is drawn as a 5-second average, as in the evidence
@@ -16,15 +17,12 @@ function RouteCharts({ route, rows }) {
         title="Arrivals vs successful"
         unit={`${route} · requests/s · success: ${SMOOTH_SECONDS}s average`}
         legend={[
-          { kind: 'line', label: 'Arrivals' },
-          { kind: 'area', label: 'Success' },
+          { kind: 'main', label: 'Arrivals' },
+          { kind: 'success', label: 'Success' },
         ]}
       >
         <ComposedChart data={smoothSuccess} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
-          {grid}
-          {xAxis(rows)}
-          {yAxis}
-          {tooltip}
+          {chartBase(rows)}
           <Area
             type="linear"
             dataKey={`${route}|ok${SMOOTHED}`}
@@ -40,12 +38,9 @@ function RouteCharts({ route, rows }) {
         </ComposedChart>
       </ChartCard>
 
-      <ChartCard title="Response time (p95)" unit="ms" legend={[{ kind: 'line', label: `${route} p95` }]}>
+      <ChartCard title="Response time (p95)" unit="ms" legend={[{ kind: 'main', label: `${route} p95` }]}>
         <LineChart data={rows} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
-          {grid}
-          {xAxis(rows)}
-          {yAxis}
-          {tooltip}
+          {chartBase(rows)}
           <Line dataKey={`${route}|p95`} name="p95" stroke="var(--color-chart-arrivals)" strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />
         </LineChart>
       </ChartCard>

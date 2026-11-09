@@ -9,7 +9,8 @@
 import { useId } from 'react';
 import { Area, Bar, BarChart, ComposedChart, Line, LineChart, ReferenceDot, ReferenceLine } from 'recharts';
 import { HatchPattern } from '../atoms/ChartLegend.jsx';
-import ChartCard, { grid, tooltip, xAxis, yAxis } from '../molecules/ChartCard.jsx';
+import ChartCard from '../molecules/ChartCard.jsx';
+import { chartBase } from '../molecules/chartBase.jsx';
 import Disclosure from '../molecules/Disclosure.jsx';
 import { SMOOTHED, bucketRows, chartRows, secondWhenTargetReaches, serverSeries, smoothRows } from '../../data/series.js';
 
@@ -92,18 +93,15 @@ export default function EvidenceDisclosure({ finding, timeline, peaks, defaultOp
             title="Arrivals vs successful"
             unit={`${timeline.loadUnit} · requests/s · success: ${SMOOTH_SECONDS}s average`}
             legend={[
-              { kind: 'line', label: 'Arrivals' },
-              { kind: 'area', label: 'Success' },
+              { kind: 'main', label: 'Arrivals' },
+              { kind: 'success', label: 'Success' },
               ...(kneeSecond !== null ? [{ kind: 'knee', label: `Knee · ${finding.knee_at.load}` }] : []),
               ...(capacity ? [{ kind: 'capacity', label: `Capacity · ${capacity} req/s` }] : []),
               ...(campaignSecond !== null ? [{ kind: 'campaign', label: `Campaign · ${peaks.campaign.visitsPerSecond} visits/s` }] : []),
             ]}
           >
             <ComposedChart data={smoothSuccess} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
-              {grid}
-              {xAxis(rows)}
-              {yAxis}
-              {tooltip}
+              {chartBase(rows)}
               <Area
                 type="linear"
                 dataKey={`${route}|ok${SMOOTHED}`}
@@ -128,18 +126,15 @@ export default function EvidenceDisclosure({ finding, timeline, peaks, defaultOp
             title="Visitors who left or saw a fallback"
             unit={`visitors/s · one bar per ${BAR_SECONDS}s`}
             legend={[
-              { kind: 'block', label: 'Left' },
-              { kind: 'hatched', label: 'Fallback' },
+              { kind: 'left', label: 'Left' },
+              { kind: 'fallback', label: 'Fallback' },
             ]}
           >
             <BarChart data={bars} margin={{ top: 6, right: 6, bottom: 0, left: 0 }} barCategoryGap={1}>
               <defs>
                 <HatchPattern id={hatchId} />
               </defs>
-              {grid}
-              {xAxis(bars)}
-              {yAxis}
-              {tooltip}
+              {chartBase(bars)}
               <Bar dataKey="left" name="Left" stackId="out" fill="var(--color-chart-left)" isAnimationActive={false} />
               <Bar
                 dataKey="degraded"
@@ -153,12 +148,9 @@ export default function EvidenceDisclosure({ finding, timeline, peaks, defaultOp
             </BarChart>
           </ChartCard>
 
-          <ChartCard title="Response time (p95)" unit="ms" legend={[{ kind: 'line', label: `${route} p95` }]}>
+          <ChartCard title="Response time (p95)" unit="ms" legend={[{ kind: 'main', label: `${route} p95` }]}>
             <LineChart data={rows} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
-              {grid}
-              {xAxis(rows)}
-              {yAxis}
-              {tooltip}
+              {chartBase(rows)}
               <Line dataKey={`${route}|p95`} name="p95" stroke="var(--color-chart-arrivals)" strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />
             </LineChart>
           </ChartCard>
@@ -168,13 +160,10 @@ export default function EvidenceDisclosure({ finding, timeline, peaks, defaultOp
               key={filled.key}
               title={filled.title}
               unit={filled.lines[1] ? `${filled.unit} · ${filled.lines[1][1]}: ${SMOOTH_SECONDS}s average` : filled.unit}
-              legend={filled.lines.map(([, label], i) => ({ kind: i === 0 ? 'line' : i === 1 ? 'area-red' : 'dashed-red', label }))}
+              legend={filled.lines.map(([, label], i) => ({ kind: i === 0 ? 'main' : i === 1 ? 'second' : 'other-cause', label }))}
             >
               <ComposedChart data={smoothFilled} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
-                {grid}
-                {xAxis(rows)}
-                {yAxis}
-                {tooltip}
+                {chartBase(rows)}
                 {/* The second series as a shaded area, behind the main line;
                     any further cause as a dashed red line */}
                 {filled.lines.slice(1).map(([key, label], i) => (
@@ -207,12 +196,9 @@ export default function EvidenceDisclosure({ finding, timeline, peaks, defaultOp
           ))}
 
           {serverCharts.map((c) => (
-            <ChartCard key={c.key} title={c.title} unit={c.unit} legend={[{ kind: 'line', label: c.label }]}>
+            <ChartCard key={c.key} title={c.title} unit={c.unit} legend={[{ kind: 'main', label: c.label }]}>
               <LineChart data={rows} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
-                {grid}
-                {xAxis(rows)}
-                {yAxis}
-                {tooltip}
+                {chartBase(rows)}
                 <Line dataKey={c.key} name={c.label} stroke="var(--color-chart-arrivals)" strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />
               </LineChart>
             </ChartCard>

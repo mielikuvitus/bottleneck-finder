@@ -1,6 +1,8 @@
 // Picks the run to show (Figma: Run picker / open). A button that opens a list
 // of runs, following the ARIA listbox pattern: Enter, Space or the arrow keys
 // open it; arrows move; Enter or Space selects; Esc or a click outside closes.
+// runs: runs.json. value: the selected run's name, or null; onChange(name).
+// showSuperseded and onShowSupersededChange(on): the switch.
 // autoFocus: focus the button when it appears (the page sets it after a run is
 // chosen, as the skeleton removes the picker while that run loads).
 import { useEffect, useId, useRef, useState } from 'react';
@@ -10,7 +12,7 @@ import { DESCRIPTIONS, titleOf } from '../../data/runLabels.js';
 // --duration-switch in tokens.css
 const SWITCH_MS = 240;
 
-export default function RunPicker({ runs, selected, onSelect, showSuperseded, onToggleSuperseded, autoFocus = false }) {
+export default function RunPicker({ runs, value, onChange, showSuperseded, onShowSupersededChange, autoFocus = false }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const [usingKeyboard, setUsingKeyboard] = useState(false);
@@ -27,8 +29,8 @@ export default function RunPicker({ runs, selected, onSelect, showSuperseded, on
 
   // Superseded runs only when the switch is on (the selected run always shows)
   // (while they shrink away after switching off, they're still shown)
-  const options = runs.filter((r) => showSuperseded || motion === 'out' || !r.superseded || r.name === selected);
-  const current = runs.find((r) => r.name === selected);
+  const options = runs.filter((r) => showSuperseded || motion === 'out' || !r.superseded || r.name === value);
+  const current = runs.find((r) => r.name === value);
 
   // Only when it first appears, so it doesn't take focus from elsewhere later
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function RunPicker({ runs, selected, onSelect, showSuperseded, on
   }, [open]);
 
   function openList() {
-    const index = options.findIndex((r) => r.name === selected);
+    const index = options.findIndex((r) => r.name === value);
     setActive(index >= 0 ? index : 0);
     setOpen(true);
     requestAnimationFrame(() => listRef.current?.focus());
@@ -58,7 +60,7 @@ export default function RunPicker({ runs, selected, onSelect, showSuperseded, on
   }
 
   function choose(run) {
-    onSelect(run.name);
+    onChange(run.name);
     close();
   }
 
@@ -136,7 +138,7 @@ export default function RunPicker({ runs, selected, onSelect, showSuperseded, on
             onKeyDown={onListKey}
           >
             {options.map((run, i) => {
-              const isSelected = run.name === selected;
+              const isSelected = run.name === value;
               return (
                 <li
                   key={run.name}
@@ -147,8 +149,8 @@ export default function RunPicker({ runs, selected, onSelect, showSuperseded, on
                     'run-option',
                     isSelected ? 'is-selected' : '',
                     run.superseded ? 'is-superseded' : '',
-                    run.superseded && run.name !== selected && motion === 'in' ? 'is-entering' : '',
-                    run.superseded && run.name !== selected && motion === 'out' ? 'is-leaving' : '',
+                    run.superseded && run.name !== value && motion === 'in' ? 'is-entering' : '',
+                    run.superseded && run.name !== value && motion === 'out' ? 'is-leaving' : '',
                     i === active ? 'is-active' : '',
                   ].join(' ')}
                   onMouseEnter={() => {
@@ -187,7 +189,7 @@ export default function RunPicker({ runs, selected, onSelect, showSuperseded, on
                 clearTimeout(motionTimer.current);
                 setMotion(showSuperseded ? 'out' : 'in');
                 motionTimer.current = setTimeout(() => setMotion(null), SWITCH_MS + 50);
-                onToggleSuperseded(!showSuperseded);
+                onShowSupersededChange(!showSuperseded);
               }}
             >
               <span className="switch-thumb" />

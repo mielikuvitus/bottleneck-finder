@@ -7,10 +7,10 @@ const LEVELS = {
   low: { filled: 1, label: 'Low confidence' },
 };
 
-export default function ConfidenceIndicator({ level }) {
+export default function ConfidenceIndicator({ level, className = '', ...rest }) {
   const { filled, label } = LEVELS[level] ?? { filled: 0, label: `${level ?? 'Unknown'} confidence` };
   return (
-    <span className="confidence-indicator" data-level={level}>
+    <span {...rest} className={`confidence-indicator ${className}`.trim()} data-level={level}>
       <span className="confidence-scale" aria-hidden="true">
         {[1, 2, 3].map((bar) => (
           <span key={bar} className={`confidence-bar${bar <= filled ? ' is-filled' : ''}`} />

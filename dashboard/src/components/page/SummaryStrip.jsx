@@ -4,6 +4,8 @@
 import Disclosure from '../molecules/Disclosure.jsx';
 import AssumptionsList from '../organisms/AssumptionsList.jsx';
 import SiteScreenshots from '../molecules/SiteScreenshots.jsx';
+import { siteShots } from '../../data/screenshots.js';
+import { assumptionsFor } from '../../data/assumptions.js';
 
 const SEVERITIES = ['critical', 'high', 'medium', 'low', 'info'];
 const TEST_NAMES = { main: 'Main test', signup: 'Sign-up test' };
@@ -71,8 +73,8 @@ export default function SummaryStrip({ run, defaultOpen = false }) {
         </div>
       </div>
       {findings.normal_day_warning ? <p className="summary-note">Normal-day numbers: {findings.normal_day_warning}</p> : null}
-      <SiteScreenshots test={findings.test} />
-      <AssumptionsList config={run.config} routeContext={run.routeContext} findings={findings} />
+      <SiteScreenshots shots={siteShots(findings.test)} />
+      <AssumptionsList {...assumptionsFor(run)} />
     </Disclosure>
   );
 }

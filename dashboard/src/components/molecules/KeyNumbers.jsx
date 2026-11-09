@@ -1,15 +1,16 @@
 // How much traffic a finding's route carries, against both peaks
 // (finding.load_levels). Room is only shown when a level fits.
-export default function KeyNumbers({ loadLevels }) {
+import { handlesNote } from '../../data/loadLevels.js';
+
+export default function KeyNumbers({ loadLevels, className = '', ...rest }) {
   if (!loadLevels) return null;
   return (
-    <div className="key-numbers">
+    <div {...rest} className={`key-numbers ${className}`.trim()}>
       <div className="key-number">
         <p className="key-number-label">Handles</p>
         <p className="key-number-value">about {loadLevels.handles_visitors} visitors</p>
         <p className="key-number-note">
-          {/* "visitors at once" → "at once": the value already says visitors */}
-          {loadLevels.handles_what.replace(/^visitors /, '')} · {loadLevels.handles_requests_per_second} requests a second
+          {handlesNote(loadLevels.handles_what)} · {loadLevels.handles_requests_per_second} requests a second
         </p>
       </div>
       {loadLevels.levels.map((level) => (

@@ -10,10 +10,10 @@ const BADGES = {
   info: { label: 'Healthy', icon: 'check' },
 };
 
-export default function SeverityBadge({ severity }) {
+export default function SeverityBadge({ severity, className = '', ...rest }) {
   const badge = BADGES[severity] ?? { label: severity, icon: null };
   return (
-    <span className="severity-badge" data-severity={severity}>
+    <span {...rest} className={`severity-badge ${className}`.trim()} data-severity={severity}>
       {badge.icon ? <Icon name={badge.icon} size={14} /> : null}
       {badge.label}
     </span>

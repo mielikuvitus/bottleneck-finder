@@ -82,3 +82,7 @@ export function smoothRows(rows, keys, size = 5) {
     return out;
   });
 }
+
+// Chart tooltips: hovering shows the real value for that second, also on a
+// smoothed line (its key ends with SMOOTHED)
+export const tooltipValue = (value, name, item) => [item.dataKey.endsWith(SMOOTHED) ? item.payload[item.dataKey.slice(0, -SMOOTHED.length)] : value, name];

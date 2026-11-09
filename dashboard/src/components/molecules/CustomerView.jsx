@@ -1,14 +1,14 @@
-// What a visitor sees (Figma: Customer view panel): a browser-style frame
-// with the page address, a tab per state that has a screenshot, and a caption.
-// customerView: finding.customer_view { route, shown_on, caption, state }.
-// The screenshot opens large (ScreenshotButton), like the test site's.
+// What a visitor sees: a browser-style frame with the page address, a tab per
+// state that has a screenshot, and a caption. The screenshot opens large
+// (ScreenshotButton), like the test site's.
+// states: [{ key, label, src, caption }], from statesFor() in
+// src/data/screenshots.js. initialState: the tab it opens on. address: the page
+// address in the bar. caption: under the frame. No states, and nothing shows.
 import { useId, useState } from 'react';
 import ScreenshotButton from './ScreenshotButton.jsx';
-import { statesFor } from '../../data/screenshots.js';
 
-export default function CustomerView({ customerView }) {
-  const states = statesFor(customerView?.route);
-  const initial = states.find((s) => s.key === customerView?.state) ?? states[0];
+export default function CustomerView({ states = [], initialState, address, caption }) {
+  const initial = states.find((s) => s.key === initialState) ?? states[0];
   const [current, setCurrent] = useState(initial?.key);
   const id = useId();
   if (!states.length) return null;
@@ -27,7 +27,7 @@ export default function CustomerView({ customerView }) {
   return (
     <figure className="customer-view">
       <div className="browser-frame">
-        <div className="browser-bar">tomorrow {customerView.shown_on ?? ''}</div>
+        <div className="browser-bar">tomorrow {address ?? ''}</div>
         <div className="browser-tabs" role="tablist" aria-label="What visitors see" onKeyDown={onKey}>
           {states.map((s) => (
             <button
@@ -47,12 +47,12 @@ export default function CustomerView({ customerView }) {
           ))}
         </div>
         <div className="browser-page" role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-tab-${shown.key}`}>
-          <ScreenshotButton file={shown.file} caption={shown.caption} className="browser-page-enlarge" />
+          <ScreenshotButton src={shown.src} caption={shown.caption} className="browser-page-enlarge" />
         </div>
       </div>
       <figcaption className="customer-view-label">
         <span className="customer-view-title">Customer view</span>
-        <span className="customer-view-caption">{customerView.caption}</span>
+        <span className="customer-view-caption">{caption}</span>
       </figcaption>
     </figure>
   );

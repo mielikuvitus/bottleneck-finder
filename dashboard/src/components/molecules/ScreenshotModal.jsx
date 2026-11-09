@@ -1,11 +1,11 @@
 // One screenshot, large, in a native <dialog>: the page behind is blocked,
 // Esc closes it, and focus returns to the button that opened it. Closes with
 // the ✕ at the top right or a click outside the image.
+// src: the image's address; caption: the dialog's label and the alt text.
 import { useEffect, useRef } from 'react';
 import Icon from '../atoms/Icon.jsx';
-import { imageUrl } from '../../data/api.js';
 
-export default function ScreenshotModal({ file, caption, onClose }) {
+export default function ScreenshotModal({ src, caption, onClose }) {
   const ref = useRef(null);
 
   // Open as a modal on mount. No close() on cleanup: removing the dialog
@@ -24,7 +24,7 @@ export default function ScreenshotModal({ file, caption, onClose }) {
       // image or the button) is on the backdrop around it
       onClick={(e) => e.target === ref.current && ref.current.close()}
     >
-      <img src={imageUrl(file)} alt={caption} />
+      <img src={src} alt={caption} />
       <button type="button" className="screenshot-modal-close" onClick={() => ref.current.close()}>
         <Icon name="close" size={20} />
         <span className="visually-hidden">Close</span>

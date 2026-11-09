@@ -39,10 +39,10 @@ export default function DashboardPage() {
   const picker = (
     <RunPicker
       runs={runs}
-      selected={selected}
-      onSelect={onSelectRun}
+      value={selected}
+      onChange={onSelectRun}
       showSuperseded={showSuperseded}
-      onToggleSuperseded={setShowSuperseded}
+      onShowSupersededChange={setShowSuperseded}
       autoFocus={refocusPicker}
     />
   );

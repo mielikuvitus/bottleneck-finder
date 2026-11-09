@@ -9,8 +9,10 @@ import SiteComponents from './SiteComponents.jsx';
 import TokensTab from './TokensTab.jsx';
 import { INTERACTIVE, JumpContext, JumpHint, UsedInLink, useJumps } from './jumps.jsx';
 import { chartRows } from '../data/series.js';
-import { SCREENSHOTS } from '../data/screenshots.js';
-import ChartCard, { grid, tooltip, xAxis, yAxis } from '../components/molecules/ChartCard.jsx';
+import { siteShots, statesFor } from '../data/screenshots.js';
+import { assumptionsFor } from '../data/assumptions.js';
+import ChartCard from '../components/molecules/ChartCard.jsx';
+import { chartBase } from '../components/molecules/chartBase.jsx';
 import SiteScreenshots from '../components/molecules/SiteScreenshots.jsx';
 import ScreenshotModal from '../components/molecules/ScreenshotModal.jsx';
 import ScreenshotButton from '../components/molecules/ScreenshotButton.jsx';
@@ -28,6 +30,7 @@ import Placeholder from '../components/atoms/Placeholder.jsx';
 import Icon from '../components/atoms/Icon.jsx';
 import ChartLegend from '../components/atoms/ChartLegend.jsx';
 import CanWaitCallout from '../components/molecules/CanWaitCallout.jsx';
+import CanWaitTitle from '../components/molecules/CanWaitTitle.jsx';
 import KeyNumbers from '../components/molecules/KeyNumbers.jsx';
 import CustomerView from '../components/molecules/CustomerView.jsx';
 import RunPicker from '../components/molecules/RunPicker.jsx';
@@ -45,14 +48,20 @@ import FindingCard from '../components/organisms/FindingCard.jsx';
 
 const SEVERITIES = ['critical', 'high', 'medium', 'low', 'info'];
 const ICONS = ['error', 'priorityHigh', 'warningAmber', 'arrowDownward', 'check', 'checkCircle', 'visibility', 'schedule', 'bolt', 'close', 'description', 'arrowUpward', 'autoAwesome'];
-const WAIT_VARIANTS = ['safe', 'caution', 'soon', 'now'];
+// The look of each variant, with a title the analyser writes for it
+const WAIT_VARIANTS = [
+  ['safe', 'Safe to wait'],
+  ['caution', 'Watch closely'],
+  ['soon', 'Fix before campaign'],
+  ['now', 'Fix now'],
+];
 const LEGEND_KINDS = [
-  { kind: 'line', label: 'Arrivals' },
-  { kind: 'area', label: 'Success' },
-  { kind: 'area-red', label: 'Waiting' },
-  { kind: 'dashed-red', label: 'Second cause' },
-  { kind: 'block', label: 'Left' },
-  { kind: 'hatched', label: 'Fallback' },
+  { kind: 'main', label: 'Arrivals' },
+  { kind: 'success', label: 'Success' },
+  { kind: 'second', label: 'Waiting' },
+  { kind: 'other-cause', label: 'Second cause' },
+  { kind: 'left', label: 'Left' },
+  { kind: 'fallback', label: 'Fallback' },
   { kind: 'knee', label: 'Knee' },
   { kind: 'capacity', label: 'Capacity' },
   { kind: 'campaign', label: 'Campaign' },
@@ -67,6 +76,7 @@ const USED_IN = {
   ChartLegend: 'EvidenceDisclosure',
   Placeholder: 'DashboardSkeleton',
   CanWaitCallout: 'VerdictCard',
+  CanWaitTitle: 'FindingCard',
   PromptComposer: 'AiAnalysisDisclosure',
   AiResponse: 'AiAnalysisDisclosure',
   RunPicker: 'EmptyReport',
@@ -167,8 +177,8 @@ function DashboardComponents() {
   const anyRun = main ?? signup ?? clear;
   const healthyRun = [main, signup, clear].find((run) => run?.findings.healthyRoutes?.length);
   const p95Rows = useMemo(() => (main ? chartRows(main.timeline) : []), [main]);
-  const modalShot = SCREENSHOTS['GET /'].normal;
-  const picker = <RunPicker runs={runs} selected={selected} onSelect={setSelected} showSuperseded={showSuperseded} onToggleSuperseded={setShowSuperseded} />;
+  const modalShot = siteShots('main')[0];
+  const picker = <RunPicker runs={runs} value={selected} onChange={setSelected} showSuperseded={showSuperseded} onShowSupersededChange={setShowSuperseded} />;
 
   return (
     <JumpContext.Provider value={jumps}>
@@ -195,7 +205,7 @@ function DashboardComponents() {
         ))}
       </Specimen>
       <Specimen name="ChartLegend (every kind)">
-        <ChartLegend items={LEGEND_KINDS} />
+        <ChartLegend legend={LEGEND_KINDS} />
       </Specimen>
       <Specimen name="Placeholder">
         <div style={{ width: 320, display: 'grid', gap: 8 }}>
@@ -207,21 +217,21 @@ function DashboardComponents() {
       <h2 className="dev-level">Molecules</h2>
       <Specimen name="CanWaitCallout (regular)">
         <div className="dev-grid-4">
-          {WAIT_VARIANTS.map((v) => (
-            <CanWaitCallout key={v} variant={v} text={`Sample sentence for the ${v} look.`} />
+          {WAIT_VARIANTS.map(([v, title]) => (
+            <CanWaitCallout key={v} variant={v} title={title} text={`Sample sentence for the ${v} look.`} />
           ))}
         </div>
       </Specimen>
       <Specimen name='CanWaitCallout (size="large")'>
         <div className="dev-grid-4">
-          {WAIT_VARIANTS.map((v) => (
-            <CanWaitCallout key={v} variant={v} size="large" text={`Sample sentence for the ${v} look.`} />
+          {WAIT_VARIANTS.map(([v, title]) => (
+            <CanWaitCallout key={v} variant={v} title={title} size="large" text={`Sample sentence for the ${v} look.`} />
           ))}
         </div>
       </Specimen>
-      <Specimen name='CanWaitCallout (size="inline")'>
-        {WAIT_VARIANTS.map((v) => (
-          <CanWaitCallout key={v} variant={v} size="inline" />
+      <Specimen name="CanWaitTitle">
+        {WAIT_VARIANTS.map(([v, title]) => (
+          <CanWaitTitle key={v} variant={v} title={title} />
         ))}
       </Specimen>
       <Specimen name="PromptComposer (send replays AiResponse's typing below)">
@@ -254,19 +264,21 @@ function DashboardComponents() {
       <RunSpecimen name="CustomerView (main run, first finding)" status={status} ready={firstFinding} empty={NO_FINDINGS}>
         {() => (
           <div style={{ width: 440 }}>
-            <CustomerView customerView={firstFinding.customer_view} />
+            <CustomerView
+              states={statesFor(firstFinding.customer_view?.route)}
+              initialState={firstFinding.customer_view?.state}
+              address={firstFinding.customer_view?.shown_on}
+              caption={firstFinding.customer_view?.caption}
+            />
           </div>
         )}
       </RunSpecimen>
       <RunSpecimen name="ChartCard (p95, main run, first finding)" status={status} ready={firstFinding} empty={NO_FINDINGS}>
         {() => (
           <div style={{ width: '100%', maxWidth: 560 }}>
-            <ChartCard title="Response time (p95)" unit="ms" legend={[{ kind: 'line', label: `${firstFinding.route} p95` }]}>
+            <ChartCard title="Response time (p95)" unit="ms" legend={[{ kind: 'main', label: `${firstFinding.route} p95` }]}>
               <LineChart data={p95Rows} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
-                {grid}
-                {xAxis(p95Rows)}
-                {yAxis}
-                {tooltip}
+                {chartBase(p95Rows)}
                 <Line dataKey={`${firstFinding.route}|p95`} name="p95" stroke="var(--color-chart-arrivals)" strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />
               </LineChart>
             </ChartCard>
@@ -275,11 +287,11 @@ function DashboardComponents() {
       </RunSpecimen>
       <Specimen name="SiteScreenshots (main test: both pages; sign-up test: one)">
         <div style={{ width: '100%' }}>
-          <SiteScreenshots test="main" />
+          <SiteScreenshots shots={siteShots('main')} />
         </div>
       </Specimen>
       <Specimen name="ScreenshotButton (caption under the image, or as its alt text)">
-        <ScreenshotButton file={modalShot.file} caption={modalShot.caption} className="site-screenshot" captionClassName="site-screenshot-caption" />
+        <ScreenshotButton src={modalShot.src} caption={modalShot.caption} className="site-screenshot" captionClassName="site-screenshot-caption" />
       </Specimen>
       <Specimen name="Disclosure">
         <div style={{ width: '100%' }}>
@@ -292,12 +304,12 @@ function DashboardComponents() {
         <button type="button" className="text-link" onClick={() => setModalOpen(true)}>
           Open the modal
         </button>
-        {modalOpen ? <ScreenshotModal file={modalShot.file} caption={modalShot.caption} onClose={() => setModalOpen(false)} /> : null}
+        {modalOpen ? <ScreenshotModal src={modalShot.src} caption={modalShot.caption} onClose={() => setModalOpen(false)} /> : null}
       </Specimen>
       <RunSpecimen name="AssumptionsList" status={status} ready={anyRun} empty={NO_RUNS}>
         {() => (
           <div style={{ width: '100%' }}>
-            <AssumptionsList config={anyRun.config} routeContext={anyRun.routeContext} findings={anyRun.findings} />
+            <AssumptionsList {...assumptionsFor(anyRun)} />
           </div>
         )}
       </RunSpecimen>

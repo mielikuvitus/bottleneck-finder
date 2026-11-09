@@ -1,12 +1,12 @@
 // The test's assumptions, behind a "Show assumptions" link at the bottom of
-// the test details. Condensed: the traffic numbers as a grid, the viewed
-// test's visitor behaviour on one line, and one row per route this run
-// reports on (its findings plus its healthy routes). Labels come from
-// _labels in test-config.json; the long _ notes stay in the file.
+// the test details. Condensed: the traffic numbers as a grid, the visitor
+// behaviour on one line, and one row per route. Labels come from _labels in
+// test-config.json; the long _ notes stay in the file.
+// config: test-config.json. behaviour: the viewed test's group in it.
+// routes: [[route, route-context.json entry]] for the routes this run reports
+// on. assumptionsFor(run) in src/data/assumptions.js gives all three.
 import { useId, useState } from 'react';
 
-// The test-config.json group each test reads
-const TEST_GROUPS = { main: 'main_funnel', signup: 'signup_test' };
 const ON_FAILURE = { left: 'leaves', degraded: 'carries on degraded' };
 
 // expected_peak_visitors → Expected peak visitors (when a run has no _labels)
@@ -97,14 +97,10 @@ function RouteTable({ routes }) {
   );
 }
 
-export default function AssumptionsList({ config, routeContext, findings }) {
+export default function AssumptionsList({ config, behaviour, routes }) {
   const [open, setOpen] = useState(false);
   const id = useId();
-  if (!config && !routeContext) return null;
-
-  const usedRoutes = new Set([...findings.findings.map((f) => f.route), ...(findings.healthyRoutes ?? []).map((h) => h.route)]);
-  const routes = Object.entries(routeContext ?? {}).filter(([route]) => usedRoutes.has(route));
-  const group = config?.[TEST_GROUPS[findings.test]];
+  if (!config && !routes) return null;
 
   return (
     <div className="assumptions-list">
@@ -114,8 +110,8 @@ export default function AssumptionsList({ config, routeContext, findings }) {
       {open ? (
         <div className="assumptions-content" id={`${id}-list`}>
           {config ? <TrafficGrid config={config} /> : null}
-          {group ? <Behaviour group={group} /> : null}
-          {routes.length ? <RouteTable routes={routes} /> : null}
+          {behaviour ? <Behaviour group={behaviour} /> : null}
+          {routes?.length ? <RouteTable routes={routes} /> : null}
           {/* Where a developer changes these (the files also explain each value) */}
           <p className="assumptions-source">
             Traffic and visitor behaviour are set in <code>load-tests/test-config.json</code>, routes in{' '}

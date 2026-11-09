@@ -9,6 +9,7 @@ import CustomerView from '../molecules/CustomerView.jsx';
 import AiAnalysisDisclosure from './AiAnalysisDisclosure.jsx';
 import EvidenceDisclosure from './EvidenceDisclosure.jsx';
 import { waitVariant } from '../../data/severity.js';
+import { statesFor } from '../../data/screenshots.js';
 
 // onCollapse (from FindingCard) adds Read less at the bottom, back to the short card
 export default function VerdictCard({ finding, timeline, routeContext, peaks, onCollapse }) {
@@ -65,7 +66,12 @@ export default function VerdictCard({ finding, timeline, routeContext, peaks, on
             )}
           </div>
         </div>
-        <CustomerView customerView={finding.customer_view} />
+        <CustomerView
+          states={statesFor(finding.customer_view?.route)}
+          initialState={finding.customer_view?.state}
+          address={finding.customer_view?.shown_on}
+          caption={finding.customer_view?.caption}
+        />
       </div>
 
       <AiAnalysisDisclosure finding={finding} peaks={peaks} />

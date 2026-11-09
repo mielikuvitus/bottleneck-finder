@@ -13,8 +13,9 @@ no organism does (Tomorrow: worked out from the pages; Dashboard: `USED_IN` in
 
 Every component, its props, the real data fields it uses, and one example
 value from the current runs: `2026-10-19_000132-main` and
-`2026-10-19_001114-signup`. The components are unstyled stubs in
-`src/components/`. Colours and shadows always come from the CSS variables in
+`2026-10-19_001114-signup`. The components are in `src/components/`. Atoms, and
+molecules with a single outer element, also take `className` (added to their
+own) and any other attribute, such as `aria-*`, for that outer element. Colours and shadows always come from the CSS variables in
 [src/styles/tokens.css](src/styles/tokens.css) (`npm run check:tokens` checks this);
 spacing, type and corner radius use one when it has the same value. I'm not maintaining a Figma file
 for this project.
@@ -128,19 +129,19 @@ of this atom: it's the first line of `EvidenceDisclosure`.
 
 | Prop | Example |
 | ---- | ------- |
-| `items` | `[{ kind: "line", label: "Arrivals" }, { kind: "hatched", label: "Fallback" }]` |
+| `legend` | `[{ kind: "main", label: "Arrivals" }, { kind: "fallback", label: "Fallback" }]` |
 
 A row of small SVG symbols
 with labels. Kinds and colours (tokens in `tokens.css`, `--color-chart-*`):
 
 | `kind` | Means | Looks like |
 | ------ | ----- | ---------- |
-| `line` | arrivals | solid navy line |
-| `area` | successful | pale green shaded area with a solid green top edge |
-| `area-red` | the second series in "what filled up" (e.g. requests waiting) | pale red shaded area with a solid red top edge |
-| `dashed-red` | any further cause in "Server busy" (`cause.contributors`) | red dashed line, no fill |
-| `block` | left | solid navy block |
-| `hatched` | saw a fallback | pale red block, red hatching, dotted red outline |
+| `main` | the chart's main series: arrivals, a route's p95, CPU, the event loop | solid navy line |
+| `success` | successful | pale green shaded area with a solid green top edge |
+| `second` | the second series in "what filled up" (e.g. requests waiting) | pale red shaded area with a solid red top edge |
+| `other-cause` | any further cause in "Server busy" (`cause.contributors`) | red dashed line, no fill |
+| `left` | left | solid navy block |
+| `fallback` | saw a fallback | pale red block, red hatching, dotted red outline |
 | `knee` | where it broke | grey open circle |
 | `capacity` | the most it served | dotted grey line |
 | `campaign` | campaign peak | vertical grey line |
@@ -161,9 +162,9 @@ also closes it.
 | Prop | Field | Example |
 | ---- | ----- | ------- |
 | `runs` | all of `runs.json` (superseded ones are hidden unless the switch is on) | `{ "name": "2026-10-19_000132-main", "test": "main", "date_label": "19 Oct 2026 · 00:01 BST", "superseded": false, ... }` |
-| `selected` | the selected run's `name`, or `null` | `"2026-10-19_000132-main"` |
-| `onSelect` | – | function(name) |
-| `showSuperseded`, `onToggleSuperseded` | – | `false`, function(on) |
+| `value` | the selected run's `name`, or `null` | `"2026-10-19_000132-main"` |
+| `onChange` | – | function(name) |
+| `showSuperseded`, `onShowSupersededChange` | – | `false`, function(on) |
 | `autoFocus` | – | `true` to focus the button when it appears; the page sets it after a run is chosen, as the skeleton removes the picker while the run loads |
 
 Each option and the button show:
@@ -181,7 +182,7 @@ no run selected. `?run=<name>` in the address opens a run directly.
 
 ### CanWaitCallout
 
-A bold title and a sentence underneath. The
+A box with a bold title and a sentence underneath. The
 look comes from `variant`; the words come from the analyser.
 
 | Prop | Field | Example |
@@ -189,7 +190,7 @@ look comes from `variant`; the words come from the analyser.
 | `variant` | from `finding.severity` (below) | `"soon"` |
 | `title` | `finding.can_wait_title` | `"Fix before campaign"` |
 | `text` | `finding.can_wait` | `"Not past the next campaign: it copes with a normal busy hour (48% to spare), but an ad would push it 37% over its limit."` |
-| `size` | – | `"regular"` (default), `"large"` (the verdict card) or `"inline"` (just the title in the variant's colour, no box; the short finding card). Inline is made of spans so it can sit in a button; `children` follow the title in the same colour. |
+| `size` | – | `"regular"` (default) or `"large"` (the verdict card) |
 
 | `variant` | Look | Icon | Severity |
 | --------- | ---- | ---- | -------- |
@@ -200,13 +201,24 @@ look comes from `variant`; the words come from the analyser.
 
 The icon says *when* to act, so it's different from
 the severity badge's icons, which say how bad it is. It sits before the title
-in the title's colour: 16px, 18px in `large`, 15px in `inline`.
+in the title's colour: 16px, 18px in `large`, 15px in `CanWaitTitle`.
 
 `can_wait_title` is chosen by the analyser from why the finding got its
 severity, so it only mentions a campaign when the campaign peak is the reason:
 "Fix now", "Fix before campaign", "Fix before next release", "Fix before
 traffic grows", "Watch closely", "Safe for now" or "Safe to wait". All wording
-is placeholder, to be revisited.
+is placeholder, to be revisited. There's no fallback title: it always comes
+from the analyser.
+
+### CanWaitTitle
+
+The can-it-wait title on its own, for the short finding card: the icon and
+title in the variant's colour, no box. Made of spans, so it can sit in a button.
+
+| Prop | Example |
+| ---- | ------- |
+| `variant`, `title` | as for `CanWaitCallout` |
+| `children` | follow the title in the same colour (the finding card's "→ Read more") |
 
 ### ChartCard
 
@@ -214,23 +226,25 @@ is placeholder, to be revisited.
 | ---- | ------- |
 | `title` | `"Response time (p95)"` |
 | `unit` | `"ms"` (shown above the y axis, in mono) |
-| `legend` | `ChartLegend` items: `[{ kind: "line", label: "GET /signup p95" }]`. Left out, there's no legend |
-| `children` | a Recharts chart |
+| `legend` | `ChartLegend` items: `[{ kind: "main", label: "GET /signup p95" }]`. Left out, there's no legend |
+| `children` | a Recharts chart, starting with `{chartBase(rows)}` |
 
-One chart card. Also exports the shared `xAxis(rows)`, `yAxis`, `tooltip` and
-`grid`. Used by `EvidenceDisclosure` and `HealthyRoutes`.
+One chart card. Used by `EvidenceDisclosure` and `HealthyRoutes`.
+`chartBase(rows)` (in `src/components/molecules/chartBase.jsx`) gives what every
+chart starts with: the grid, the time axis over `rows`' seconds, the value axis
+and the tooltip (which shows the real value even on a smoothed line).
 
 ### SiteScreenshots
 
 "The test site" in the test details, above "Show assumptions": thumbnails of
 the test site's pages, each a `ScreenshotButton`. The main test shows the
-homepage and the sign-up page, the sign-up test only the sign-up page. Files
-and captions come from the `normal` state in `src/data/screenshots.js`
-(`GET /` → `tomorrow1.png`, `GET /signup` → `tomorrow2.png`).
+homepage and the sign-up page, the sign-up test only the sign-up page:
+`siteShots(findings.test)` in `src/data/screenshots.js` picks them, from the
+`normal` state (`GET /` → `tomorrow1.png`, `GET /signup` → `tomorrow2.png`).
 
 | Prop | Example |
 | ---- | ------- |
-| `test` | `findings.test`: `"main"` or `"signup"` (anything else shows nothing) |
+| `shots` | `[{ src, caption }]`: `siteShots("main")`. Empty, and nothing shows |
 
 ### ScreenshotButton
 
@@ -239,7 +253,7 @@ larger" for screen readers. Used by `SiteScreenshots` and `CustomerView`.
 
 | Prop | Example |
 | ---- | ------- |
-| `file` | `"tomorrow1.png"` (relative to `public/data/images`) |
+| `src` | the image's address: `src` from `siteShots()` or `statesFor()` in `src/data/screenshots.js` |
 | `caption` | `"The homepage"` |
 | `className` | `"site-screenshot"`: the button's look comes from its user |
 | `captionClassName` | `"site-screenshot-caption"`: shows the caption under the image. Left out, the caption is the image's alt text instead |
@@ -266,7 +280,7 @@ outside the image, or Esc; focus then returns to the thumbnail.
 
 | Prop | Example |
 | ---- | ------- |
-| `file` | `"tomorrow1.png"` (relative to `public/data/images`) |
+| `src` | the image's address: `src` from `siteShots()` or `statesFor()` in `src/data/screenshots.js` |
 | `caption` | `"The homepage"` (the dialog's label and the image's alt text) |
 | `onClose` | called once it has closed |
 
@@ -328,7 +342,7 @@ gets it.
 
 The short card: `SeverityBadge` and `ConfidenceIndicator`, the `headline`, a
 grey line (`powers` from `route-context.json` · `customer_view.shown_on` ·
-`evidence_summary`), and `CanWaitCallout size="inline"` (`can_wait_title`)
+`evidence_summary`), and `CanWaitTitle` (`can_wait_title`)
 followed by "→ READ MORE" on the same line, in its colour (the button: the text is "Read more", capitals come from CSS). Hovering the card underlines the whole line. On hover the card also lifts 2px with a
 shadow under it (`--shadow-card-hover`; no lift with reduced motion).
 
@@ -378,12 +392,12 @@ a screenshot (Normal, Slow / Loading, Fallback; tabs without a screenshot are
 left out), and a caption. Tabs work with the arrow keys. Clicking the
 screenshot (a `ScreenshotButton`) opens the current tab's image large.
 
-| Field (`finding.customer_view`) | Example |
-| ------------------------------- | ------- |
-| `route` | `"GET /api/rates"` (picks the screenshots in `src/data/screenshots.js`) |
-| `shown_on` | `"/"` |
-| `state` | `"fallback"`: the tab it opens on (what most visitors saw) |
-| `caption` | `"Savings rate cards on the homepage at campaign peak"` |
+| Prop | Field | Example |
+| ---- | ----- | ------- |
+| `states` | `statesFor(finding.customer_view.route)` in `src/data/screenshots.js`: `[{ key, label, src, caption }]`. Empty, and nothing shows | the `GET /api/rates` screenshots |
+| `initialState` | `customer_view.state`: the tab it opens on (what most visitors saw) | `"fallback"` |
+| `address` | `customer_view.shown_on` | `"/"` |
+| `caption` | `customer_view.caption` | `"Savings rate cards on the homepage at campaign peak"` |
 
 ### AiAnalysisDisclosure
 
@@ -455,8 +469,11 @@ seconds without a sample, or `{ pollFailed: true }` when `/metrics` didn't answe
 | Prop | Field | Example |
 | ---- | ----- | ------- |
 | `config` | `test-config.json`: the values with a `_labels` entry (`{ label, unit? }`) | `expected_peak_visitors: 110` with `_labels.expected_peak_visitors: { label: "Busy-hour peak", unit: "visitors at once" }` |
-| `routeContext` | `route-context.json[route]`: `powers`, `timeout_ms`, `on_failure`, `critical` | `"POST /api/signup": { powers: "Submitting an email to create an account", timeout_ms: 3000, on_failure: "left", critical: true }` |
-| `findings` | `findings.test`, the routes in `findings.findings[]` and `findings.healthyRoutes[]` | `"signup"` |
+| `behaviour` | the viewed test's group in `test-config.json` (`main_funnel` or `signup_test`) | `{ go_to_signup: 0.3, submit_signup: 0.6, … }` |
+| `routes` | `[route, route-context.json entry]` for the routes in `findings.findings[]` and `findings.healthyRoutes[]` (`powers`, `timeout_ms`, `on_failure`, `critical`); `null` when the run has no `route-context.json` | `["POST /api/signup", { powers: "Submitting an email to create an account", timeout_ms: 3000, on_failure: "left", critical: true }]` |
+
+`assumptionsFor(run)` in `src/data/assumptions.js` gives all three, so the test
+details pass them with `<AssumptionsList {...assumptionsFor(run)} />`.
 
 An underlined "Show assumptions" / "Hide assumptions" link at the bottom of the
 test details. Open, three compact parts, numbers in IBM Plex Mono:
