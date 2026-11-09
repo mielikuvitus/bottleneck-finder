@@ -13,7 +13,9 @@ import { SCREENSHOTS } from '../data/screenshots.js';
 import ChartCard, { grid, tooltip, xAxis, yAxis } from '../components/molecules/ChartCard.jsx';
 import SiteScreenshots from '../components/molecules/SiteScreenshots.jsx';
 import ScreenshotModal from '../components/molecules/ScreenshotModal.jsx';
-import AssumptionsList from '../components/molecules/AssumptionsList.jsx';
+import ScreenshotButton from '../components/molecules/ScreenshotButton.jsx';
+import Disclosure from '../components/molecules/Disclosure.jsx';
+import AssumptionsList from '../components/organisms/AssumptionsList.jsx';
 import EvidenceDisclosure from '../components/organisms/EvidenceDisclosure.jsx';
 import HealthyRoutes from '../components/organisms/HealthyRoutes.jsx';
 import AllClearCard from '../components/organisms/AllClearCard.jsx';
@@ -73,6 +75,8 @@ const USED_IN = {
   ChartCard: 'EvidenceDisclosure',
   SiteScreenshots: 'SummaryStrip',
   ScreenshotModal: 'VerdictCard',
+  ScreenshotButton: 'VerdictCard',
+  Disclosure: 'AiAnalysisDisclosure',
   AssumptionsList: 'SummaryStrip',
 };
 
@@ -272,6 +276,16 @@ function DashboardComponents() {
       <Specimen name="SiteScreenshots (main test: both pages; sign-up test: one)">
         <div style={{ width: '100%' }}>
           <SiteScreenshots test="main" />
+        </div>
+      </Specimen>
+      <Specimen name="ScreenshotButton (caption under the image, or as its alt text)">
+        <ScreenshotButton file={modalShot.file} caption={modalShot.caption} className="site-screenshot" captionClassName="site-screenshot-caption" />
+      </Specimen>
+      <Specimen name="Disclosure">
+        <div style={{ width: '100%' }}>
+          <Disclosure label="Sample disclosure">
+            <p className="muted">The content, shown while it's open.</p>
+          </Disclosure>
         </div>
       </Specimen>
       <Specimen name="ScreenshotModal (opens over the page)">

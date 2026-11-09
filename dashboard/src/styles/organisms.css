@@ -1,9 +1,8 @@
-/* The verdict card (Figma: Expanded verdict). One 28px gutter for every
-   section; 24px between sections, 12px within a group. */
+/* Organisms: the finding and verdict cards, the evidence and AI panels,
+   the assumptions, healthy routes and the funnel. */
 
 /* The card's gutter, page-wide so healthy routes and the funnel can line up */
 :root { --verdict-gutter: 28px; }
-
 .verdict-card {
   display: flex;
   flex-direction: column;
@@ -14,9 +13,6 @@
   border-radius: var(--radius-frame);
   line-height: normal;
   overflow: hidden;
-  /* undo the stub page's section and article spacing */
-  margin-top: 0;
-  padding-top: 0;
 }
 .verdict-card + .verdict-card { margin-top: var(--space-5); }
 
@@ -52,22 +48,6 @@
   padding-bottom: var(--space-5);
   border-bottom: 1px solid var(--color-border);
 }
-.key-numbers {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-5);
-}
-.key-number { display: flex; flex-direction: column; gap: var(--space-1); }
-.key-number p { margin: 0; }
-.key-number-label { color: var(--color-text-muted); font-size: var(--font-size-small); }
-.key-number-value {
-  color: var(--color-text);
-  font-size: 20px;
-  font-weight: var(--font-weight-extrabold);
-}
-.key-number[data-fits='true'] .key-number-verdict { color: var(--color-wait-safe); }
-.key-number[data-fits='false'] .key-number-verdict { color: var(--color-danger); }
-.key-number-note { color: var(--color-text-muted); font-size: var(--font-size-small); }
 
 /* Decision and fix, next to what visitors see */
 .verdict-body {
@@ -78,19 +58,7 @@
   padding: 0 var(--verdict-gutter);
 }
 .verdict-decision { display: flex; flex-direction: column; gap: var(--space-5); }
-.can-wait[data-size='large'] {
-  gap: var(--space-3);
-  padding: var(--space-card-large);
-  border-radius: 14px;
-}
-.can-wait[data-size='large'] .can-wait-title { font-size: 18px; }
 .verdict-fix { display: flex; flex-direction: column; gap: var(--space-3); }
-.verdict-fix-title {
-  margin: 0;
-  color: var(--color-text);
-  font-size: var(--font-size-lead);
-  font-weight: var(--font-weight-extrabold);
-}
 .verdict-fix-text,
 .verdict-fix-list {
   margin: 0;
@@ -98,6 +66,7 @@
   font-size: var(--font-size-lead);
   line-height: var(--line-height-note);
 }
+
 /* Several fixes: bullet points */
 .verdict-fix-list {
   display: flex;
@@ -111,68 +80,10 @@
 .verdict-fix-cause { margin: 0; color: var(--color-text); font-size: var(--font-size-lead); font-weight: var(--font-weight-bold); }
 .verdict-fix-share { color: var(--color-text-muted); font-family: var(--font-family-mono); font-size: var(--font-size-small); font-weight: normal; }
 
-/* Customer view */
-.customer-view {
-  margin: 0;
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-}
-.browser-bar {
-  padding: var(--space-tight);
-  background: var(--color-symbol-surface);
-  color: var(--color-text-muted);
-  font-family: var(--font-family-mono);
-  font-size: 10px;
-}
-.browser-tabs {
-  display: flex;
-  gap: 18px;
-  padding: var(--space-2) var(--space-3);
-  border-bottom: 1px solid var(--color-border);
-}
-.browser-tab {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--color-text-muted);
-  font: inherit;
-  font-size: var(--font-size-caption);
-  font-weight: 500;
-  cursor: pointer;
-}
-.browser-tab.is-active {
-  color: var(--color-danger);
-  font-weight: var(--font-weight-extrabold);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.browser-tab:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 2px; }
-.browser-page { background: var(--color-background); }
-.browser-page img { display: block; width: 100%; height: auto; }
-/* The screenshot opens large (ScreenshotModal) */
-.browser-page-enlarge {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: zoom-in;
-}
-.browser-page-enlarge:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: -2px; }
-.customer-view-label {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-3);
-  border-top: 1px solid var(--color-border);
-}
-.customer-view-title { color: var(--color-text); font-size: var(--font-size-small); font-weight: var(--font-weight-extrabold); }
-.customer-view-caption { color: var(--color-text-muted); font-size: var(--font-size-caption); line-height: var(--line-height); }
-
-/* Evidence (the box and toggle are .disclosure, in atoms.css) */
+/* Evidence (the box and toggle are .disclosure, in molecules.css) */
 .evidence-disclosure { margin: 0 var(--verdict-gutter); }
 .evidence-content { display: flex; flex-direction: column; gap: var(--space-3); padding-top: var(--space-3); }
+
 /* Why the finding has its confidence (confidence_reason) */
 .evidence-confidence { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-label); line-height: var(--line-height-note); }
 .evidence-confidence strong { display: block; color: var(--color-text); font-weight: var(--font-weight-extrabold); }
@@ -182,31 +93,6 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
 }
-.evidence-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-}
-.evidence-card-title { margin: 0; color: var(--color-text); font-size: var(--font-size-heading-3); font-weight: var(--font-weight-extrabold); }
-.evidence-card-chart { height: 160px; }
-/* Chart legend (Figma: Legend & chart annotation vocabulary) */
-.chart-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-caption);
-}
-.chart-legend-item { display: inline-flex; align-items: center; gap: 6px; }
-.chart-legend-item svg { flex: none; }
-/* The unit above the y axis */
-.evidence-card-unit { margin: 0; color: var(--color-text-muted); font-family: var(--font-family-mono); font-size: var(--font-size-caption); }
 .evidence-list {
   margin: 0;
   padding-left: var(--space-4);
@@ -226,22 +112,10 @@
 /* Phones: everything in one column */
 @media (max-width: 600px) {
   :root { --verdict-gutter: 20px; }
-  .key-numbers,
   .verdict-body { grid-template-columns: minmax(0, 1fr); }
-}
-
-/* Findings: full cards span the row; short ones sit two to a row (one on phones) */
-.findings {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-5);
 }
 .finding-full { grid-column: 1 / -1; }
 .finding-full:focus { outline: none; }
-.findings .verdict-card + .verdict-card { margin-top: 0; }
-@media (max-width: 760px) {
-  .findings { grid-template-columns: minmax(0, 1fr); }
-}
 
 /* All clear (AllClearCard): the verdict card's frame and headline, the
    summary under it, and the keep-it-fresh note in italics */
@@ -280,12 +154,11 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-frame);
   line-height: normal;
-  /* undo the stub page's section and article spacing */
-  margin-top: 0;
   /* for the Read more button's click area, stretched over the card below */
   position: relative;
   transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
 }
+
 /* Hover: a darker border, and the card lifts a little with a shadow under it */
 .finding-card:hover {
   border-color: color-mix(in srgb, var(--color-border), var(--color-hover-shade) 18%);
@@ -295,6 +168,7 @@
 .finding-card:is([data-severity='critical'], [data-severity='high']):hover {
   border-color: color-mix(in srgb, var(--color-severity-critical-border), var(--color-hover-shade) 18%);
 }
+
 /* Critical and high: a red ring grows out of the border and fades, 3 times
    when the card first appears. Critical's ring is stronger. */
 .finding-card--pulse[data-severity='critical'] { --pulse-alpha: 0.55; }
@@ -306,6 +180,7 @@
   from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-severity-critical-border) calc(var(--pulse-alpha) * 100%), transparent); }
   to { box-shadow: 0 0 0 12px color-mix(in srgb, var(--color-severity-critical-border) 0%, transparent); }
 }
+
 /* An opened critical or high card: its can-it-wait box pulses the same ring,
    3 times, each time the card opens */
 .finding-full .verdict-card[data-severity='critical'] .can-wait[data-size='large'] { --pulse-alpha: 0.55; }
@@ -332,6 +207,7 @@
   font-size: var(--font-size-label);
   line-height: var(--line-height-note);
 }
+
 /* The can-it-wait line: opens the full card */
 .finding-card-expand {
   align-self: flex-start;
@@ -344,6 +220,7 @@
   text-align: left;
   cursor: pointer;
 }
+
 /* → Read more, after the can-it-wait title in its colour */
 .finding-card-more {
   font-size: var(--font-size-small);
@@ -352,6 +229,7 @@
 }
 .finding-card-expand:hover .can-wait-title,
 .finding-card:hover .can-wait-title { text-decoration: underline; }
+
 /* The button's click area covers the whole card, so a click anywhere opens it */
 .finding-card-expand::after {
   content: '';
@@ -359,6 +237,7 @@
   inset: 0;
   border-radius: inherit;
 }
+
 /* Read less: the last thing in the full card (FindingCard only), styled like Read more */
 .verdict-collapse {
   align-self: flex-start;
@@ -375,8 +254,8 @@
   cursor: pointer;
 }
 .verdict-collapse:hover { text-decoration: underline; }
-.verdict-collapse:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 4px; border-radius: 2px; }
-.finding-card-expand:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 4px; border-radius: 2px; }
+.verdict-collapse:focus-visible { outline: var(--focus-ring); outline-offset: 4px; border-radius: 2px; }
+.finding-card-expand:focus-visible { outline: var(--focus-ring); outline-offset: 4px; border-radius: 2px; }
 
 /* Healthy routes (HealthyRoutes): the shared load once, then one row per
    route that opens its charts (the chart cards are .evidence-card above) */
@@ -416,7 +295,7 @@
   text-align: left;
   cursor: pointer;
 }
-.healthy-route-toggle:focus-visible { outline: 2px solid var(--color-border-active); outline-offset: 2px; }
+.healthy-route-toggle:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
 .healthy-route-name { font-family: var(--font-family-mono); font-weight: var(--font-weight-bold); }
 .healthy-route-powers { color: var(--color-text-muted); }
 .healthy-route-p95 { font-family: var(--font-family-mono); text-align: right; white-space: nowrap; }
@@ -438,7 +317,7 @@
    like the stage table in the test details. Exits and degraded visits are
    indented under the step they came from. */
 .funnel { display: flex; flex-direction: column; gap: var(--space-4); line-height: normal; }
-.funnel-table { width: 100%; margin: 0; font-size: var(--font-size-label); }
+.funnel-table { width: 100%; margin: 0; border-collapse: collapse; font-size: var(--font-size-label); }
 .funnel-table th,
 .funnel-table td {
   padding: var(--space-2) 0 var(--space-2) var(--space-4);
@@ -452,6 +331,7 @@
   color: var(--color-text-muted);
   font-size: var(--font-size-small);
   font-weight: normal;
+  text-align: left;
   white-space: nowrap;
 }
 .funnel-table tbody tr:last-child td { border-bottom: 0; }
@@ -488,4 +368,51 @@ tr[data-empty] .funnel-bar { display: none; }
   .funnel-bar-cell,
   .funnel-why,
   .funnel-table th:last-child { display: none; }
+}
+.ai-disclosure { margin: 0 var(--verdict-gutter); }
+.ai-content[hidden] { display: none; }
+.ai-content { display: flex; flex-direction: column; gap: var(--space-4); padding-top: var(--space-3); }
+.ai-note { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-label); line-height: var(--line-height-note); }
+
+/* The icon sits on the first line of the note */
+.ai-note-warning { display: flex; align-items: flex-start; gap: var(--space-2); }
+.ai-note-warning .icon { flex: none; margin-top: 3px; color: var(--color-wait-caution); }
+
+/* Thinking… then the reply */
+.ai-thinking { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-label); }
+.assumptions-list { display: flex; flex-direction: column; gap: var(--space-4); }
+.assumptions-content { display: flex; flex-direction: column; gap: var(--space-4); }
+.assumptions-group { display: flex; flex-direction: column; gap: var(--space-1); }
+.assumptions-heading { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-small); }
+.assumptions-number { font-family: var(--font-family-mono); }
+.assumptions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-3) var(--space-5);
+  margin: 0;
+}
+.assumptions-item { display: flex; flex-direction: column; gap: 2px; }
+.assumptions-item dt { color: var(--color-text-muted); font-size: var(--font-size-small); }
+.assumptions-item dd { margin: 0; color: var(--color-text); font-size: var(--font-size-label); }
+.assumptions-behaviour { margin: 0; color: var(--color-text); font-size: var(--font-size-label); line-height: var(--line-height-note); }
+.assumptions-routes { width: 100%; margin: 0; border-collapse: collapse; font-size: var(--font-size-label); line-height: 1.4; }
+.assumptions-routes th,
+.assumptions-routes td {
+  padding: var(--space-2) var(--space-4) var(--space-2) 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+.assumptions-routes th { color: var(--color-text-muted); font-size: var(--font-size-small); font-weight: normal; white-space: nowrap; }
+.assumptions-routes tbody tr:last-child td { border-bottom: 0; }
+.assumptions-route { font-family: var(--font-family-mono); white-space: nowrap; }
+
+/* Where the assumptions live, for developers */
+.assumptions-source { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-small); line-height: var(--line-height-note); }
+.assumptions-source code { font-family: var(--font-family-mono); color: var(--color-text); }
+
+/* Phones: the routes table scrolls sideways rather than squashing */
+@media (max-width: 600px) {
+  .assumptions-group:has(.assumptions-routes) { overflow-x: auto; }
 }

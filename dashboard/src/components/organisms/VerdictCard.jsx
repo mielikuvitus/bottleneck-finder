@@ -38,7 +38,7 @@ export default function VerdictCard({ finding, timeline, routeContext, peaks, on
         <div className="verdict-decision">
           <CanWaitCallout variant={waitVariant(finding.severity)} title={finding.can_wait_title} text={finding.can_wait} size="large" />
           <div className="verdict-fix">
-            <h4 className="verdict-fix-title">Suggested fix</h4>
+            <h4 className="subheading">Suggested fix</h4>
             {/* Several causes: a list per cause, under its name and share. Else
                 several fixes as bullet points; one (or an older run) as a sentence */}
             {finding.suggested_fix_groups ? (

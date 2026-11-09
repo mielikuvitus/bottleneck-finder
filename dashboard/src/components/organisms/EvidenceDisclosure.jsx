@@ -6,10 +6,11 @@
 // the two differ by shape, not only colour, and the gap between them is the
 // traffic that wasn't served), left solid blocks, fallback hatched blocks, and
 // knee / capacity / campaign marks.
-import { useId, useState } from 'react';
+import { useId } from 'react';
 import { Area, Bar, BarChart, ComposedChart, Line, LineChart, ReferenceDot, ReferenceLine } from 'recharts';
 import { HatchPattern } from '../atoms/ChartLegend.jsx';
 import ChartCard, { grid, tooltip, xAxis, yAxis } from '../molecules/ChartCard.jsx';
+import Disclosure from '../molecules/Disclosure.jsx';
 import { SMOOTHED, bucketRows, chartRows, secondWhenTargetReaches, serverSeries, smoothRows } from '../../data/series.js';
 
 const BAR_SECONDS = 10; // one bar per 10 seconds
@@ -31,9 +32,7 @@ const showsServerCharts = (cause) => ['render', 'db', 'loop', 'unexplained'].inc
 
 // defaultOpen: true to start open (the components page)
 export default function EvidenceDisclosure({ finding, timeline, peaks, defaultOpen = false }) {
-  const [open, setOpen] = useState(defaultOpen);
-  const id = useId();
-  const hatchId = `${id.replace(/:/g, '')}-hatch`;
+  const hatchId = `${useId().replace(/:/g, '')}-hatch`;
 
   const rows = timeline ? chartRows(timeline) : [];
   const route = finding.route;
@@ -79,162 +78,154 @@ export default function EvidenceDisclosure({ finding, timeline, peaks, defaultOp
   const smoothFilled = smoothRows(rows, filledCharts.flatMap((c) => c.lines.slice(1).map(([key]) => key)), SMOOTH_SECONDS);
 
   return (
-    <section className="disclosure evidence-disclosure">
-      <button type="button" className="disclosure-toggle" aria-expanded={open} aria-controls={`${id}-content`} onClick={() => setOpen(!open)}>
-        <span className="disclosure-label">Evidence</span>
-        <span className={`run-selector-chevron${open ? ' is-up' : ''}`} aria-hidden="true" />
-      </button>
-      {open ? (
-        <div className="evidence-content" id={`${id}-content`}>
-          {finding.confidence_reason ? (
-            <p className="evidence-confidence">
-              <strong>Why {finding.confidence} confidence?</strong> {finding.confidence_reason}
-            </p>
-          ) : null}
-          {finding.evidence_summary ? <p className="evidence-summary">{finding.evidence_summary}</p> : null}
+    <Disclosure label="Evidence" className="evidence-disclosure" contentClassName="evidence-content" defaultOpen={defaultOpen}>
+      {finding.confidence_reason ? (
+        <p className="evidence-confidence">
+          <strong>Why {finding.confidence} confidence?</strong> {finding.confidence_reason}
+        </p>
+      ) : null}
+      {finding.evidence_summary ? <p className="evidence-summary">{finding.evidence_summary}</p> : null}
 
-          {timeline ? (
-            <div className="evidence-cards">
-              <ChartCard
-                title="Arrivals vs successful"
-                unit={`${timeline.loadUnit} · requests/s · success: ${SMOOTH_SECONDS}s average`}
-                legend={[
-                  { kind: 'line', label: 'Arrivals' },
-                  { kind: 'area', label: 'Success' },
-                  ...(kneeSecond !== null ? [{ kind: 'knee', label: `Knee · ${finding.knee_at.load}` }] : []),
-                  ...(capacity ? [{ kind: 'capacity', label: `Capacity · ${capacity} req/s` }] : []),
-                  ...(campaignSecond !== null ? [{ kind: 'campaign', label: `Campaign · ${peaks.campaign.visitsPerSecond} visits/s` }] : []),
-                ]}
-              >
-                <ComposedChart data={smoothSuccess} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
-                  {grid}
-                  {xAxis(rows)}
-                  {yAxis}
-                  {tooltip}
+      {timeline ? (
+        <div className="evidence-cards">
+          <ChartCard
+            title="Arrivals vs successful"
+            unit={`${timeline.loadUnit} · requests/s · success: ${SMOOTH_SECONDS}s average`}
+            legend={[
+              { kind: 'line', label: 'Arrivals' },
+              { kind: 'area', label: 'Success' },
+              ...(kneeSecond !== null ? [{ kind: 'knee', label: `Knee · ${finding.knee_at.load}` }] : []),
+              ...(capacity ? [{ kind: 'capacity', label: `Capacity · ${capacity} req/s` }] : []),
+              ...(campaignSecond !== null ? [{ kind: 'campaign', label: `Campaign · ${peaks.campaign.visitsPerSecond} visits/s` }] : []),
+            ]}
+          >
+            <ComposedChart data={smoothSuccess} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
+              {grid}
+              {xAxis(rows)}
+              {yAxis}
+              {tooltip}
+              <Area
+                type="linear"
+                dataKey={`${route}|ok${SMOOTHED}`}
+                name="Success"
+                stroke="var(--color-chart-success)"
+                strokeWidth={1.5}
+                fill="var(--color-chart-success-fill)"
+                fillOpacity={1}
+                dot={false}
+                isAnimationActive={false}
+              />
+              {capacity ? <ReferenceLine y={capacity} stroke="var(--color-chart-annotation)" strokeDasharray="3 3" ifOverflow="extendDomain" /> : null}
+              {campaignSecond !== null ? <ReferenceLine x={campaignSecond} stroke="var(--color-chart-annotation)" strokeWidth={1.5} /> : null}
+              <Line dataKey="target" name="Arrivals" stroke="var(--color-chart-arrivals)" strokeWidth={2} dot={false} isAnimationActive={false} />
+              {kneeSecond !== null ? (
+                <ReferenceDot x={kneeSecond} y={capacity} r={7} fill="var(--color-surface)" stroke="var(--color-chart-annotation)" strokeWidth={2} />
+              ) : null}
+            </ComposedChart>
+          </ChartCard>
+
+          <ChartCard
+            title="Visitors who left or saw a fallback"
+            unit={`visitors/s · one bar per ${BAR_SECONDS}s`}
+            legend={[
+              { kind: 'block', label: 'Left' },
+              { kind: 'hatched', label: 'Fallback' },
+            ]}
+          >
+            <BarChart data={bars} margin={{ top: 6, right: 6, bottom: 0, left: 0 }} barCategoryGap={1}>
+              <defs>
+                <HatchPattern id={hatchId} />
+              </defs>
+              {grid}
+              {xAxis(bars)}
+              {yAxis}
+              {tooltip}
+              <Bar dataKey="left" name="Left" stackId="out" fill="var(--color-chart-left)" isAnimationActive={false} />
+              <Bar
+                dataKey="degraded"
+                name="Fallback"
+                stackId="out"
+                fill={`url(#${hatchId})`}
+                stroke="var(--color-chart-fallback)"
+                strokeDasharray="1.5 1"
+                isAnimationActive={false}
+              />
+            </BarChart>
+          </ChartCard>
+
+          <ChartCard title="Response time (p95)" unit="ms" legend={[{ kind: 'line', label: `${route} p95` }]}>
+            <LineChart data={rows} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
+              {grid}
+              {xAxis(rows)}
+              {yAxis}
+              {tooltip}
+              <Line dataKey={`${route}|p95`} name="p95" stroke="var(--color-chart-arrivals)" strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />
+            </LineChart>
+          </ChartCard>
+
+          {filledCharts.map((filled) => (
+            <ChartCard
+              key={filled.key}
+              title={filled.title}
+              unit={filled.lines[1] ? `${filled.unit} · ${filled.lines[1][1]}: ${SMOOTH_SECONDS}s average` : filled.unit}
+              legend={filled.lines.map(([, label], i) => ({ kind: i === 0 ? 'line' : i === 1 ? 'area-red' : 'dashed-red', label }))}
+            >
+              <ComposedChart data={smoothFilled} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
+                {grid}
+                {xAxis(rows)}
+                {yAxis}
+                {tooltip}
+                {/* The second series as a shaded area, behind the main line;
+                    any further cause as a dashed red line */}
+                {filled.lines.slice(1).map(([key, label], i) => (
                   <Area
+                    key={key}
                     type="linear"
-                    dataKey={`${route}|ok${SMOOTHED}`}
-                    name="Success"
-                    stroke="var(--color-chart-success)"
+                    dataKey={key + SMOOTHED}
+                    name={label}
+                    stroke="var(--color-chart-fallback)"
                     strokeWidth={1.5}
-                    fill="var(--color-chart-success-fill)"
+                    strokeDasharray={i ? '3 2' : undefined}
+                    fill={i ? 'none' : 'var(--color-chart-fallback-fill)'}
                     fillOpacity={1}
                     dot={false}
+                    connectNulls
                     isAnimationActive={false}
                   />
-                  {capacity ? <ReferenceLine y={capacity} stroke="var(--color-chart-annotation)" strokeDasharray="3 3" ifOverflow="extendDomain" /> : null}
-                  {campaignSecond !== null ? <ReferenceLine x={campaignSecond} stroke="var(--color-chart-annotation)" strokeWidth={1.5} /> : null}
-                  <Line dataKey="target" name="Arrivals" stroke="var(--color-chart-arrivals)" strokeWidth={2} dot={false} isAnimationActive={false} />
-                  {kneeSecond !== null ? (
-                    <ReferenceDot x={kneeSecond} y={capacity} r={7} fill="var(--color-surface)" stroke="var(--color-chart-annotation)" strokeWidth={2} />
-                  ) : null}
-                </ComposedChart>
-              </ChartCard>
+                ))}
+                <Line
+                  dataKey={filled.lines[0][0]}
+                  name={filled.lines[0][1]}
+                  stroke="var(--color-chart-arrivals)"
+                  strokeWidth={2}
+                  dot={false}
+                  connectNulls
+                  isAnimationActive={false}
+                />
+              </ComposedChart>
+            </ChartCard>
+          ))}
 
-              <ChartCard
-                title="Visitors who left or saw a fallback"
-                unit={`visitors/s · one bar per ${BAR_SECONDS}s`}
-                legend={[
-                  { kind: 'block', label: 'Left' },
-                  { kind: 'hatched', label: 'Fallback' },
-                ]}
-              >
-                <BarChart data={bars} margin={{ top: 6, right: 6, bottom: 0, left: 0 }} barCategoryGap={1}>
-                  <defs>
-                    <HatchPattern id={hatchId} />
-                  </defs>
-                  {grid}
-                  {xAxis(bars)}
-                  {yAxis}
-                  {tooltip}
-                  <Bar dataKey="left" name="Left" stackId="out" fill="var(--color-chart-left)" isAnimationActive={false} />
-                  <Bar
-                    dataKey="degraded"
-                    name="Fallback"
-                    stackId="out"
-                    fill={`url(#${hatchId})`}
-                    stroke="var(--color-chart-fallback)"
-                    strokeDasharray="1.5 1"
-                    isAnimationActive={false}
-                  />
-                </BarChart>
-              </ChartCard>
-
-              <ChartCard title="Response time (p95)" unit="ms" legend={[{ kind: 'line', label: `${route} p95` }]}>
-                <LineChart data={rows} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
-                  {grid}
-                  {xAxis(rows)}
-                  {yAxis}
-                  {tooltip}
-                  <Line dataKey={`${route}|p95`} name="p95" stroke="var(--color-chart-arrivals)" strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />
-                </LineChart>
-              </ChartCard>
-
-              {filledCharts.map((filled) => (
-                <ChartCard
-                  key={filled.key}
-                  title={filled.title}
-                  unit={filled.lines[1] ? `${filled.unit} · ${filled.lines[1][1]}: ${SMOOTH_SECONDS}s average` : filled.unit}
-                  legend={filled.lines.map(([, label], i) => ({ kind: i === 0 ? 'line' : i === 1 ? 'area-red' : 'dashed-red', label }))}
-                >
-                  <ComposedChart data={smoothFilled} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
-                    {grid}
-                    {xAxis(rows)}
-                    {yAxis}
-                    {tooltip}
-                    {/* The second series as a shaded area, behind the main line;
-                        any further cause as a dashed red line */}
-                    {filled.lines.slice(1).map(([key, label], i) => (
-                      <Area
-                        key={key}
-                        type="linear"
-                        dataKey={key + SMOOTHED}
-                        name={label}
-                        stroke="var(--color-chart-fallback)"
-                        strokeWidth={1.5}
-                        strokeDasharray={i ? '3 2' : undefined}
-                        fill={i ? 'none' : 'var(--color-chart-fallback-fill)'}
-                        fillOpacity={1}
-                        dot={false}
-                        connectNulls
-                        isAnimationActive={false}
-                      />
-                    ))}
-                    <Line
-                      dataKey={filled.lines[0][0]}
-                      name={filled.lines[0][1]}
-                      stroke="var(--color-chart-arrivals)"
-                      strokeWidth={2}
-                      dot={false}
-                      connectNulls
-                      isAnimationActive={false}
-                    />
-                  </ComposedChart>
-                </ChartCard>
-              ))}
-
-              {serverCharts.map((c) => (
-                <ChartCard key={c.key} title={c.title} unit={c.unit} legend={[{ kind: 'line', label: c.label }]}>
-                  <LineChart data={rows} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
-                    {grid}
-                    {xAxis(rows)}
-                    {yAxis}
-                    {tooltip}
-                    <Line dataKey={c.key} name={c.label} stroke="var(--color-chart-arrivals)" strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />
-                  </LineChart>
-                </ChartCard>
-              ))}
-            </div>
-          ) : null}
-
-          <ul className="evidence-list">
-            <li className="evidence-cause">{finding.title}</li>
-            {finding.evidence.map((e) => (
-              <li key={e}>{e}</li>
-            ))}
-          </ul>
+          {serverCharts.map((c) => (
+            <ChartCard key={c.key} title={c.title} unit={c.unit} legend={[{ kind: 'line', label: c.label }]}>
+              <LineChart data={rows} margin={{ top: 6, right: 6, bottom: 0, left: 0 }}>
+                {grid}
+                {xAxis(rows)}
+                {yAxis}
+                {tooltip}
+                <Line dataKey={c.key} name={c.label} stroke="var(--color-chart-arrivals)" strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />
+              </LineChart>
+            </ChartCard>
+          ))}
         </div>
       ) : null}
-    </section>
+
+      <ul className="evidence-list">
+        <li className="evidence-cause">{finding.title}</li>
+        {finding.evidence.map((e) => (
+          <li key={e}>{e}</li>
+        ))}
+      </ul>
+    </Disclosure>
   );
 }

@@ -220,39 +220,10 @@ is placeholder, to be revisited.
 One chart card. Also exports the shared `xAxis(rows)`, `yAxis`, `tooltip` and
 `grid`. Used by `EvidenceDisclosure` and `HealthyRoutes`.
 
-### AssumptionsList
-
-| Prop | Field | Example |
-| ---- | ----- | ------- |
-| `config` | `test-config.json`: the values with a `_labels` entry (`{ label, unit? }`) | `expected_peak_visitors: 110` with `_labels.expected_peak_visitors: { label: "Busy-hour peak", unit: "visitors at once" }` |
-| `routeContext` | `route-context.json[route]`: `powers`, `timeout_ms`, `on_failure`, `critical` | `"POST /api/signup": { powers: "Submitting an email to create an account", timeout_ms: 3000, on_failure: "left", critical: true }` |
-| `findings` | `findings.test`, the routes in `findings.findings[]` and `findings.healthyRoutes[]` | `"signup"` |
-
-An underlined "Show assumptions" / "Hide assumptions" link at the bottom of the
-test details. Open, three compact parts, numbers in IBM Plex Mono:
-
-1. **Traffic numbers:** a grid of the top-level labelled values, label above
-   value and unit (`null` shows "measured from the run").
-2. **Visitor behaviour:** the viewed test's group (`main_funnel` or
-   `signup_test`) on one line: "30% go on to sign-up · 60% submit the form · …".
-3. **Routes:** one row per route this run reports on: route, powers, site
-   timeout, what the visitor does if it fails (`left` → leaves, `degraded` →
-   carries on degraded) and critical.
-
-Last, a muted note says where to change them: `load-tests/test-config.json`
-(traffic and visitor behaviour) and `analyzer/route-context.json` (routes).
-
-The long `_` notes and the routes' `while_slow` / `fallback` stay in the files
-(the customer view shows what visitors see). Labels come from the current
-`test-config.json`: `npm run data` adds its `_labels` to each run's copy, so
-older runs get them too; without them, keys show as sentences.
-
----
-
 ### SiteScreenshots
 
 "The test site" in the test details, above "Show assumptions": thumbnails of
-the test site's pages, each opening `ScreenshotModal`. The main test shows the
+the test site's pages, each a `ScreenshotButton`. The main test shows the
 homepage and the sign-up page, the sign-up test only the sign-up page. Files
 and captions come from the `normal` state in `src/data/screenshots.js`
 (`GET /` → `tomorrow1.png`, `GET /signup` → `tomorrow2.png`).
@@ -261,10 +232,35 @@ and captions come from the `normal` state in `src/data/screenshots.js`
 | ---- | ------- |
 | `test` | `findings.test`: `"main"` or `"signup"` (anything else shows nothing) |
 
+### ScreenshotButton
+
+A screenshot as a button that opens it large in `ScreenshotModal`, with ": open
+larger" for screen readers. Used by `SiteScreenshots` and `CustomerView`.
+
+| Prop | Example |
+| ---- | ------- |
+| `file` | `"tomorrow1.png"` (relative to `public/data/images`) |
+| `caption` | `"The homepage"` |
+| `className` | `"site-screenshot"`: the button's look comes from its user |
+| `captionClassName` | `"site-screenshot-caption"`: shows the caption under the image. Left out, the caption is the image's alt text instead |
+| `loading` | `"lazy"` (optional) |
+
+### Disclosure
+
+A bordered box with an uppercase toggle and a chevron, closed by default. Used
+by `SummaryStrip` (test details), `AiAnalysisDisclosure` and `EvidenceDisclosure`.
+
+| Prop | Example |
+| ---- | ------- |
+| `label` | `"Evidence"`, or elements (the test details put "Superseded" in front) |
+| `className`, `contentClassName` | `"evidence-disclosure"`, `"evidence-content"`: the box's and the content's own classes |
+| `defaultOpen` | `true` to start open (default `false`) |
+| `keepMounted` | `true` keeps the content in the page while closed, so its state survives (the AI reply doesn't type out again). Otherwise it's only rendered while open |
+| `children` | the content |
+
 ### ScreenshotModal
 
-Used by `SiteScreenshots` and `CustomerView` (a click on its screenshot opens
-the current tab's). One screenshot, up to 90% of the window, in a native `<dialog>` over a dark
+Used by `ScreenshotButton`. One screenshot, up to 90% of the window, in a native `<dialog>` over a dark
 backdrop (`--color-backdrop`). Closes with the ✕ at the top right, a click
 outside the image, or Esc; focus then returns to the thumbnail.
 
@@ -380,7 +376,7 @@ when a level fits; over the limit just says so.
 A browser-style frame: "tomorrow" + the page address, a tab per state that has
 a screenshot (Normal, Slow / Loading, Fallback; tabs without a screenshot are
 left out), and a caption. Tabs work with the arrow keys. Clicking the
-screenshot opens the current tab's image large in `ScreenshotModal`.
+screenshot (a `ScreenshotButton`) opens the current tab's image large.
 
 | Field (`finding.customer_view`) | Example |
 | ------------------------------- | ------- |
@@ -454,6 +450,33 @@ Extra cards, only where they explain the finding (from `cause.kind`):
 None of them appear when the run has no server samples. `server` is `null` for
 seconds without a sample, or `{ pollFailed: true }` when `/metrics` didn't answer.
 
+### AssumptionsList
+
+| Prop | Field | Example |
+| ---- | ----- | ------- |
+| `config` | `test-config.json`: the values with a `_labels` entry (`{ label, unit? }`) | `expected_peak_visitors: 110` with `_labels.expected_peak_visitors: { label: "Busy-hour peak", unit: "visitors at once" }` |
+| `routeContext` | `route-context.json[route]`: `powers`, `timeout_ms`, `on_failure`, `critical` | `"POST /api/signup": { powers: "Submitting an email to create an account", timeout_ms: 3000, on_failure: "left", critical: true }` |
+| `findings` | `findings.test`, the routes in `findings.findings[]` and `findings.healthyRoutes[]` | `"signup"` |
+
+An underlined "Show assumptions" / "Hide assumptions" link at the bottom of the
+test details. Open, three compact parts, numbers in IBM Plex Mono:
+
+1. **Traffic numbers:** a grid of the top-level labelled values, label above
+   value and unit (`null` shows "measured from the run").
+2. **Visitor behaviour:** the viewed test's group (`main_funnel` or
+   `signup_test`) on one line: "30% go on to sign-up · 60% submit the form · …".
+3. **Routes:** one row per route this run reports on: route, powers, site
+   timeout, what the visitor does if it fails (`left` → leaves, `degraded` →
+   carries on degraded) and critical.
+
+Last, a muted note says where to change them: `load-tests/test-config.json`
+(traffic and visitor behaviour) and `analyzer/route-context.json` (routes).
+
+The long `_` notes and the routes' `while_slow` / `fallback` stay in the files
+(the customer view shows what visitors see). Labels come from the current
+`test-config.json`: `npm run data` adds its `_labels` to each run's copy, so
+older runs get them too; without them, keys show as sentences.
+
 ### AllClearCard
 
 | Prop | Field | Example (main after run) |
@@ -525,7 +548,7 @@ The sign-up test starts at step 4.
 ### DashboardPage
 
 1. **Header:** title, plus `RunPicker`.
-2. **Test details** (`SummaryStrip`): in the header box under `RunPicker`, on white like it, and only once a run is open. A disclosure, closed by default, labelled with the test and scenario ("Sign-up test details · campaign scenario"). Open, it shows key numbers on the left (visit length, requests per visit, both peaks, the findings by severity) and a table of planned vs measured visitors at once per stage on the right (one column below 760px), then the normal-day note and `AssumptionsList`. It shares the `.disclosure` box and toggle with `EvidenceDisclosure`.
+2. **Test details** (`SummaryStrip`): in the header box under `RunPicker`, on white like it, and only once a run is open. A disclosure, closed by default, labelled with the test and scenario ("Sign-up test details · campaign scenario"). Open, it shows key numbers on the left (visit length, requests per visit, both peaks, the findings by severity) and a table of planned vs measured visitors at once per stage on the right (one column below 760px), then the normal-day note and `AssumptionsList`. It's a `Disclosure`, like `EvidenceDisclosure`.
 3. **Verdicts:** one `FindingCard` per finding, then `HealthyRoutes`.
 4. **Funnel:** `Funnel`.
 

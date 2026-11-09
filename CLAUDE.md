@@ -24,7 +24,9 @@ and data).
   (findings), `describe.mjs` (wording), `timeline.mjs` (builds timeline.json),
   `route-context.json`, `names.json`
 - **Dashboard:** `dashboard/src/` — `components/{atoms,molecules,organisms,page}`,
-  `data/` (useRun, `series.js` chart rows), `styles/tokens.css`;
+  `data/` (useRun, `series.js` chart rows), `styles/` (`tokens.css`, `base.css`,
+  then one file per layer: `atoms.css`, `molecules.css`, `organisms.css`,
+  `page.css`);
   `dashboard/scripts/copy-data.mjs` (npm run dashboard:data)
 - **Run results:** `load-tests/results/<run>/`. Read `findings.json` or
   `run.json`; `timeline.json` is large, so search it rather than reading it whole.

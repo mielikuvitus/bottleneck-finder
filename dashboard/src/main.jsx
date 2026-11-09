@@ -2,13 +2,11 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles/tokens.css';
 import './styles/base.css';
-import './styles/shell.css';
-import './styles/skeleton.css';
-import './styles/run-picker.css';
+// Smallest pieces first, so a larger piece's rules can build on them
 import './styles/atoms.css';
-import './styles/verdict-card.css';
-import './styles/ai-analysis.css';
-import './styles/summary.css';
+import './styles/molecules.css';
+import './styles/organisms.css';
+import './styles/page.css';
 import { RunProvider } from './data/RunContext.jsx';
 import DashboardPage from './components/page/DashboardPage.jsx';
 

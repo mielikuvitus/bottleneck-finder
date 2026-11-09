@@ -21,6 +21,8 @@ export default function RunPicker({ runs, selected, onSelect, showSuperseded, on
   const rootRef = useRef(null);
   const buttonRef = useRef(null);
   const listRef = useRef(null);
+  // Read once, when the picker first appears
+  const autoFocusRef = useRef(autoFocus);
   const id = useId();
 
   // Superseded runs only when the switch is on (the selected run always shows)
@@ -30,7 +32,7 @@ export default function RunPicker({ runs, selected, onSelect, showSuperseded, on
 
   // Only when it first appears, so it doesn't take focus from elsewhere later
   useEffect(() => {
-    if (autoFocus) buttonRef.current?.focus();
+    if (autoFocusRef.current) buttonRef.current?.focus();
   }, []);
 
   // Close on a click outside
